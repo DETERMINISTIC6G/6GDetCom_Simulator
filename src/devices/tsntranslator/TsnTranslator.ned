@@ -21,6 +21,8 @@ module TsnTranslator extends TsnSwitch
         int numTtInterfaces = default(0); // Number of other TT interfaces connected to this TSN Translator.
         bool isDstt = default(false); // Specifies whether the TSN Translator is a DS-TT (otherwise it is a NW-TT).
         
+        clock.typename = "PiServoClock";
+        
         volatile double delayUplink @mutable @unit(s) = default(0s); // Uplink Delay
         volatile double delayDownlink @mutable @unit(s) = default(0s); // Downlink Delay
         
@@ -37,13 +39,15 @@ module TsnTranslator extends TsnSwitch
         // "EthernetStreamThroughPhyLayer" is used if cut-through switching is enabled.
         // "EthernetPreemptingPhyLayer" is used if frame preemption is enabled but cut-through is not.
         // "EthernetPhyLayer" is the default PHY layer type.
-        tt[*].phyLayer.typename = default(hasCutthroughSwitching ? "EthernetStreamThroughPhyLayer" : (hasFramePreemption ? "EthernetPreemptingPhyLayer" : "EthernetPhyLayer"));
+        tt[*].phyLayer.typename = default("EthernetStreamThroughPhyLayer");
 
         bridging.typename = default("TTBridgingLayer");
 
         bridging.delayLayer.typename = default(isDstt ? "TTDelayLayer" : "");
         bridging.delayLayer.delayUplink = default(this.delayUplink);
         bridging.delayLayer.delayDownlink = default(this.delayDownlink);
+        eth[*].enableTimeTagging=default(true);
+        
     gates:
         inout ttg[numTtInterfaces] @labels(EtherFrame-conn);
     submodules:

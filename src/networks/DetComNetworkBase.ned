@@ -21,6 +21,7 @@ network DetComNetworkBase extends TsnNetworkBase
         // If not explicitly defined elsewhere, the default value will be used.
         *.eth[*].bitrate = default(1Gbps);
         detCom.*.eth[*].bitrate = default(1Gbps);
+        **.eth[*].phyLayer.typename = default("EthernetStreamThroughPhyLayer");
         
         
 		**.hasEgressTrafficShaping = true; // Enabling egress traffic shaping for all nodes in the network.
