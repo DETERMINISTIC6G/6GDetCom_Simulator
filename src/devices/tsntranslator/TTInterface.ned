@@ -62,7 +62,7 @@ module TTInterface  extends NetworkInterface like IEthernetInterface {
             parameters:
                 @display("p=400,400");
         }
-        timeChunkLayer: <default("EthernetPhyLayer")> like IEthernetPhyLayer {
+        timeChunkLayer: TimeChunkLayer {
             parameters:
                 @display("p=400,500");
         }
