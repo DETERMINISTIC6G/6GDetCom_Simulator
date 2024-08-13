@@ -42,9 +42,9 @@ void TimeChunkInserter::initialize(int stage)
 
 
 
-void TimeChunkInserter::insertChunk(Packet *packet ) {
+void TimeChunkInserter::insertChunk(Packet *packet) {
     Enter_Method("insertChunk");
-    ingressTime = packet->getTag<IngressTimeInd>->getReceptionStarted();
+    ingressTime = packet->getTag<IngressTimeInd>()->getReceptionStarted();
 
     auto ingressTimeData = makeShared<ByteCountChunk>(B(4),
                                                       ingressTime); // chunk's type should be configured, and convert data type

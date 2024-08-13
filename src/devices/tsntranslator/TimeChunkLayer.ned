@@ -21,14 +21,15 @@ module TimeChunkLayer
         timeChunkInserter: TimeChunkInserter {
             @display("p=200,100");
         }
-        timeChunkChecker: <default("TimeChunkChecker")> like TimeChunkInserter {
+        timeChunkChecker: TimeChunkInserter {
             @display("p=500,100");
         }
     connections:
         upperLayerIn --> { @display("m=n"); } --> timeChunkInserter.in;
         timeChunkInserter.out --> { @display("m=n"); } --> lowerLayerOut;
-        
+
         lowerLayerIn --> { @display("m=n"); } --> timeChunkChecker.in;
         timeChunkChecker.out --> { @display("m=n"); } --> upperLayerOut;
-        
+
+
 }
