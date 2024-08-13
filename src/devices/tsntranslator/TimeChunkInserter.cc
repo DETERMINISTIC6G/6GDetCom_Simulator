@@ -17,44 +17,19 @@ namespace inet {
 //Define_Module(InterpacketGapInserter);
 Define_Module(TIMECHUNKINSERTER);
 
-void TimeChunkInserter::initialize(int stage)
-{
-    ClockUserModuleMixin::initialize(stage);
-    if (stage == INITSTAGE_LOCAL) {
-        durationPar = &par("duration");
-        timer = new ClockEvent("IfgTimer");
-        progress = new ClockEvent("ProgressTimer");
-        WATCH(packetStartTime);
-        WATCH(packetEndTime);
-    }
-    // KLUDGE: this runs after the clock stage, the clocks must be initialized
-    else if (stage == INITSTAGE_CLOCK + 1) {
-        packetEndTime = par("initialChannelBusy") ? getClockTime() : getClockTime().setRaw(INT64_MIN / 2); // INT64_MIN / 2 to prevent overflow
-    }
-    else if (stage == INITSTAGE_LAST) {
-        if (packetEndTime + durationPar->doubleValue() > getClockTime()) {
-            double interpacketGapDuration = durationPar->doubleValue();
-            rescheduleClockEventAt(packetEndTime + interpacketGapDuration, timer);
-            emit(interpacketGapStartedSignal, interpacketGapDuration);
-        }
-    }
-}
-
-
-
-void TimeChunkInserter::insertChunk(Packet *packet ) {
+void TimeChunkInserter::insertChunk(Packet *packet) {
     Enter_Method("insertChunk");
     ingressTime = packet->getTag<IngressTimeInd>->getReceptionStarted();
 
     auto ingressTimeData = makeShared<ByteCountChunk>(B(4),
-                                                      ingressTime); // chunk's type should be configured, and convert data type
+                                                      ingressTime); // chunk's type should be configured, and convert data type first?
     packet->insertAtBack(ingressTimeData);
 }
 
 void TimeChunkInserter::checkChunk(Packet *packet) {
     Enter_Method("checkChunk");
-
-
+    ingressTimeData = packet->popAtBack<ByteCountChunk>(4);
+    packet->addTag<IngressTimeInd>(); //not correct
 }
 
 } // namespace inet
