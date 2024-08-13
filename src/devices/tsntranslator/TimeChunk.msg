@@ -12,10 +12,7 @@ import inet.common.TagBase;
 import inet.clock.contract.ClockTime;
 
 namespace d6g;
-//
-// This is a base class for all IEEE 802.3 Ethernet PHY headers defined the IEEE
-// Std 802.3-2018, IEEE Standard for Ethernet.
-//
+
 class TimeChunk extends inet::FieldsChunk
 {
 //    chunkLength = 4;

@@ -7,8 +7,8 @@
 //
 
 
-#ifndef DEVICES_TSNTRANSLATOR_TIMECHUNKINSERTER_H_
-#define DEVICES_TSNTRANSLATOR_TIMECHUNKINSERTER_H_
+#ifndef DEVICES_TSNTRANSLATOR_TIMECHUNKCHECKER_H_
+#define DEVICES_TSNTRANSLATOR_TIMECHUNKCHECKER_H_
 
 #include "inet/queueing/base/PacketFlowBase.h"
 
@@ -19,7 +19,7 @@ using namespace inet;
 using namespace inet::queueing;
 
 
-class TimeChunkInserter: public PacketFlowBase
+class TimeChunkChecker: public PacketFlowBase
 {
     protected:
     virtual void processPacket(Packet *packet) override;

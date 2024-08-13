@@ -21,7 +21,7 @@ module TimeChunkLayer
         timeChunkInserter: TimeChunkInserter {
             @display("p=200,100");
         }
-        timeChunkChecker: TimeChunkInserter { // another module
+        timeChunkChecker: TimeChunkChecker {
             @display("p=500,100");
         }
     connections:

@@ -10,7 +10,6 @@
 #include "TimeChunkInserter.h"
 #include "TimeChunk_m.h"
 
-#include "inet/common/ModuleAccess.h"
 #include "inet/common/ProgressTag_m.h"
 
 #include "inet/networklayer/common/TimeTag_m.h"
@@ -24,17 +23,19 @@ Define_Module(TimeChunkInserter);
 
 void TimeChunkInserter::processPacket(Packet *packet) {
     Enter_Method("processPacket");
+
     auto ingressTime = packet->getTag<IngressTimeInd>()->getReceptionStarted();
-    auto ingressTimeData = makeShared<TimeChunk>();
-    ingressTimeData->setReceptionStarted(ingressTime.inUnit(SIMTIME_NS));
-    packet->insertAtBack(ingressTimeData);
+    auto ingressTimeChunk = makeShared<TimeChunk>();
+    ingressTimeChunk->setReceptionStarted(ingressTime.inUnit(SIMTIME_NS));
+    packet->insertAtBack(ingressTimeChunk);
+
+    ingressTime = packet->getTag<IngressTimeInd>()->getReceptionEnded();
+    ingressTimeChunk = makeShared<TimeChunk>();
+    ingressTimeChunk->setReceptionEnded(ingressTime.inUnit(SIMTIME_NS));
+    packet->insertAtBack(ingressTimeChunk);
+
 }
 
-//void TimeChunkInserter::checkChunk(Packet *packet) {
-//    Enter_Method("checkChunk");
-//    ingressTimeData = packet->popAtBack<ByteCountChunk>(4);
-//    packet->addTag<IngressTimeInd>(); //not correct
-//}
 
 } // namespace inet
 
