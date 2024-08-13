@@ -10,22 +10,21 @@
 #ifndef DEVICES_TSNTRANSLATOR_TIMECHUNKINSERTER_H_
 #define DEVICES_TSNTRANSLATOR_TIMECHUNKINSERTER_H_
 
-#include "inet/common/clock/ClockUserModuleMixin.h"
+//#include "inet/common/clock/ClockUserModuleMixin.h"
 #include "inet/queueing/base/PacketPusherBase.h"
+#include "inet/queueing/base/PacketFlowBase.h"
+
 
 namespace d6g {
 
 using namespace inet;
-Define_Module(TIMECHUNKINSERTER);
+using namespace inet::queueing;
 
-class TimeChunkInserter
+
+class TimeChunkInserter: public PacketFlowBase
 {
-  protected:
-    clocktime_t ingressTime;
-
-  protected:
-    virtual void insertChunk(Packet *packet);
-    virtual void checkChunk(Packet *packet);
+    protected:
+    virtual void processPacket(Packet *packet) override;
 
 };
 

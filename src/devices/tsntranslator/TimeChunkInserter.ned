@@ -7,12 +7,11 @@
 
 package d6g.devices.tsntranslator;
 
+import inet.queueing.base.PacketFlowBase;
 
-module TimeChunkInserter
+
+module TimeChunkInserter extends PacketFlowBase
 {
     parameters:
         @class(TimeChunkInserter);
-    gates:
-        input in;
-        output out;
 }
