@@ -17,15 +17,7 @@ namespace inet {
 //Define_Module(InterpacketGapInserter);
 Define_Module(TIMECHUNKINSERTER);
 
-TIMECHUNKINSERTER::~TIMECHUNKINSERTER()
-{
-    cancelAndDelete(timer);
-    if (progress != nullptr)
-        delete static_cast<Packet *>(progress->getContextPointer());
-    cancelAndDeleteClockEvent(progress);
-}
-
-void TIMECHUNKINSERTER::initialize(int stage)
+void TimeChunkInserter::initialize(int stage)
 {
     ClockUserModuleMixin::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
@@ -48,185 +40,21 @@ void TIMECHUNKINSERTER::initialize(int stage)
     }
 }
 
-void TIMECHUNKINSERTER::handleMessage(cMessage *message)
-{
-    if (message->isSelfMessage()) {
-        if (message == timer) {
-            emit(interpacketGapEndedSignal, 0.0);
-            if (canPushSomePacket(inputGate))
-                if (producer != nullptr)
-                    producer.handleCanPushPacketChanged();
-        }
-        else if (message == progress) {
-            auto packet = static_cast<Packet *>(message->getContextPointer());
-            message->setContextPointer(nullptr);
-            if (packet->isUpdate()) {
-                auto progressTag = packet->getTag<ProgressTag>();
-                pushOrSendPacketProgress(packet, outputGate, consumer, progressTag->getDatarate(), progressTag->getPosition(), progressTag->getExtraProcessableLength(), packet->getTransmissionId());
-            }
-            else
-                pushOrSendPacket(packet, outputGate, consumer);
-            handlePacketProcessed(packet);
-        }
-        else
-            throw cRuntimeError("Unknown message");
-    }
-    else {
-        // if an asynchronous message is received from the input gate
-        // then it's processed as if it were pushed as synchronous message
-        if (message->isPacket()) {
-            auto packet = check_and_cast<Packet *>(message);
-            if (packet->isUpdate()) {
-                auto progressTag = packet->getTag<ProgressTag>();
-                pushOrSendPacketProgress(packet, outputGate, consumer, progressTag->getDatarate(), progressTag->getPosition(), progressTag->getExtraProcessableLength(), packet->getTransmissionId());
-            }
-            else
-                pushPacket(packet, packet->getArrivalGate());
-            handlePacketProcessed(packet);
-        }
-        else
-            throw cRuntimeError("Unknown message");
-    }
-    updateDisplayString();
+
+
+void TimeChunkInserter::insertChunk(Packet *packet ) {
+    Enter_Method("insertChunk");
+    ingressTime = packet->getTag<IngressTimeInd>->getReceptionStarted();
+
+    auto ingressTimeData = makeShared<ByteCountChunk>(B(4),
+                                                      ingressTime); // chunk's type should be configured, and convert data type
+    packet->insertAtBack(ingressTimeData);
 }
 
-void TIMECHUNKINSERTER::receivePacketStart(cPacket *cpacket, cGate *gate, double datarate)
-{
-    auto packet = check_and_cast<Packet *>(cpacket);
-    pushOrSendPacketStart(packet, outputGate, consumer, bps(datarate), packet->getTransmissionId());
-}
+void TimeChunkInserter::checkChunk(Packet *packet) {
+    Enter_Method("checkChunk");
 
-void TIMECHUNKINSERTER::receivePacketProgress(cPacket *cpacket, cGate *gate, double datarate, int bitPosition, simtime_t timePosition, int extraProcessableBitLength, simtime_t extraProcessableDuration)
-{
-    auto packet = check_and_cast<Packet *>(cpacket);
-    pushOrSendPacketProgress(packet, outputGate, consumer, bps(datarate), b(bitPosition), b(extraProcessableBitLength), packet->getTransmissionId());
-}
 
-void TIMECHUNKINSERTER::receivePacketEnd(cPacket *cpacket, cGate *gate, double datarate)
-{
-    auto packet = check_and_cast<Packet *>(cpacket);
-    pushOrSendPacketEnd(packet, outputGate, consumer, packet->getTransmissionId());
-}
-
-bool TIMECHUNKINSERTER::canPushSomePacket(const cGate *gate) const
-{
-    return (getClockTime() >= packetEndTime + durationPar->doubleValue()) &&
-           (consumer == nullptr || consumer.canPushSomePacket());
-}
-
-bool TIMECHUNKINSERTER::canPushPacket(Packet *packet, const cGate *gate) const
-{
-    return (getClockTime() >= packetEndTime + durationPar->doubleValue()) &&
-           (consumer == nullptr || consumer.canPushPacket(packet));
-}
-
-void TIMECHUNKINSERTER::pushPacket(Packet *packet, const cGate *gate)
-{
-    Enter_Method("pushPacket");
-    take(packet);
-    auto now = getClockTime();
-    packetDelay = packetEndTime + durationPar->doubleValue() - now;
-    if (packetDelay < 0)
-        packetDelay = 0;
-    packetStartTime = now + packetDelay;
-    packetEndTime = packetStartTime + SIMTIME_AS_CLOCKTIME(packet->getDuration());
-    if (packetDelay == 0) {
-        handlePacketProcessed(packet);
-        pushOrSendPacket(packet, outputGate, consumer);
-    }
-    else {
-        EV_INFO << "Inserting packet gap before" << EV_FIELD(packet) << EV_ENDL;
-        progress->setContextPointer(packet);
-        scheduleClockEventAt(now + packetDelay, progress);
-    }
-    updateDisplayString();
-}
-
-void TIMECHUNKINSERTER::handleCanPushPacketChanged(const cGate *gate)
-{
-    Enter_Method("handleCanPushPacketChanged");
-    if (packetEndTime + durationPar->doubleValue() <= getClockTime()) {
-        if (producer != nullptr)
-            producer.handleCanPushPacketChanged();
-    }
-    else {
-        double interpacketGapDuration = durationPar->doubleValue();
-        rescheduleClockEventAt(packetEndTime + interpacketGapDuration, timer);
-        emit(interpacketGapStartedSignal, interpacketGapDuration);
-    }
-}
-
-void TIMECHUNKINSERTER::pushPacketStart(Packet *packet, const cGate *gate, bps datarate)
-{
-    Enter_Method("pushPacketStart");
-    take(packet);
-    streamDatarate = datarate;
-    pushOrSendOrSchedulePacketProgress(packet, gate, datarate, b(0), b(0));
-    updateDisplayString();
-}
-
-void TIMECHUNKINSERTER::pushPacketEnd(Packet *packet, const cGate *gate)
-{
-    Enter_Method("pushPacketEnd");
-    take(packet);
-    pushOrSendOrSchedulePacketProgress(packet, gate, streamDatarate, packet->getDataLength(), b(0));
-    streamDatarate = bps(NaN);
-    updateDisplayString();
-}
-
-void TIMECHUNKINSERTER::pushPacketProgress(Packet *packet, const cGate *gate, bps datarate, b position, b extraProcessableLength)
-{
-    Enter_Method("pushPacketProgress");
-    take(packet);
-    streamDatarate = datarate;
-    pushOrSendOrSchedulePacketProgress(packet, gate, datarate, position, extraProcessableLength);
-    updateDisplayString();
-}
-
-void TIMECHUNKINSERTER::handlePushPacketProcessed(Packet *packet, const cGate *gate, bool successful)
-{
-    packetEndTime = getClockTime();
-    if (producer != nullptr)
-        producer.handlePushPacketProcessed(packet, successful);
-}
-
-void TIMECHUNKINSERTER::pushOrSendOrSchedulePacketProgress(Packet *packet, const cGate *gate, bps datarate, b position, b extraProcessableLength)
-{
-    auto now = getClockTime();
-    if (now >= packetEndTime) {
-        packetDelay = packetEndTime + durationPar->doubleValue() - now;
-        if (packetDelay < 0)
-            packetDelay = 0;
-        packetStartTime = now + packetDelay;
-    }
-    packetEndTime = packetStartTime + SIMTIME_AS_CLOCKTIME(packet->getDuration());
-    if (progress == nullptr || !progress->isScheduled()) {
-        if (packet->getDataLength() == position + extraProcessableLength)
-            handlePacketProcessed(packet);
-        pushOrSendPacketProgress(packet, outputGate, consumer, datarate, position, extraProcessableLength, packet->getTransmissionId());
-    }
-    else {
-        EV_INFO << "Inserting packet gap before" << EV_FIELD(packet) << EV_ENDL;
-        cancelClockEvent(progress);
-        auto progressTag = packet->addTagIfAbsent<ProgressTag>();
-        progressTag->setDatarate(datarate);
-        progressTag->setPosition(position);
-        progressTag->setExtraProcessableLength(extraProcessableLength);
-        progress->setContextPointer(packet);
-        scheduleClockEventAt(packetStartTime, progress);
-    }
-}
-
-std::string TIMECHUNKINSERTER::resolveDirective(char directive) const
-{
-    switch (directive) {
-        case 'g':
-            return simtime_t(durationPar->doubleValue()).ustr().c_str();
-        case 'd':
-            return CLOCKTIME_AS_SIMTIME(packetDelay).ustr().c_str();
-        default:
-            return PacketPusherBase::resolveDirective(directive);
-    }
 }
 
 } // namespace inet
