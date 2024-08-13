@@ -21,9 +21,11 @@ Define_Module(TIMECHUNKINSERTER);
 class TimeChunkInserter
 {
   protected:
-    virtual void initialize(int stage) override;
-    void insertChunk(Packet *packet);
-    void checkChunk(Packet *packet);
+    clocktime_t ingressTime;
+
+  protected:
+    virtual void insertChunk(Packet *packet);
+    virtual void checkChunk(Packet *packet);
 
 };
 
