@@ -11,20 +11,26 @@
 #define DEVICES_TSNTRANSLATOR_TIMECHUNKINSERTER_H_
 
 #include "inet/queueing/base/PacketFlowBase.h"
-
+#include "inet/common/ProtocolUtils.h"
 
 namespace d6g {
 
-using namespace inet;
-using namespace inet::queueing;
 
+    using namespace inet;
+    using namespace inet::queueing;
 
-class TimeChunkInserter: public PacketFlowBase
-{
+    class TimeChunkInserter : public PacketFlowBase {
+    public:
+        static const Protocol timeTag;
+
     protected:
-    virtual void processPacket(Packet *packet) override;
+        const Protocol *nextProtocol = nullptr;
 
-};
+    protected:
+        virtual void initialize(int stage) override;
+        virtual void processPacket(Packet *packet) override;
+
+    };
 
 } // namespace inet
 

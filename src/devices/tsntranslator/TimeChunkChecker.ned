@@ -7,10 +7,10 @@
 
 package d6g.devices.tsntranslator;
 
-import inet.queueing.base.PacketFlowBase;
+import inet.queueing.base.PacketFilterBase;
 
 
-module TimeChunkChecker extends PacketFlowBase
+module TimeChunkChecker extends PacketFilterBase
 {
     parameters:
         @class(TimeChunkChecker);

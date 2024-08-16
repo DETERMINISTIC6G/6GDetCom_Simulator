@@ -10,21 +10,22 @@
 #ifndef DEVICES_TSNTRANSLATOR_TIMECHUNKCHECKER_H_
 #define DEVICES_TSNTRANSLATOR_TIMECHUNKCHECKER_H_
 
-#include "inet/queueing/base/PacketFlowBase.h"
+#include "inet/queueing/base/PacketFilterBase.h"
+#include "inet/common/IProtocolRegistrationListener.h"
 
 
 namespace d6g {
 
-using namespace inet;
-using namespace inet::queueing;
+    using namespace inet;
+    using namespace inet::queueing;
 
 
-class TimeChunkChecker: public PacketFlowBase
-{
+    class TimeChunkChecker : public PacketFilterBase, public TransparentProtocolRegistrationListener {
     protected:
-    virtual void processPacket(Packet *packet) override;
-
-};
+        virtual void processPacket(Packet *packet) override;
+        virtual bool matchesPacket(const Packet *packet) const override;
+        virtual cGate *getRegistrationForwardingGate(cGate *gate) override;
+    };
 
 } // namespace inet
 

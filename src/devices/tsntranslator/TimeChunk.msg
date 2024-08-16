@@ -13,11 +13,13 @@ import inet.clock.contract.ClockTime;
 
 namespace d6g;
 
+cplusplus {{
+using namespace inet;
+}}
+
 class TimeChunk extends inet::FieldsChunk
 {
-//    chunkLength = 4;
+    chunkLength = B(16);
     int64_t receptionStarted;
     int64_t receptionEnded;
 }
-
-

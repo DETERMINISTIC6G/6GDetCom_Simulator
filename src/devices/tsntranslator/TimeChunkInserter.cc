@@ -10,31 +10,29 @@
 #include "TimeChunkInserter.h"
 #include "TimeChunk_m.h"
 
-#include "inet/common/ProgressTag_m.h"
-
 #include "inet/networklayer/common/TimeTag_m.h"
+#include "inet/common/ProtocolTag_m.h"
 
 
 namespace d6g {
+    Define_Module(TimeChunkInserter);
 
+    using namespace inet;
 
-Define_Module(TimeChunkInserter);
+    void TimeChunkInserter::processPacket(Packet *packet) {
+        Enter_Method("processPacket");
 
+        if (auto ingressTag = packet->findTag<IngressTimeInd>()) {
+            auto ingressTimeChunk = makeShared<TimeChunk>();
+            ingressTimeChunk->setReceptionStarted(0);
+            ingressTimeChunk->setReceptionEnded(1);
+            packet->insertAtBack(ingressTimeChunk);
+        }
+    }
 
-void TimeChunkInserter::processPacket(Packet *packet) {
-    Enter_Method("processPacket");
-
-    auto ingressTime = packet->getTag<IngressTimeInd>()->getReceptionStarted();
-    auto ingressTimeChunk = makeShared<TimeChunk>();
-    ingressTimeChunk->setReceptionStarted(ingressTime.inUnit(SIMTIME_NS));
-    packet->insertAtBack(ingressTimeChunk);
-
-    ingressTime = packet->getTag<IngressTimeInd>()->getReceptionEnded();
-    ingressTimeChunk = makeShared<TimeChunk>();
-    ingressTimeChunk->setReceptionEnded(ingressTime.inUnit(SIMTIME_NS));
-    packet->insertAtBack(ingressTimeChunk);
-
-}
+    void TimeChunkInserter::initialize(int stage) {
+        PacketFlowBase::initialize(stage);
+    }
 
 
 } // namespace inet

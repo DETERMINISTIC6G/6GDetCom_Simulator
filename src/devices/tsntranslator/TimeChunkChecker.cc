@@ -10,26 +10,34 @@
 #include "TimeChunkChecker.h"
 #include "TimeChunk_m.h"
 
-#include "inet/common/ProgressTag_m.h"
-
-#include "inet/networklayer/common/TimeTag_m.h"
+#include "../../timestamping/TimeTagDetCom_m.h"
 
 
 namespace d6g {
+    Define_Module(TimeChunkChecker);
 
+    void TimeChunkChecker::processPacket(Packet *packet) {
+        Enter_Method("processPacket");
+        auto timeChunk = packet->popAtBack<TimeChunk>(B(16));
 
-Define_Module(TimeChunkChecker);
+        auto timeTag = packet->addTagIfAbsent<DetComIngressTime>();
+        timeTag->setReceptionStarted(ClockTime(timeChunk->getReceptionStarted(), SIMTIME_NS));
+        timeTag->setReceptionEnded(ClockTime(timeChunk->getReceptionEnded(), SIMTIME_NS));
+    }
 
+    bool TimeChunkChecker::matchesPacket(const Packet *packet) const {
+        // TODO: This shouldn't be needed
+        return true;
+    }
 
-void TimeChunkChecker::processPacket(Packet *packet) {
-    Enter_Method("processPacket");
-    auto ingressTime = packet->peekAtBack<TimeChunk>();
-
-    packet->addTag<IngressTimeInd>()->setReceptionStarted(ingressTime->getReceptionStarted());
-    packet->addTag<IngressTimeInd>()->setReceptionEnded(ingressTime->getReceptionEnded());
-
-
-}
+    cGate *TimeChunkChecker::getRegistrationForwardingGate(cGate *gate)
+    {
+        if (gate == outputGate)
+            return inputGate;
+        else if (gate == inputGate)
+            return outputGate;
+        else
+            throw cRuntimeError("Unknown gate");
+    }
 
 } // namespace inet
-

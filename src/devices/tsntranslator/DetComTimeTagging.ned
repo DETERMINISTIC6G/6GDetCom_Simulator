@@ -8,7 +8,7 @@
 package d6g.devices.tsntranslator;
 
 
-module TimeChunkLayer
+module DetComTimeTagging
 {
     parameters:
         @display("i=block/layer");
@@ -26,9 +26,9 @@ module TimeChunkLayer
         }
     connections:
         upperLayerIn --> { @display("m=n"); } --> timeChunkInserter.in;
-        timeChunkInserter.out --> { @display("m=n"); } --> lowerLayerOut;
+        timeChunkInserter.out --> { @display("m=s"); } --> lowerLayerOut;
 
-        lowerLayerIn --> { @display("m=n"); } --> timeChunkChecker.in;
+        lowerLayerIn --> { @display("m=s"); } --> timeChunkChecker.in;
         timeChunkChecker.out --> { @display("m=n"); } --> upperLayerOut;
 
 
