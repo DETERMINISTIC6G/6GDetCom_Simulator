@@ -1,21 +1,28 @@
-// This file is part of Deliverable D4.1 DetCom Simulator Framework Release 1
-// of the DETERMINISTIC6G project receiving funding from the
-// European Union’s Horizon Europe research and innovation programme
-// under Grant Agreement No. 101096504.
 //
-// SPDX-License-Identifier: LGPL-3.0-or-later
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+// 
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Lesser General Public License for more details.
+// 
+// You should have received a copy of the GNU Lesser General Public License
+// along with this program.  If not, see http://www.gnu.org/licenses/.
+// 
 
-
-#include "TTDelayer.h"
+#include "PdcDelayer.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/common/TimeTag_m.h"
 
 namespace d6g {
 
-Define_Module(TTDelayer);
+Define_Module(PdcDelayer);
 
-void TTDelayer::initialize(int stage)
+void PdcDelayer::initialize(int stage)
 {
     PacketDelayerBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
@@ -46,7 +53,7 @@ void TTDelayer::initialize(int stage)
     }
 }
 
-void TTDelayer::addInterfacesToSet(std::set<int>& set, const char *interfaceType) {
+void PdcDelayer::addInterfacesToSet(std::set<int>& set, const char *interfaceType) {
     // Check if context has submodule with name interfaceType
     auto node = getContainingNode(this);
     if (!node->hasSubmoduleVector(interfaceType)) {
@@ -63,7 +70,7 @@ void TTDelayer::addInterfacesToSet(std::set<int>& set, const char *interfaceType
     }
 }
 
-clocktime_t TTDelayer::computeDelay(Packet *packet) const
+clocktime_t PdcDelayer::computeDelay(Packet *packet) const
 {
     auto context = getContainingNode(this);
 
@@ -89,21 +96,30 @@ clocktime_t TTDelayer::computeDelay(Packet *packet) const
     if (!indInterfaceMatch || !reqInterfaceMatch) {
         return 0;
     }
-    //####
-    auto tag = packet->addTagIfAbsent<inet::CreationTimeTag>();
-    tag->setCreationTime(simTime());
-    EV << "Timestamp created: " << tag->getCreationTime() << endl;
-    //####
-    return delayParameter->doubleValue();
+    //#####
+    simtime_t current;
+    auto tag = packet->findTag<inet::CreationTimeTag>();
+    if (tag != nullptr) {
+        simtime_t timestamp = tag->getCreationTime();
+        EV << "Timestamp: " << timestamp << endl;
+        current = simTime() - timestamp;
+        //packet->removeTag<inet::CreationTimeTag>();
+        if (current.dbl() > delayParameter->doubleValue() ) {
+            return 0;
+        }
+    }
+    //#####
+    return (delayParameter->doubleValue()) - current.dbl();
 }
 
-void TTDelayer::setDelay(cPar *delay) {
+void PdcDelayer::setDelay(cPar *delay) {
     delayParameter = delay;
 }
 
-void TTDelayer::handleParameterChange(const char *parname) {
+void PdcDelayer::handleParameterChange(const char *parname) {
     if (!strcmp(parname, "delay")) {
         setDelay(&par("delay"));
     }
 }
-} //namespace
+
+} /* namespace d6g */

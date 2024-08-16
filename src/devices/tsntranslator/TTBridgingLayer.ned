@@ -36,6 +36,10 @@ module TTBridgingLayer like IProtocolLayer
         directionReverser: <default("DirectionReverserLayer")> like IProtocolLayer {
             @display("p=300,300");
         }
+        pdcCorrection: <default("")> like IProcessingDelayLayer { // new layer
+			@display("i=block/control;b=50,50,255");
+            @display("p=300,376");
+        }
         streamIdentifier: <default("")> like IProtocolLayer {
             @display("p=300,450");
         }
@@ -60,8 +64,11 @@ module TTBridgingLayer like IProtocolLayer
     connections:
         upperLayerIn --> processingDelayLayer.upperLayerIn;
         processingDelayLayer.lowerLayerOut --> directionReverser.upperLayerIn;
-        directionReverser.lowerLayerOut --> streamIdentifier.upperLayerIn;
+
+        directionReverser.lowerLayerOut --> pdcCorrection.upperLayerIn; // new
+        pdcCorrection.lowerLayerOut --> streamIdentifier.upperLayerIn;
         streamIdentifier.lowerLayerOut --> streamRelay.upperLayerIn;
+
         streamRelay.lowerLayerOut --> streamFilter.upperLayerIn;
         streamFilter.lowerLayerOut --> streamCoder.upperLayerIn;
         streamCoder.lowerLayerOut --> interfaceRelay.upperLayerIn;
@@ -75,8 +82,11 @@ module TTBridgingLayer like IProtocolLayer
         interfaceRelay.upperLayerOut --> streamCoder.lowerLayerIn;
         streamCoder.upperLayerOut --> streamFilter.lowerLayerIn;
         streamFilter.upperLayerOut --> streamRelay.lowerLayerIn;
-        streamRelay.upperLayerOut --> streamIdentifier.lowerLayerIn;
-        streamIdentifier.upperLayerOut --> directionReverser.lowerLayerIn;
+
+        streamRelay.upperLayerOut --> streamIdentifier.lowerLayerIn; // new
+        streamIdentifier.upperLayerOut --> pdcCorrection.lowerLayerIn;
+        pdcCorrection.upperLayerOut --> directionReverser.lowerLayerIn;
+
         directionReverser.upperLayerOut --> processingDelayLayer.lowerLayerIn;
         processingDelayLayer.upperLayerOut --> upperLayerOut;
 }
