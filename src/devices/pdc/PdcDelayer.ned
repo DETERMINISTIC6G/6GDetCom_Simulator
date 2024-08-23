@@ -25,7 +25,12 @@ import inet.queueing.contract.IPacketDelayer;
 simple PdcDelayer extends PacketDelayerBase like IPacketDelayer
 {
     parameters:
-        volatile double delay @unit(s) = default(0s); // specifies delay per packet
+        volatile double delay @unit(s) @mutable = default(0s); // specifies pdc delay
+        // array of objects, where each object maps
+        // a PDC value and a PCP value to a stream name, 
+        //for example [{stream: "stream1", pcp: 7, pdc: "5ms"}, ...]
+        volatile object mapping @mutable = default([]);
+         
         object indInterfaceTypes = default([]); // Only apply delay if the ind interface is of specific type (e.g. ["tt"] or ["tt", "eth"], empty means any)
         object reqInterfaceTypes = default([]); // Only apply delay if the req interface is of specific type (e.g. ["tt"] or ["tt", "eth"], empty means any)
         @class(PdcDelayer);

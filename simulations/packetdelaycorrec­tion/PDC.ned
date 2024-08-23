@@ -18,6 +18,7 @@ package d6g.simulations.packetdelaycorrec­tion;
 import d6g.devices.DetCom;
 import d6g.distribution.histogram.HistogramContainer;
 import d6g.networks.DetComNetworkBase;
+import inet.clock.model.SettableClock;
 import inet.node.ethernet.EthernetLink;
 import inet.node.tsn.TsnDevice;
 import inet.node.tsn.TsnSwitch;

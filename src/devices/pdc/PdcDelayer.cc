@@ -18,6 +18,24 @@
 #include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/common/TimeTag_m.h"
 
+//#include "inet/common/DirectionTag_m.h"
+
+//#include "inet/common/ProtocolTag_m.h"
+//#include "inet/common/SequenceNumberTag_m.h"
+//#include "inet/linklayer/common/DropEligibleTag_m.h"
+//#include "inet/linklayer/common/InterfaceTag_m.h"
+//#include "inet/linklayer/common/MacAddressTag_m.h"
+#include "inet/linklayer/common/PcpTag_m.h"
+#include "inet/linklayer/common/UserPriorityTag_m.h"
+#include "inet/linklayer/common/VlanTag_m.h"
+//#include "inet/protocolelement/cutthrough/CutthroughTag_m.h"
+#include "inet/protocolelement/redundancy/StreamTag_m.h"
+//#include "inet/protocolelement/shaper/EligibilityTimeTag_m.h"
+//#include "inet/linklayer/ieee8021q/Ieee8021qTagHeader_m.h"
+#include "inet/common/packet/Packet.h"
+
+using namespace omnetpp;
+using namespace inet;
 namespace d6g {
 
 Define_Module(PdcDelayer);
@@ -26,7 +44,9 @@ void PdcDelayer::initialize(int stage)
 {
     PacketDelayerBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
+        clock = check_and_cast<SettableClock*>(getModuleByPath(par("clockModule").stringValue()));
         setDelay(&par("delay"));
+        configureMappings();
     }
 
     if (stage == INITSTAGE_LAST) {
@@ -97,19 +117,44 @@ clocktime_t PdcDelayer::computeDelay(Packet *packet) const
         return 0;
     }
     //#####
-    simtime_t current;
-    auto tag = packet->findTag<inet::CreationTimeTag>();
-    if (tag != nullptr) {
-        simtime_t timestamp = tag->getCreationTime();
+   auto& tags = packet->getTags();
+   for (int i=0; i<tags.getNumTags(); i++) {
+       EV << "Tag in PDC Layer: " << tags.getTag(i) << endl;
+   }
+
+
+    clocktime_t timeDifference;
+    auto CreationTimeTag = packet->findTag<inet::CreationTimeTag>();
+    if (CreationTimeTag != nullptr) {
+        simtime_t timestamp = CreationTimeTag->getCreationTime();
         EV << "Timestamp: " << timestamp << endl;
-        current = simTime() - timestamp;
-        //packet->removeTag<inet::CreationTimeTag>();
-        if (current.dbl() > delayParameter->doubleValue() ) {
-            return 0;
+        clocktime_t currentTime = clock->getClockTime();
+        timeDifference = currentTime - timestamp.dbl();
+
+
+        packet->removeTag<inet::CreationTimeTag>();
+
+        auto streamIdTag = packet->findTag<StreamInd>();
+        if (streamIdTag != nullptr) {
+            auto streamID = streamIdTag->getStreamName();
+            EV << "Stream ID: " << streamID << endl;
+            for (auto &mapping : mappings) {
+                if (!strcmp(mapping.stream.c_str(), streamID)) {
+                    const_cast<cPar&>(par("delay")).setDoubleValue(mapping.pdc);
+
+                    EV << "Delay aus Mapping: " << mapping.pdc << endl;
+                    break;
+                }
+            }
         }
+        if (timeDifference.dbl() > delayParameter->doubleValue()) {
+            return 0;
+        } else {
+            return (delayParameter->doubleValue()) - timeDifference.dbl();
+        }
+    } else {
+        return 0;
     }
-    //#####
-    return (delayParameter->doubleValue()) - current.dbl();
 }
 
 void PdcDelayer::setDelay(cPar *delay) {
@@ -119,6 +164,26 @@ void PdcDelayer::setDelay(cPar *delay) {
 void PdcDelayer::handleParameterChange(const char *parname) {
     if (!strcmp(parname, "delay")) {
         setDelay(&par("delay"));
+    }
+    if (!strcmp(parname, "mapping")) {
+            configureMappings();
+    }
+}
+
+
+void PdcDelayer::configureMappings()
+{
+    auto mappingParameter = check_and_cast<cValueArray *>(par("mapping").objectValue());
+
+    mappings.resize(mappingParameter->size());
+    for (int i = 0; i < mappingParameter->size(); i++) {
+        auto element = check_and_cast<cValueMap *>(mappingParameter->get(i).objectValue());
+        Mapping& mapping = mappings[i];
+        //mapping.vlanId = element->containsKey("vlan") ? element->get("vlan").intValue() : -1;
+        mapping.pcp = element->containsKey("pcp") ? element->get("pcp").intValue() : -1;
+        mapping.stream = element->get("stream").stringValue();
+        mapping.pdc = element->containsKey("pdc") ? simtime_t::parse(element->get("pdc")).dbl() : 0;
+
     }
 }
 

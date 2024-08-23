@@ -36,21 +36,24 @@ module TTBridgingLayer like IProtocolLayer
         directionReverser: <default("DirectionReverserLayer")> like IProtocolLayer {
             @display("p=300,300");
         }
-        pdcCorrection: <default("")> like IProcessingDelayLayer { // new layer
-			@display("i=block/control;b=50,50,255");
-            @display("p=300,376");
-        }
+
         streamIdentifier: <default("")> like IProtocolLayer {
-            @display("p=300,450");
+            @display("p=300,508");
         }
         streamRelay: <default("")> like IProtocolLayer {
-            @display("p=300,600");
+            @display("p=300,635");
         }
         streamFilter: <default("")> like IProtocolLayer {
-            @display("p=300,750");
+            @display("p=300,790");
         }
+
+        pdcCorrection: <default("")> like IProcessingDelayLayer { // new layer
+            //@display("i=block/control;b=50,50,255;p=574,360");
+            @display("p=519,572");
+        }
+
         streamCoder: <default("")> like IProtocolLayer {
-            @display("p=300,900");
+            @display("p=300,912");
         }
         interfaceRelay: <default("InterfaceRelayLayer")> like IProtocolLayer {
             @display("p=300,1050");
@@ -65,12 +68,14 @@ module TTBridgingLayer like IProtocolLayer
         upperLayerIn --> processingDelayLayer.upperLayerIn;
         processingDelayLayer.lowerLayerOut --> directionReverser.upperLayerIn;
 
-        directionReverser.lowerLayerOut --> pdcCorrection.upperLayerIn; // new
-        pdcCorrection.lowerLayerOut --> streamIdentifier.upperLayerIn;
-        streamIdentifier.lowerLayerOut --> streamRelay.upperLayerIn;
+        directionReverser.lowerLayerOut --> streamIdentifier.upperLayerIn;
+
+        streamIdentifier.lowerLayerOut --> pdcCorrection.upperLayerIn;
+        pdcCorrection.lowerLayerOut --> streamRelay.upperLayerIn;
 
         streamRelay.lowerLayerOut --> streamFilter.upperLayerIn;
         streamFilter.lowerLayerOut --> streamCoder.upperLayerIn;
+
         streamCoder.lowerLayerOut --> interfaceRelay.upperLayerIn;
         interfaceRelay.lowerLayerOut --> vlanPolicy.upperLayerIn;
         vlanPolicy.lowerLayerOut --> delayLayer.upperLayerIn;
@@ -80,12 +85,13 @@ module TTBridgingLayer like IProtocolLayer
         delayLayer.upperLayerOut --> vlanPolicy.lowerLayerIn;
         vlanPolicy.upperLayerOut --> interfaceRelay.lowerLayerIn;
         interfaceRelay.upperLayerOut --> streamCoder.lowerLayerIn;
+
         streamCoder.upperLayerOut --> streamFilter.lowerLayerIn;
         streamFilter.upperLayerOut --> streamRelay.lowerLayerIn;
 
-        streamRelay.upperLayerOut --> streamIdentifier.lowerLayerIn; // new
-        streamIdentifier.upperLayerOut --> pdcCorrection.lowerLayerIn;
-        pdcCorrection.upperLayerOut --> directionReverser.lowerLayerIn;
+        streamRelay.upperLayerOut --> pdcCorrection.lowerLayerIn;
+        pdcCorrection.upperLayerOut --> streamIdentifier.lowerLayerIn;
+        streamIdentifier.upperLayerOut --> directionReverser.lowerLayerIn;
 
         directionReverser.upperLayerOut --> processingDelayLayer.lowerLayerIn;
         processingDelayLayer.upperLayerOut --> upperLayerOut;

@@ -18,6 +18,9 @@
 
 #include <omnetpp.h>
 #include "inet/queueing/base/PacketDelayerBase.h"
+//#include "inet/common/clock/ClockUserModuleMixin.h"
+#include "inet/clock/model/SettableClock.h"
+
 
 using namespace omnetpp;
 using namespace inet;
@@ -26,10 +29,24 @@ using namespace inet::queueing;
 namespace d6g {
 
 class PdcDelayer : public PacketDelayerBase {
+
+
+protected:
+    class Mapping
+    {
+      public:
+        //int vlanId = -1;
+        int pcp = -1;
+        std::string stream;
+        double pdc = 0;
+    };
+    SettableClock* clock;
+
 private:
     cPar *delayParameter = nullptr;
     std::set<int> indInterfaces;
     std::set<int> reqInterfaces;
+    std::vector<Mapping> mappings;
 
 protected:
     void initialize(int stage) override;
@@ -48,6 +65,8 @@ protected:
     void addInterfacesToSet(std::set<int> &set, const char *interfaceList);
 
     void handleParameterChange(const char *parname) override;
+
+    void configureMappings();
 
 };
 

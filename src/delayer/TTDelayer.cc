@@ -90,6 +90,11 @@ clocktime_t TTDelayer::computeDelay(Packet *packet) const
         return 0;
     }
     //####
+    auto& tags = packet->getTags();
+       for (int i=0; i<tags.getNumTags(); i++) {
+           EV << "Tag in Delay Layer: " << tags.getTag(i) << endl;
+       }
+
     auto tag = packet->addTagIfAbsent<inet::CreationTimeTag>();
     tag->setCreationTime(simTime());
     EV << "Timestamp created: " << tag->getCreationTime() << endl;

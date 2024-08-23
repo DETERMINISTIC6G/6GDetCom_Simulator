@@ -15,19 +15,34 @@
 
 package d6g.devices.pdc;
 
+import inet.clock.model.SettableClock;
 import inet.protocolelement.processing.IProcessingDelayLayer;
 import inet.protocolelement.processing.ProcessingDelayLayer;
 
 
 module PDCLayer extends ProcessingDelayLayer like IProcessingDelayLayer
 {
-    parameters:  
-        volatile double delayCorrection @mutable @unit(s) = default(0s); // pdc: delay
+    parameters:
+        volatile double pdc @mutable @unit(s) = default(0s); // pdc: const delay
+        object pdcMapping @mutable = default([]); // per stream delay
 
         // Arrives at tt (ingress, from other UE or NWTT) --> delay --> bridging logic --> eth (egress)
         ingress.typename = default("PdcDelayer");
+        egress.typename = default("");
          // We do not know the egress interface at the ingress delayer, so only use indInterfaceType
         ingress.indInterfaceTypes = ["tt"];
-        ingress.delay = default(this.delayCorrection);
+
+        ingress.delay = default(this.pdc);
+        ingress.mapping = default(dup(this.pdcMapping));
+        ingress.clockModule = default("^.pdcclock");
+
+    submodules:
+        pdcclock: SettableClock {
+            parameters :
+                oscillator.typename = default("RandomDriftOscillator");
+                oscillator.driftRateChange = 100ppm;
+            @display("p=711.936,113.093994");
+        }
+
 
 }
