@@ -8,7 +8,9 @@
 
 
 #include "TimeChunkChecker.h"
+#include "TimeChunkInserter.h"
 #include "TimeChunk_m.h"
+#include "inet/linklayer/common/EtherType_m.h"
 
 #include "TimeTagDetCom_m.h"
 
@@ -16,18 +18,43 @@
 namespace d6g {
     Define_Module(TimeChunkChecker);
 
-    void TimeChunkChecker::processPacket(Packet *packet) {
-        Enter_Method("processPacket");
-        auto timeChunk = packet->popAtBack<TimeChunk>(B(16));
-
-        auto timeTag = packet->addTagIfAbsent<DetComIngressTime>();
-        timeTag->setReceptionStarted(ClockTime(timeChunk->getReceptionStarted(), SIMTIME_NS));
-        timeTag->setReceptionEnded(ClockTime(timeChunk->getReceptionEnded(), SIMTIME_NS));
+    void TimeChunkChecker::initialize(int stage) {
+        PacketFilterBase::initialize(stage);
+        if (stage == INITSTAGE_LINK_LAYER)
+            registerProtocol(TimeChunkInserter::timeTagProtocol, nullptr, inputGate);
     }
 
-    bool TimeChunkChecker::matchesPacket(const Packet *packet) const {
-        // TODO: This shouldn't be needed
-        return true;
+    void TimeChunkChecker::processPacket(Packet *packet) {
+        Enter_Method("processPacket");
+        auto timeChunk = packet->popAtFront<TimeChunk>(B(18));
+        appendEncapsulationProtocolInd(packet, &TimeChunkInserter::timeTagProtocol);
+
+        auto timeTag = packet->addTagIfAbsent<DetComIngressTime>();
+        timeTag->setReceptionStarted(timeChunk->getReceptionStarted());
+        timeTag->setReceptionEnded(timeChunk->getReceptionEnded());
+
+        auto typeOrLength = timeChunk->getTypeOrLength();
+        const Protocol *protocol;
+        if (isIeee8023Length(typeOrLength))
+            protocol = &Protocol::ieee8022llc;
+        else
+            protocol = ProtocolGroup::getEthertypeProtocolGroup()->getProtocol(typeOrLength);
+        auto packetProtocolTag = packet->addTagIfAbsent<PacketProtocolTag>();
+        packetProtocolTag->setFrontOffset(b(0));
+        packetProtocolTag->setBackOffset(b(0));
+        packetProtocolTag->setProtocol(protocol);
+        packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(protocol);
+    }
+
+    bool TimeChunkChecker::matchesPacket(const Packet *packet) const
+    {
+        const auto& header = packet->peekAtFront<TimeChunk>();
+        auto typeOrLength = header->getTypeOrLength();
+        if (!isIeee8023Length(typeOrLength) && ProtocolGroup::getEthertypeProtocolGroup()->findProtocol(typeOrLength) == nullptr)
+            return false;
+        else {
+            return true;
+        }
     }
 
 } // namespace inet

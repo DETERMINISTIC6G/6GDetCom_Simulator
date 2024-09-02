@@ -11,8 +11,9 @@
 #include "TimeChunk_m.h"
 
 #include "inet/networklayer/common/TimeTag_m.h"
-#include "inet/common/ProtocolTag_m.h"
 #include "inet/common/IProtocolRegistrationListener.h"
+#include "inet/networklayer/common/NetworkInterface.h"
+#include "inet/linklayer/common/InterfaceTag_m.h"
 
 
 namespace d6g {
@@ -29,24 +30,55 @@ namespace d6g {
             if (*nextProtocolAsString != '\0')
                 nextProtocol = Protocol::getProtocol(nextProtocolAsString);
 
-            auto protocol = ProtocolGroup::getIpProtocolGroup()->findProtocol(ETHERTYPE_5G_TIME_TAG);
+            auto protocol = ProtocolGroup::getEthertypeProtocolGroup()->findProtocol(ETHERTYPE_5G_TIME_TAG);
             if (!protocol) {
-                std::string name = "prot_" + std::to_string(ETHERTYPE_5G_TIME_TAG);
-                protocol = new Protocol(name.c_str(), name.c_str());
-                ProtocolGroup::getIpProtocolGroup()->addProtocol(ETHERTYPE_5G_TIME_TAG, protocol);
+                ProtocolGroup::getEthertypeProtocolGroup()->addProtocol(ETHERTYPE_5G_TIME_TAG, &timeTagProtocol);
             }
         }
         else if (stage == INITSTAGE_LINK_LAYER)
             registerService(timeTagProtocol, inputGate, nullptr);
+        else if (stage == INITSTAGE_LAST) {
+            auto reqInterfaceTypes = check_and_cast<cValueArray *>(par("reqInterfaceTypes").objectValue());
+            for (int i = 0; i < reqInterfaceTypes->size(); i++) {
+                addInterfacesToSet(reqInterfaces, reqInterfaceTypes->get(i).stringValue());
+            }
+            EV << " ===  reqInterfaces: ";
+            for (auto interfaceId : reqInterfaces) {
+                EV << interfaceId << " ";
+            }
+            EV << endl;
+        }
+    }
+
+    void TimeChunkInserter::addInterfacesToSet(std::set<int> &set, const char *interfaceType)
+    {
+        // Check if context has submodule with name interfaceType
+        auto node = getContainingNode(this);
+        if (!node->hasSubmoduleVector(interfaceType)) {
+            throw cRuntimeError("No submodule with name '%s' found in '%s'", interfaceType, node->getFullPath().c_str());
+        }
+
+        // Get submodule vector with name interfaceType
+        for (int i = 0; i < node->getSubmoduleVectorSize(interfaceType); i++) {
+            auto *interface = dynamic_cast<NetworkInterface *>(node->getSubmodule(interfaceType, i));
+            if (interface == nullptr) {
+                throw cRuntimeError("Submodule with name '%s' is not a NetworkInterface", interfaceType);
+            }
+            set.insert(interface->getInterfaceId());
+        }
     }
 
     void TimeChunkInserter::processPacket(Packet *packet) {
         Enter_Method("processPacket");
 
-        if (auto ingressTag = packet->findTag<IngressTimeInd>()) {
+        auto interfaceReqTag = packet->getTag<InterfaceReq>();
+        auto interfaceReq = reqInterfaces.find(interfaceReqTag->getInterfaceId());
+
+        auto ingressTag = packet->findTag<IngressTimeInd>();
+        if (ingressTag && interfaceReq != reqInterfaces.end()) {
             auto ingressTimeChunk = makeShared<TimeChunk>();
-            ingressTimeChunk->setReceptionStarted(0);
-            ingressTimeChunk->setReceptionEnded(1);
+            ingressTimeChunk->setReceptionStarted(ingressTag->getReceptionStarted());
+            ingressTimeChunk->setReceptionEnded(ingressTag->getReceptionEnded());
 
             auto& packetProtocolTag = packet->getTagForUpdate<PacketProtocolTag>();
             auto protocol = packetProtocolTag->getProtocol();
@@ -57,9 +89,9 @@ namespace d6g {
             packet->insertAtFront(ingressTimeChunk);
             packetProtocolTag->setProtocol(&timeTagProtocol);
             packetProtocolTag->setFrontOffset(b(0));
-            removeDispatchProtocol(packet, &timeTagProtocol);
-            setDispatchProtocol(packet, nextProtocol != nullptr ? nextProtocol : &Protocol::ethernetMac);
         }
+        removeDispatchProtocol(packet, &timeTagProtocol);
+        setDispatchProtocol(packet, nextProtocol != nullptr ? nextProtocol : &Protocol::ethernetMac);
     }
 
 
