@@ -7,24 +7,34 @@
 //
 
 
-#ifndef DEVICES_TSNTRANSLATOR_TIMECHUNKCHECKER_H_
-#define DEVICES_TSNTRANSLATOR_TIMECHUNKCHECKER_H_
+#ifndef DEVICES_TSNTRANSLATOR_TIMECHUNKINSERTER_H_
+#define DEVICES_TSNTRANSLATOR_TIMECHUNKINSERTER_H_
 
-#include "inet/queueing/base/PacketFilterBase.h"
-#include "inet/common/IProtocolRegistrationListener.h"
-
+#include "inet/queueing/base/PacketFlowBase.h"
+#include "inet/common/ProtocolUtils.h"
 
 namespace d6g {
+
 
     using namespace inet;
     using namespace inet::queueing;
 
+    enum EtherType5G {
+        ETHERTYPE_5G_TIME_TAG = 0x820F
+    };
 
-    class TimeChunkChecker : public PacketFilterBase, public TransparentProtocolRegistrationListener {
+    class TimeChunkInserter : public PacketFlowBase {
+    public:
+        static const Protocol timeTagProtocol;
+
     protected:
+        const Protocol *nextProtocol = nullptr;
+
+    protected:
+        virtual void initialize(int stage) override;
+
         virtual void processPacket(Packet *packet) override;
-        virtual bool matchesPacket(const Packet *packet) const override;
-        virtual cGate *getRegistrationForwardingGate(cGate *gate) override;
+
     };
 
 } // namespace inet

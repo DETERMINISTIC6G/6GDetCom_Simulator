@@ -19,7 +19,8 @@ using namespace inet;
 
 class TimeChunk extends inet::FieldsChunk
 {
-    chunkLength = B(16);
+    chunkLength = B(18);
     int64_t receptionStarted;
     int64_t receptionEnded;
+    uint16_t typeOrLength;
 }

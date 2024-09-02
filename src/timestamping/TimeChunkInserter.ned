@@ -5,7 +5,7 @@
 //
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-package d6g.devices.tsntranslator;
+package d6g.timestamping;
 
 import inet.queueing.base.PacketFlowBase;
 
@@ -14,4 +14,6 @@ module TimeChunkInserter extends PacketFlowBase
 {
     parameters:
         @class(TimeChunkInserter);
+        @display("i=block/inserter");
+        string nextProtocol = default("ethernetmac");
 }

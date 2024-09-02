@@ -7,8 +7,10 @@
 
 package d6g.devices.tsntranslator;
 
-import inet.node.tsn.TsnSwitch;
+import d6g.timestamping.DetComTimeTagging;
 import inet.linklayer.contract.IEthernetInterface;
+import inet.node.tsn.TsnSwitch;
+
 
 // This module extends the TsnSwitch module and is to be used within the DetCom node.
 // It provides all functionality a full TsnSwitch provides.
@@ -18,8 +20,6 @@ import inet.linklayer.contract.IEthernetInterface;
 module TsnTranslator extends TsnSwitch
 {
     parameters:
-        ethernet.typename = "TTEthernetLayer";
-
         int numTtInterfaces = default(0); // Number of other TT interfaces connected to this TSN Translator.
         bool isDstt = default(false); // Specifies whether the TSN Translator is a DS-TT (otherwise it is a NW-TT).
 
@@ -45,11 +45,13 @@ module TsnTranslator extends TsnSwitch
 
         bridging.typename = default("TTBridgingLayer");
 
-        bridging.delayLayer.typename = default(isDstt ? "TTDelayLayer" : "");
+        bridging.delayLayer.typename = default("TTDelayLayer");
         bridging.delayLayer.delayUplink = default(this.delayUplink);
         bridging.delayLayer.delayDownlink = default(this.delayDownlink);
         eth[*].enableTimeTagging = default(true);
         tt[*].enableTimeTagging = default(true);
+
+        ieee8021q.nextProtocol = default("timeTag5G");
 
     gates:
         inout ttg[numTtInterfaces] @labels(EtherFrame-conn);
@@ -66,10 +68,10 @@ module TsnTranslator extends TsnSwitch
             li.in++ <-- tt[i].upperLayerOut;
             tt[i].phys <--> { @display("m=s"); } <--> ttg[i];
         }
-        
+
         timeTagging.lowerLayerOut --> li.in++;
         li.out++ --> timeTagging.lowerLayerIn;
-        
+
         timeTagging.upperLayerOut --> bl.in++;
         bl.out++ --> timeTagging.upperLayerIn;
 }

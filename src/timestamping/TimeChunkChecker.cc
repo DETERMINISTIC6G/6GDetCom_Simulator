@@ -10,7 +10,7 @@
 #include "TimeChunkChecker.h"
 #include "TimeChunk_m.h"
 
-#include "../../timestamping/TimeTagDetCom_m.h"
+#include "TimeTagDetCom_m.h"
 
 
 namespace d6g {
@@ -28,16 +28,6 @@ namespace d6g {
     bool TimeChunkChecker::matchesPacket(const Packet *packet) const {
         // TODO: This shouldn't be needed
         return true;
-    }
-
-    cGate *TimeChunkChecker::getRegistrationForwardingGate(cGate *gate)
-    {
-        if (gate == outputGate)
-            return inputGate;
-        else if (gate == inputGate)
-            return outputGate;
-        else
-            throw cRuntimeError("Unknown gate");
     }
 
 } // namespace inet
