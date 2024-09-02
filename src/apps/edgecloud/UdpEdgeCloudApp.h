@@ -19,7 +19,7 @@ namespace d6g {
  * UDPEdgeCloudApp is based on the UdpEchoApp. It is used to forward packets to another node (or back) and delay them.
  * See the NED file for more info.
  */
-class INET_API UdpEdgeCloudApp : public UdpEchoApp {
+class UdpEdgeCloudApp : public UdpEchoApp {
 protected:
     virtual void socketDataArrived(UdpSocket *socket, Packet *packet) override;
     virtual void handleStartOperation(LifecycleOperation *operation) override;

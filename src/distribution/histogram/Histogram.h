@@ -22,12 +22,12 @@ using namespace inet;
  * The histogram configuration is provided in the NED file as a parameter.
  * For more information on the histogram configuration, see the NED doc.
  */
-class INET_API Histogram : public cSimpleModule, public IRandomNumberProvider {
+class Histogram : public cSimpleModule, public IRandomNumberProvider {
     /**
      * BinEntry is a class that represents a bin in the histogram.
      */
 public:
-    class INET_API BinEntry {
+    class BinEntry {
     public:
         explicit BinEntry(cXMLElement *binEntity, cModule *context = nullptr);
 
@@ -36,7 +36,6 @@ public:
         cValue rightBoundary = INFINITY; ///< Right boundary
         int count = 0; ///< Count of elements in the bin
         int accumulatedCount = 0; ///< Accumulated count from beginning of the histogram including this bin
-        ~BinEntry() = default;
     };
 
 private:
@@ -46,8 +45,6 @@ private:
 protected:
     void initialize(int stage) override;
 public:
-    Histogram();
-    ~Histogram();
     void parseHistogramConfig(cXMLElement *histogramEntity);
 
 public:
