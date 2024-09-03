@@ -7,10 +7,12 @@
 
 #include "TTDelayer.h"
 
+#include "../timestamping/DetComTimeTag_m.h"
 #include "../timestamping/TimeChunkInserter.h"
 #include "inet/common/ProtocolUtils.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/common/NetworkInterface.h"
+#include "inet/networklayer/common/TimeTag_m.h"
 
 namespace d6g {
 Define_Module(TTDelayer);
@@ -66,8 +68,6 @@ void TTDelayer::addInterfacesToSet(std::set<int> &set, const char *interfaceType
 
 clocktime_t TTDelayer::computeDelay(Packet *packet) const
 {
-    auto context = getContainingNode(this);
-
     bool indInterfaceMatch = false;
     bool reqInterfaceMatch = false;
 
@@ -90,7 +90,28 @@ clocktime_t TTDelayer::computeDelay(Packet *packet) const
     if (!indInterfaceMatch || !reqInterfaceMatch) {
         return 0;
     }
-    return delayParameter->doubleValue();
+    auto delay = delayParameter->doubleValue();
+
+    addResidenceTimeTag(packet, delay);
+
+    return delay;
+}
+
+void TTDelayer::addResidenceTimeTag(Packet *packet, double delay) const {
+    auto ingressTag = packet->findTag<IngressTimeTag>();
+    if (!ingressTag) {
+        throw cRuntimeError("Packet does not have IngressTimeTag, make sure timeTagging is enabled");
+    }
+
+    auto detComIngressTag = packet->findTag<DetComIngressTimeTag>();
+    if (!detComIngressTag) {
+        // Received packet from eth and not tt, cannot calculate residence time yet
+        return;
+    }
+
+    auto residenceTimeTag = packet->addTag<DetComResidenceTimeTag>();
+    auto residenceTime = ingressTag->getReceptionEnded() - detComIngressTag->getReceptionEnded() + delay;
+    residenceTimeTag->setResidenceTime(residenceTime);
 }
 
 void TTDelayer::setDelay(cPar *delay) { delayParameter = delay; }

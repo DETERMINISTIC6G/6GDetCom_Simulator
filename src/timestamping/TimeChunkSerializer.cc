@@ -31,4 +31,3 @@ const Ptr<Chunk> TimeChunkSerializer::deserialize(MemoryInputStream& stream) con
     return header;
 }
 } // namespace inet
-

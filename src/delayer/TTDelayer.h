@@ -44,6 +44,7 @@ protected:
 
     virtual void processPacket(Packet *packet, simtime_t sendingTime) override;
 
+    void addResidenceTimeTag(Packet *pPacket, double delay) const;
 };
 
 } //namespace
