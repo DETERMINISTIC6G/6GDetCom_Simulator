@@ -110,7 +110,7 @@ void TTDelayer::addResidenceTimeTag(Packet *packet, double delay) const {
     }
 
     auto residenceTimeTag = packet->addTag<DetComResidenceTimeTag>();
-    auto residenceTime = ingressTag->getReceptionEnded() - detComIngressTag->getReceptionEnded() + delay;
+    auto residenceTime = ingressTag->getReceptionStarted() - detComIngressTag->getReceptionStarted() + delay;
     residenceTimeTag->setResidenceTime(residenceTime);
 }
 
