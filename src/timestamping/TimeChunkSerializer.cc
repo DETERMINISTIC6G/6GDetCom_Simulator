@@ -5,18 +5,18 @@
 //
 
 #include "TimeChunkSerializer.h"
-#include "TimeChunk_m.h"
+#include "DetComTimeChunk_m.h"
 #include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
 
 
 namespace d6g {
     using namespace inet;
 
-Register_Serializer(TimeChunk, TimeChunkSerializer);
+Register_Serializer(DetComTimeChunk, TimeChunkSerializer);
 
 void TimeChunkSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
-    const auto& header = staticPtrCast<const TimeChunk>(chunk);
+    const auto& header = staticPtrCast<const DetComTimeChunk>(chunk);
     stream.writeUint16Be(header->getTypeOrLength());
     stream.writeUint64Be(header->getReceptionStarted().raw());
     stream.writeUint64Be(header->getReceptionEnded().raw());
@@ -24,7 +24,7 @@ void TimeChunkSerializer::serialize(MemoryOutputStream& stream, const Ptr<const 
 
 const Ptr<Chunk> TimeChunkSerializer::deserialize(MemoryInputStream& stream) const
 {
-    const auto& header = makeShared<TimeChunk>();
+    const auto& header = makeShared<DetComTimeChunk>();
     header->setTypeOrLength(stream.readUint16Be());
     header->setReceptionStarted(stream.readUint64Be());
     header->setReceptionEnded(stream.readUint64Be());

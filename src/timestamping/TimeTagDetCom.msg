@@ -7,7 +7,7 @@ cplusplus {{
 using namespace inet;
 }}
 
-class DetComIngressTime extends inet::TagBase
+class DetComIngressTimeTag extends inet::TagBase
 {
     inet::clocktime_t receptionStarted;
     inet::clocktime_t receptionEnded;

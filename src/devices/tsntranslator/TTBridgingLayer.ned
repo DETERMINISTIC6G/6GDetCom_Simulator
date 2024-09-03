@@ -24,6 +24,7 @@ module TTBridgingLayer like IProtocolLayer
         *.macTableModule = default(absPath(this.macTableModule));
         *.interfaceTableModule = default(this.interfaceTableModule);
         @display("i=block/layer");
+        directionReverser.reverser.typename = "TTPacketDirectionReverser";
     gates:
         input upperLayerIn;
         output upperLayerOut;

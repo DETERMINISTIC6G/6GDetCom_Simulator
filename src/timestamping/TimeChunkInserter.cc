@@ -8,7 +8,7 @@
 
 
 #include "TimeChunkInserter.h"
-#include "TimeChunk_m.h"
+#include "DetComTimeChunk_m.h"
 
 #include "inet/networklayer/common/TimeTag_m.h"
 #include "inet/common/IProtocolRegistrationListener.h"
@@ -74,9 +74,9 @@ namespace d6g {
         auto interfaceReqTag = packet->getTag<InterfaceReq>();
         auto interfaceReq = reqInterfaces.find(interfaceReqTag->getInterfaceId());
 
-        auto ingressTag = packet->findTag<IngressTimeInd>();
+        auto ingressTag = packet->findTag<IngressTimeTag>();
         if (ingressTag && interfaceReq != reqInterfaces.end()) {
-            auto ingressTimeChunk = makeShared<TimeChunk>();
+            auto ingressTimeChunk = makeShared<DetComTimeChunk>();
             ingressTimeChunk->setReceptionStarted(ingressTag->getReceptionStarted());
             ingressTimeChunk->setReceptionEnded(ingressTag->getReceptionEnded());
 

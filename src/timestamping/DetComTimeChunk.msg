@@ -17,7 +17,7 @@ cplusplus {{
 using namespace inet;
 }}
 
-class TimeChunk extends inet::FieldsChunk
+class DetComTimeChunk extends inet::FieldsChunk
 {
     chunkLength = B(18);
     inet::clocktime_t receptionStarted;

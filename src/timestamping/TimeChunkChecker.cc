@@ -9,7 +9,7 @@
 
 #include "TimeChunkChecker.h"
 #include "TimeChunkInserter.h"
-#include "TimeChunk_m.h"
+#include "DetComTimeChunk_m.h"
 #include "inet/linklayer/common/EtherType_m.h"
 
 #include "TimeTagDetCom_m.h"
@@ -26,10 +26,10 @@ namespace d6g {
 
     void TimeChunkChecker::processPacket(Packet *packet) {
         Enter_Method("processPacket");
-        auto timeChunk = packet->popAtFront<TimeChunk>(B(18));
+        auto timeChunk = packet->popAtFront<DetComTimeChunk>(B(18));
         appendEncapsulationProtocolInd(packet, &TimeChunkInserter::timeTagProtocol);
 
-        auto timeTag = packet->addTagIfAbsent<DetComIngressTime>();
+        auto timeTag = packet->addTagIfAbsent<DetComIngressTimeTag>();
         timeTag->setReceptionStarted(timeChunk->getReceptionStarted());
         timeTag->setReceptionEnded(timeChunk->getReceptionEnded());
 
@@ -48,7 +48,7 @@ namespace d6g {
 
     bool TimeChunkChecker::matchesPacket(const Packet *packet) const
     {
-        const auto& header = packet->peekAtFront<TimeChunk>();
+        const auto& header = packet->peekAtFront<DetComTimeChunk>();
         auto typeOrLength = header->getTypeOrLength();
         if (!isIeee8023Length(typeOrLength) && ProtocolGroup::getEthertypeProtocolGroup()->findProtocol(typeOrLength) == nullptr)
             return false;

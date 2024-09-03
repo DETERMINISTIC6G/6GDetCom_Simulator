@@ -6,7 +6,7 @@
 
 #include "TimeChunkDissector.h"
 
-#include "TimeChunk_m.h"
+#include "DetComTimeChunk_m.h"
 #include "TimeChunkInserter.h"
 #include "inet/common/ProtocolGroup.h"
 #include "inet/common/packet/dissector/ProtocolDissectorRegistry.h"
@@ -19,7 +19,7 @@ Register_Protocol_Dissector(&TimeChunkInserter::timeTagProtocol, TimeChunkDissec
 
 void TimeChunkDissector::dissect(Packet *packet, const Protocol *protocol, ICallback &callback) const
 {
-    const auto &header = packet->popAtFront<TimeChunk>();
+    const auto &header = packet->popAtFront<DetComTimeChunk>();
     callback.startProtocolDataUnit(protocol);
     callback.visitChunk(header, protocol);
     int typeOrLength = header->getTypeOrLength();
