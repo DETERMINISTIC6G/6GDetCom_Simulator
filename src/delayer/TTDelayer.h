@@ -42,6 +42,8 @@ protected:
 
     void handleParameterChange(const char *parname) override;
 
+    virtual void processPacket(Packet *packet, simtime_t sendingTime) override;
+
 };
 
 } //namespace

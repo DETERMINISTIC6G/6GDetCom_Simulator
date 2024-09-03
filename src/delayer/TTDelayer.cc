@@ -5,14 +5,15 @@
 //
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-
 #include "TTDelayer.h"
+
+#include "../timestamping/TimeChunkInserter.h"
+#include "inet/common/ProtocolUtils.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/common/TimeTag_m.h"
 
 namespace d6g {
-
 Define_Module(TTDelayer);
 
 void TTDelayer::initialize(int stage)
@@ -46,7 +47,8 @@ void TTDelayer::initialize(int stage)
     }
 }
 
-void TTDelayer::addInterfacesToSet(std::set<int>& set, const char *interfaceType) {
+void TTDelayer::addInterfacesToSet(std::set<int> &set, const char *interfaceType)
+{
     // Check if context has submodule with name interfaceType
     auto node = getContainingNode(this);
     if (!node->hasSubmoduleVector(interfaceType)) {
@@ -102,13 +104,19 @@ clocktime_t TTDelayer::computeDelay(Packet *packet) const
     return delayParameter->doubleValue();
 }
 
-void TTDelayer::setDelay(cPar *delay) {
-    delayParameter = delay;
-}
+void TTDelayer::setDelay(cPar *delay) { delayParameter = delay; }
 
-void TTDelayer::handleParameterChange(const char *parname) {
+void TTDelayer::handleParameterChange(const char *parname)
+{
     if (!strcmp(parname, "delay")) {
         setDelay(&par("delay"));
     }
 }
-} //namespace
+
+void TTDelayer::processPacket(Packet *packet, simtime_t sendingTime)
+{
+    PacketDelayerBase::processPacket(packet, sendingTime);
+    ensureEncapsulationProtocolReq(packet, &TimeChunkInserter::timeTagProtocol);
+    setDispatchProtocol(packet);
+}
+} // namespace d6g

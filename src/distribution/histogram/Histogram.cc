@@ -15,8 +15,6 @@ using namespace inet::xmlutils;
 
 /// Test for D6G
 Define_Module(Histogram);
-Histogram::Histogram(){}
-Histogram::~Histogram(){}
 void Histogram::initialize(int stage) {
     // Parse the histogram configuration
     if (stage == INITSTAGE_LOCAL) {

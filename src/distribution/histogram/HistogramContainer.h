@@ -26,7 +26,7 @@ using namespace inet;
  *
  * For detailed usage and configuration, refer to the NED doc.
  */
-class INET_API HistogramContainer : public cSimpleModule, public IRandomNumberProvider {
+class HistogramContainer : public cSimpleModule, public IRandomNumberProvider {
 
 private:
     std::map<std::string, Histogram *> histograms; ///< Map associating string keys with Histogram instances.
