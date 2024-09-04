@@ -15,37 +15,45 @@
 
 package d6g.devices.pdc;
 
-import inet.clock.contract.IClock;
-import inet.protocolelement.processing.IProcessingDelayLayer;
-import inet.protocolelement.processing.ProcessingDelayLayer;
+import d6g.timestamping.TimeChunkEnforcer;
+import inet.protocolelement.contract.IProtocolLayer;
+import inet.queueing.contract.IPacketDelayer;
 
 
-module PDCLayer extends ProcessingDelayLayer like IProcessingDelayLayer
+module PDCLayer like IProtocolLayer
 {
     parameters:
-        volatile double pdc @mutable @unit(s) = default(0s); // pdc: const delay
-        object pdcMapping @mutable = default([]); // per stream delay
+        @display("i=block/layer");
+        // volatile double pdc @mutable @unit(s) = default(0s); // pdc: const delay
+        // object pdcMapping @mutable = default([]); // per stream delay
 
         // Arrives at tt (ingress, from other UE or NWTT) --> delay --> bridging logic --> eth (egress)
-        ingress.typename = default("PdcDelayer");
+        ingress.typename = default("");
         egress.typename = default("");
          // We do not know the egress interface at the ingress delayer, so only use indInterfaceType
-        ingress.indInterfaceTypes = ["tt"];
+        // ingress.indInterfaceTypes = ["tt"];
 
-        ingress.delay = default(this.pdc);
-        ingress.mapping = default(dup(this.pdcMapping));
-        
-        bool has6gClock = default(false);
-        ingress.clockModule = default(has6gClock ? "^.^.^.clock" : "^.pdcclock");
-        //ingress.clockModule = default("^.pdcclock");
+        // ingress.delay = default(this.pdc);
+        // ingress.mapping = default(dup(this.pdcMapping));
 
+    // ingress.clockModule = default(has6gClock ? "^.^.^.clock" : "^.pdcclock");
+    //ingress.clockModule = default("^.pdcclock");
+    gates:
+        input upperLayerIn;
+        output upperLayerOut;
+        input lowerLayerIn;
+        output lowerLayerOut;
     submodules:
-        pdcclock: <default("IdealClock")> like IClock {
-            parameters:
-                oscillator.typename = default("RandomDriftOscillator");
-                oscillator.driftRateChange = 100ppm;
-                @display("p=711.936,113.093994");
+        pdcDelayer: <default("")> like IPacketDelayer {
+            @display("p=200,150;i=block/blackboard");
         }
+        timeChunkEnforcer: TimeChunkEnforcer {
+            @display("p=500,150;i=block/blackboard");
+        }
+    connections:
+        upperLayerIn --> { @display("m=n"); } --> timeChunkEnforcer.in;
+        timeChunkEnforcer.out --> { @display("m=s"); } --> lowerLayerOut;
 
-
+        lowerLayerIn --> { @display("m=s"); } --> pdcDelayer.in;
+        pdcDelayer.out --> { @display("m=n"); } --> upperLayerOut;
 }

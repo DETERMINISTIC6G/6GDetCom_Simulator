@@ -13,7 +13,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package d6g.simulations.packetdelaycorrec­tion;
+package d6g.simulations.packetdelaycorrection;
 
 import d6g.devices.DetCom;
 import d6g.distribution.histogram.HistogramContainer;

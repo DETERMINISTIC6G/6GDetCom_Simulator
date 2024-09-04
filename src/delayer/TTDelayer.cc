@@ -122,11 +122,4 @@ void TTDelayer::handleParameterChange(const char *parname)
         setDelay(&par("delay"));
     }
 }
-
-void TTDelayer::processPacket(Packet *packet, simtime_t sendingTime)
-{
-    PacketDelayerBase::processPacket(packet, sendingTime);
-    ensureEncapsulationProtocolReq(packet, &TimeChunkInserter::timeTagProtocol);
-    setDispatchProtocol(packet);
-}
 } // namespace d6g
