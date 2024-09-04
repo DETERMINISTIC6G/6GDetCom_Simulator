@@ -12,3 +12,8 @@ class DetComIngressTimeTag extends inet::TagBase
     inet::clocktime_t receptionStarted;
     inet::clocktime_t receptionEnded;
 }
+
+class DetComResidenceTimeTag extends inet::TagBase
+{
+    inet::clocktime_t residenceTime;
+}

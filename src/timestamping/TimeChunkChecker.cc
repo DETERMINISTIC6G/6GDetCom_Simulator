@@ -6,14 +6,12 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
-
 #include "TimeChunkChecker.h"
-#include "TimeChunkInserter.h"
+
 #include "DetComTimeChunk_m.h"
+#include "DetComTimeTag_m.h"
+#include "TimeChunkInserter.h"
 #include "inet/linklayer/common/EtherType_m.h"
-
-#include "TimeTagDetCom_m.h"
-
 
 namespace d6g {
     Define_Module(TimeChunkChecker);

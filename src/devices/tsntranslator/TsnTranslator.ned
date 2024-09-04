@@ -8,6 +8,7 @@
 package d6g.devices.tsntranslator;
 
 import d6g.timestamping.DetComTimeTagging;
+import inet.clock.contract.IClock;
 import inet.linklayer.contract.IEthernetInterface;
 import inet.node.tsn.TsnSwitch;
 
@@ -61,6 +62,9 @@ module TsnTranslator extends TsnSwitch
         }
         timeTagging: DetComTimeTagging {
             @display("p=1100,525");
+        }
+        detComClock: <default("IdealClock")> like IClock {
+            @display("p=200,500;is=s");
         }
     connections:
         for i=0..sizeof(ttg)-1 {
