@@ -16,7 +16,12 @@
 #include "PdcDelayer.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/common/NetworkInterface.h"
-#include "inet/common/TimeTag_m.h"
+//#include "inet/common/TimeTag_m.h"
+
+//#include "../timestamping/DetComTimeTag_m.h"
+//#include "../timestamping/TimeChunkInserter.h"
+#include "inet/common/ProtocolUtils.h"
+#include "inet/networklayer/common/TimeTag_m.h"
 
 //#include "inet/common/DirectionTag_m.h"
 
@@ -124,15 +129,15 @@ clocktime_t PdcDelayer::computeDelay(Packet *packet) const
 
 
     clocktime_t timeDifference;
-    auto CreationTimeTag = packet->findTag<inet::CreationTimeTag>();
+    auto CreationTimeTag = packet->findTag<inet::IngressTimeTag>();
     if (CreationTimeTag != nullptr) {
-        simtime_t timestamp = CreationTimeTag->getCreationTime();
+        clocktime_t timestamp = CreationTimeTag->getReceptionStarted(); //getCreationTime();
         EV << "Timestamp: " << timestamp << endl;
         clocktime_t currentTime = clock->getClockTime();
         timeDifference = currentTime - timestamp.dbl();
 
 
-        packet->removeTag<inet::CreationTimeTag>();
+        //packet->removeTag<inet::CreationTimeTag>();
 
         auto streamIdTag = packet->findTag<StreamInd>();
         if (streamIdTag != nullptr) {

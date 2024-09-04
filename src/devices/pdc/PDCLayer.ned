@@ -40,7 +40,7 @@ module PDCLayer extends ProcessingDelayLayer like IProcessingDelayLayer
         //ingress.clockModule = default("^.pdcclock");
 
     submodules:
-        pdcclock: <default("SettableClock")> like IClock {
+        pdcclock: <default("IdealClock")> like IClock {
             parameters:
                 oscillator.typename = default("RandomDriftOscillator");
                 oscillator.driftRateChange = 100ppm;
