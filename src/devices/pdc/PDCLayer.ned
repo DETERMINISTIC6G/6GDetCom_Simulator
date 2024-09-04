@@ -15,7 +15,7 @@
 
 package d6g.devices.pdc;
 
-import inet.clock.model.SettableClock;
+import inet.clock.contract.IClock;
 import inet.protocolelement.processing.IProcessingDelayLayer;
 import inet.protocolelement.processing.ProcessingDelayLayer;
 
@@ -34,14 +34,17 @@ module PDCLayer extends ProcessingDelayLayer like IProcessingDelayLayer
 
         ingress.delay = default(this.pdc);
         ingress.mapping = default(dup(this.pdcMapping));
-        ingress.clockModule = default("^.pdcclock");
+        
+        bool has6gClock = default(false);
+        ingress.clockModule = default(has6gClock ? "^.^.^.clock" : "^.pdcclock");
+        //ingress.clockModule = default("^.pdcclock");
 
     submodules:
-        pdcclock: SettableClock {
-            parameters :
+        pdcclock: <default("SettableClock")> like IClock {
+            parameters:
                 oscillator.typename = default("RandomDriftOscillator");
                 oscillator.driftRateChange = 100ppm;
-            @display("p=711.936,113.093994");
+                @display("p=711.936,113.093994");
         }
 
 

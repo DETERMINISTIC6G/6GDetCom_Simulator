@@ -44,7 +44,7 @@ void PdcDelayer::initialize(int stage)
 {
     PacketDelayerBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-        clock = check_and_cast<SettableClock*>(getModuleByPath(par("clockModule").stringValue()));
+        clock = check_and_cast<IClock*>(getModuleByPath(par("clockModule").stringValue()));
         setDelay(&par("delay"));
         configureMappings();
     }

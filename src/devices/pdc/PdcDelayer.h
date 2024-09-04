@@ -19,7 +19,8 @@
 #include <omnetpp.h>
 #include "inet/queueing/base/PacketDelayerBase.h"
 //#include "inet/common/clock/ClockUserModuleMixin.h"
-#include "inet/clock/model/SettableClock.h"
+//#include "inet/clock/model/SettableClock.h"
+#include "inet/clock/contract/IClock.h"
 
 
 using namespace omnetpp;
@@ -40,7 +41,7 @@ protected:
         std::string stream;
         double pdc = 0;
     };
-    SettableClock* clock;
+    IClock* clock;
 
 private:
     cPar *delayParameter = nullptr;
