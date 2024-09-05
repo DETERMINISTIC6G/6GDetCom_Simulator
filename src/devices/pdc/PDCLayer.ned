@@ -24,28 +24,26 @@ module PDCLayer like IProtocolLayer
 {
     parameters:
         @display("i=block/layer");
-        // volatile double pdc @mutable @unit(s) = default(0s); // pdc: const delay
-        // object pdcMapping @mutable = default([]); // per stream delay
+         volatile double pdcDefault @mutable @unit(s) = default(0s); // const default delay
+         object pdcMapping @mutable = default([]); // per stream delay
 
         // Arrives at tt (ingress, from other UE or NWTT) --> delay --> bridging logic --> eth (egress)
-        ingress.typename = default("");
-        egress.typename = default("");
-         // We do not know the egress interface at the ingress delayer, so only use indInterfaceType
-        // ingress.indInterfaceTypes = ["tt"];
+        // We do not know the egress interface at the ingress delayer, so only use indInterfaceType
+        pdcDelayer.indInterfaceTypes = ["tt"];
+		pdcDelayer.delay = default(this.pdcDefault);
+        pdcDelayer.mapping = default(dup(this.pdcMapping));
+       	pdcDelayer.clockModule = default("^.^.^.detComClock");
 
-        // ingress.delay = default(this.pdc);
-        // ingress.mapping = default(dup(this.pdcMapping));
-
-    // ingress.clockModule = default(has6gClock ? "^.^.^.clock" : "^.pdcclock");
-    //ingress.clockModule = default("^.pdcclock");
     gates:
         input upperLayerIn;
         output upperLayerOut;
         input lowerLayerIn;
         output lowerLayerOut;
     submodules:
+        pdcDelayer: <default("PdcDelayer")> like IPacketDelayer {
         pdcDelayer: <default("PacketDelayer")> like IPacketDelayer {
             @display("p=200,150;i=block/blackboard");
+
         }
     connections:
         upperLayerIn --> lowerLayerOut;

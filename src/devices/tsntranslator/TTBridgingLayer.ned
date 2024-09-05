@@ -50,7 +50,7 @@ module TTBridgingLayer like IProtocolLayer
             @display("p=300,750");
         }
 
-        pdcCorrection: <default("PDCLayer")> like IProtocolLayer { // new layer
+        pdcCorrection: <default("")> like IProtocolLayer { // new layer
             //@display("i=block/control;b=50,50,255;p=574,360");
             @display("p=300,900");
         }

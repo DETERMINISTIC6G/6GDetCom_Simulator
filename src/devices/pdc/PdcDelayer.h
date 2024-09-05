@@ -19,8 +19,6 @@
 #include <omnetpp.h>
 
 #include "inet/queueing/base/PacketDelayerBase.h"
-// #include "inet/common/clock/ClockUserModuleMixin.h"
-// #include "inet/clock/model/SettableClock.h"
 #include "inet/clock/contract/IClock.h"
 
 using namespace omnetpp;
@@ -36,8 +34,6 @@ class PdcDelayer : public PacketDelayerBase
     class Mapping
     {
       public:
-        // int vlanId = -1;
-        int pcp = -1;
         std::string stream;
         double pdc = 0;
     };
