@@ -14,18 +14,15 @@
 //
 
 #include "ResidenceTimeCalculator.h"
+#include "inet/common/clock/ClockUserModuleMixinImpl.h"
 
 #include "DetComTimeTag_m.h"
 
-namespace inet{
-using namespace queueing;
-template class ClockUserModuleMixin<PacketFlowBase>;
+namespace inet {
+template class ClockUserModuleMixin<inet::queueing::PacketFlowBase>;
 }
 
 namespace d6g {
-using namespace inet;
-
-
 Define_Module(ResidenceTimeCalculator);
 
 void ResidenceTimeCalculator::initialize(int stage) { ClockUserModuleMixin::initialize(stage); }

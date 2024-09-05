@@ -26,7 +26,6 @@ using namespace omnetpp;
 namespace d6g {
 using namespace inet;
 using namespace inet::queueing;
-
 /**
  * TODO - Generated class
  */
