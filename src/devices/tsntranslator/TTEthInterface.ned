@@ -1,0 +1,26 @@
+// This file is part of Deliverable D4.1 DetCom Simulator Framework Release 1
+// of the DETERMINISTIC6G project receiving funding from the
+// European Union’s Horizon Europe research and innovation programme
+// under Grant Agreement No. 101096504.
+//
+// SPDX-License-Identifier: LGPL-3.0-or-later
+
+package d6g.devices.tsntranslator;
+
+import d6g.timestamping.TimeTagger;
+import inet.linklayer.ethernet.modular.LayeredEthernetInterface;
+
+
+// This module extends the LayeredEthernetInterface module.
+// However, as its purpose is to connect multiple TsnTranslator modules within a DetCom node, no additional delay and
+// no ifg should be used there. Thus, the interFrameGapInserter is set to 0s and the bitrate is set to inf Mbps.
+// This module only works in combination when connecting it with another TTInterface using the TTChannel module.
+//
+// See the DetCom to see how this module is implemented.
+module TTEthInterface extends LayeredEthernetInterface
+{
+    submodules:
+        timeTagger: TimeTagger {
+            @display("p=100,300;is=s");
+        }
+}

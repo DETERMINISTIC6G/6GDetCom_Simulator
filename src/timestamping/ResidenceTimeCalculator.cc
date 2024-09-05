@@ -31,8 +31,7 @@ void ResidenceTimeCalculator::processPacket(Packet *packet)
 {
     auto detComIngressTag = packet->findTag<DetComIngressTimeTag>();
     if (!detComIngressTag) {
-        // Received packet from eth and not tt, cannot calculate residence time yet
-        return;
+        throw cRuntimeError("DetComIngressTimeTag not found in packet");
     }
 
     auto residenceTimeTag = packet->addTag<DetComResidenceTimeTag>();

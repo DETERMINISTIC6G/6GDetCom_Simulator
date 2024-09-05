@@ -25,6 +25,8 @@ module TsnTranslator extends TsnSwitch
         bool isDstt = default(false); // Specifies whether the TSN Translator is a DS-TT (otherwise it is a NW-TT).
 
         clock.typename = "PiServoClock";
+        
+        eth[*].typename = default("TTEthInterface");
 
         volatile double delayUplink @mutable @unit(s) = default(0s); // Uplink Delay
         volatile double delayDownlink @mutable @unit(s) = default(0s); // Downlink Delay
@@ -50,7 +52,9 @@ module TsnTranslator extends TsnSwitch
         bridging.delayLayer.delayUplink = default(this.delayUplink);
         bridging.delayLayer.delayDownlink = default(this.delayDownlink);
         eth[*].enableTimeTagging = default(true);
-        tt[*].enableTimeTagging = default(true);
+        tt[*].enableTimeTagging = default(false);
+
+        eth[*].timeTagger.clockModule = default(exists(detComClock) ? absPath(".detComClock") : "");
 
     gates:
         inout ttg[numTtInterfaces] @labels(EtherFrame-conn);

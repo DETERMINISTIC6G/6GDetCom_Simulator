@@ -9,9 +9,9 @@
 #include "TimeChunkInserter.h"
 
 #include "DetComTimeChunk_m.h"
+#include "DetComTimeTag_m.h"
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/networklayer/common/NetworkInterface.h"
-#include "inet/networklayer/common/TimeTag_m.h"
 
 namespace d6g {
 Define_Module(TimeChunkInserter);
@@ -41,7 +41,7 @@ void TimeChunkInserter::processPacket(Packet *packet)
 {
     Enter_Method("processPacket");
 
-    auto ingressTag = packet->findTag<IngressTimeTag>();
+    auto ingressTag = packet->findTag<DetComIngressTimeTag>();
     if (!ingressTag)
         throw cRuntimeError("TimeChunkInserter requires IngressTimeTag to be present in the packet");
 

@@ -17,16 +17,10 @@
 
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/common/NetworkInterface.h"
-#include "inet/common/TimeTag_m.h"
 
 #include "../../timestamping/DetComTimeTag_m.h"
 
-#include "inet/common/ProtocolUtils.h"
-#include "inet/networklayer/common/TimeTag_m.h"
-
 #include "inet/protocolelement/redundancy/StreamTag_m.h"
-
-#include "inet/common/packet/Packet.h"
 
 using namespace omnetpp;
 using namespace inet;
