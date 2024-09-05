@@ -15,39 +15,24 @@
 
 package d6g.devices.pdc;
 
-import d6g.timestamping.TimeChunkEnforcer;
-import inet.protocolelement.contract.IProtocolLayer;
-import inet.queueing.contract.IPacketDelayer;
+import inet.protocolelement.processing.IProcessingDelayLayer;
+import inet.protocolelement.processing.ProcessingDelayLayer;
 
 
-module PDCLayer like IProtocolLayer
+module PDCLayer extends ProcessingDelayLayer like IProcessingDelayLayer
 {
     parameters:
         @display("i=block/layer");
-         volatile double pdcDefault @mutable @unit(s) = default(0s); // const default delay
-         object pdcMapping @mutable = default([]); // per stream delay
+        volatile double pdcDefault @mutable @unit(s) = default(0s); // const default delay
+        object pdcMapping @mutable = default([]); // per stream delay
+
+        ingress.typename = default("PdcDelayer");
+        egress.typename = default("");
 
         // Arrives at tt (ingress, from other UE or NWTT) --> delay --> bridging logic --> eth (egress)
         // We do not know the egress interface at the ingress delayer, so only use indInterfaceType
-        pdcDelayer.indInterfaceTypes = ["tt"];
-		pdcDelayer.delay = default(this.pdcDefault);
-        pdcDelayer.mapping = default(dup(this.pdcMapping));
-       	pdcDelayer.clockModule = default("^.^.^.detComClock");
-
-    gates:
-        input upperLayerIn;
-        output upperLayerOut;
-        input lowerLayerIn;
-        output lowerLayerOut;
-    submodules:
-        pdcDelayer: <default("PdcDelayer")> like IPacketDelayer {
-        pdcDelayer: <default("PacketDelayer")> like IPacketDelayer {
-            @display("p=200,150;i=block/blackboard");
-
-        }
-    connections:
-        upperLayerIn --> lowerLayerOut;
-
-        lowerLayerIn --> { @display("m=s"); } --> pdcDelayer.in;
-        pdcDelayer.out --> { @display("m=n"); } --> upperLayerOut;
+        ingress.indInterfaceTypes = ["tt"];
+        ingress.delay = default(this.pdcDefault);
+        ingress.mapping = default(dup(this.pdcMapping));
+        ingress.clockModule = default("^.^.^.detComClock");
 }
