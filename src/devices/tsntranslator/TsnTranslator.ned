@@ -24,7 +24,7 @@ module TsnTranslator extends TsnSwitch
         int numTtInterfaces = default(0); // Number of other TT interfaces connected to this TSN Translator.
         bool isDstt = default(false); // Specifies whether the TSN Translator is a DS-TT (otherwise it is a NW-TT).
 
-        clock.typename = "IdealClock";
+        clock.typename = "PiServoClock";
         
         eth[*].typename = default("TTEthInterface");
 
@@ -53,6 +53,8 @@ module TsnTranslator extends TsnSwitch
         bridging.delayLayer.delayDownlink = default(this.delayDownlink);
         eth[*].enableTimeTagging = default(true);
         tt[*].enableTimeTagging = default(false);
+        
+        gptp.typename = default(hasGptp ? "DetComGptp" : "");
 
         eth[*].timeTagger.clockModule = default(exists(detComClock) ? absPath(".detComClock") : "");
 
