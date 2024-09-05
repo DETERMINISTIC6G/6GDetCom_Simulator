@@ -64,8 +64,11 @@ module TTBridgingLayer like IProtocolLayer
         vlanPolicy: <default("")> like IProtocolLayer {
             @display("p=300,1350");
         }
-        delayLayer: <default("")> like IProcessingDelayLayer {
+        timestampingLayer: <default("DetComTimestampingLayer")> like IProtocolLayer {
             @display("p=300,1500");
+        }
+        delayLayer: <default("")> like IProcessingDelayLayer {
+            @display("p=300,1650");
         }
     connections:
         upperLayerIn --> processingDelayLayer.upperLayerIn;
@@ -77,11 +80,13 @@ module TTBridgingLayer like IProtocolLayer
         pdcCorrection.lowerLayerOut --> streamCoder.upperLayerIn;
         streamCoder.lowerLayerOut --> interfaceRelay.upperLayerIn;
         interfaceRelay.lowerLayerOut --> vlanPolicy.upperLayerIn;
-        vlanPolicy.lowerLayerOut --> delayLayer.upperLayerIn;
+        vlanPolicy.lowerLayerOut --> timestampingLayer.upperLayerIn;
+        timestampingLayer.lowerLayerOut --> delayLayer.upperLayerIn;
         delayLayer.lowerLayerOut --> lowerLayerOut;
 
         lowerLayerIn --> delayLayer.lowerLayerIn;
-        delayLayer.upperLayerOut --> vlanPolicy.lowerLayerIn;
+        delayLayer.upperLayerOut --> timestampingLayer.lowerLayerIn;
+        timestampingLayer.upperLayerOut --> vlanPolicy.lowerLayerIn;
         vlanPolicy.upperLayerOut --> interfaceRelay.lowerLayerIn;
         interfaceRelay.upperLayerOut --> streamCoder.lowerLayerIn;
         streamCoder.upperLayerOut --> pdcCorrection.lowerLayerIn;

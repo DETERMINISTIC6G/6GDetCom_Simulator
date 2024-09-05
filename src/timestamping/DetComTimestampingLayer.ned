@@ -13,14 +13,14 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package d6g.devices.pdc;
+package d6g.timestamping;
 
 import d6g.timestamping.TimeChunkEnforcer;
 import inet.protocolelement.contract.IProtocolLayer;
 import inet.queueing.contract.IPacketDelayer;
 
 
-module PDCLayer like IProtocolLayer
+module DetComTimestampingLayer like IProtocolLayer
 {
     parameters:
         @display("i=block/layer");
@@ -44,12 +44,16 @@ module PDCLayer like IProtocolLayer
         input lowerLayerIn;
         output lowerLayerOut;
     submodules:
-        pdcDelayer: <default("PacketDelayer")> like IPacketDelayer {
+        residenceTimeCalculator: ResidenceTimeCalculator {
             @display("p=200,150;i=block/blackboard");
         }
+        timeChunkEnforcer: TimeChunkEnforcer {
+            @display("p=500,150;i=block/blackboard");
+        }
     connections:
-        upperLayerIn --> lowerLayerOut;
+        upperLayerIn --> { @display("m=n"); } --> timeChunkEnforcer.in;
+        timeChunkEnforcer.out --> { @display("m=s"); } --> lowerLayerOut;
 
-        lowerLayerIn --> { @display("m=s"); } --> pdcDelayer.in;
-        pdcDelayer.out --> { @display("m=n"); } --> upperLayerOut;
+        lowerLayerIn --> { @display("m=s"); } --> residenceTimeCalculator.in;
+        residenceTimeCalculator.out --> { @display("m=n"); } --> upperLayerOut;
 }

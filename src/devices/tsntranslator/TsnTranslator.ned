@@ -52,8 +52,6 @@ module TsnTranslator extends TsnSwitch
         eth[*].enableTimeTagging = default(true);
         tt[*].enableTimeTagging = default(true);
 
-        ieee8021q.nextProtocol = default("timeTag5G");
-
     gates:
         inout ttg[numTtInterfaces] @labels(EtherFrame-conn);
     submodules:

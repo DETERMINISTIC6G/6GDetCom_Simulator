@@ -21,10 +21,8 @@ import inet.queueing.base.PacketFlowBase;
 //
 // TODO auto-generated module
 //
-simple TimeChunkEnforcer extends PacketFlowBase
+simple ResidenceTimeCalculator extends PacketFlowBase
 {
-    parameters:
-        @class(TimeChunkEnforcer);
-        object indInterfaceTypes = default([]); // Only apply delay if the ind interface is of specific type (e.g. ["tt"] or ["tt", "eth"], empty means any)
-        object reqInterfaceTypes = default(["tt"]); // Only apply delay if the req interface is of specific type (e.g. ["tt"] or ["tt", "eth"], empty means any)
+	parameters:
+		@class(ResidenceTimeCalculator);
 }

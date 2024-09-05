@@ -15,6 +15,5 @@ module TimeChunkInserter extends PacketFlowBase
     parameters:
         @class(TimeChunkInserter);
         @display("i=block/inserter");
-        object reqInterfaceTypes = default(["tt"]); // Only apply delay if the req interface is of specific type (e.g. ["tt"] or ["tt", "eth"], empty means any)
         string nextProtocol = default("ethernetmac");
 }

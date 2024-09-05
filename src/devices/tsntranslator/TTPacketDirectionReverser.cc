@@ -24,4 +24,4 @@ void TTPacketDirectionReverser::processPacket(inet::Packet *packet)
         newDetComResidenceTimeTag->setResidenceTime(detComResidenceTimeTag->getResidenceTime());
     }
 }
-}
+} // namespace d6g

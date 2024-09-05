@@ -25,28 +25,16 @@ Define_Module(TimeChunkEnforcer);
 
 void TimeChunkEnforcer::initialize(int stage)
 {
-    PacketFlowBase::initialize(stage);
-}
-void TimeChunkEnforcer::addInterfacesToSet(std::set<int> &set, const char *interfaceType)
-{
-    // Check if context has submodule with name interfaceType
-    auto node = getContainingNode(this);
-    if (!node->hasSubmoduleVector(interfaceType)) {
-        throw cRuntimeError("No submodule with name '%s' found in '%s'", interfaceType, node->getFullPath().c_str());
-    }
-
-    // Get submodule vector with name interfaceType
-    for (int i = 0; i < node->getSubmoduleVectorSize(interfaceType); i++) {
-        auto *interface = dynamic_cast<NetworkInterface *>(node->getSubmodule(interfaceType, i));
-        if (interface == nullptr) {
-            throw cRuntimeError("Submodule with name '%s' is not a NetworkInterface", interfaceType);
-        }
-        set.insert(interface->getInterfaceId());
-    }
+    InterfaceFilterMixin::initialize(stage);
 }
 
 void TimeChunkEnforcer::processPacket(Packet *packet) {
-    ensureEncapsulationProtocolReq(packet, &TimeChunkInserter::timeTagProtocol);
+    if (matchesInterfaceConfiguration(packet)) {
+        ensureEncapsulationProtocolReq(packet, &TimeChunkInserter::timeTagProtocol);
+    } else {
+        removeEncapsulationProtocolReq(packet, &TimeChunkInserter::timeTagProtocol);
+    }
+
     setDispatchProtocol(packet);
     handlePacketProcessed(packet);
 }
