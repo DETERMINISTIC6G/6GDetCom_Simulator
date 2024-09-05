@@ -17,27 +17,15 @@
 
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/common/NetworkInterface.h"
-// #include "inet/common/TimeTag_m.h"
+#include "inet/common/TimeTag_m.h"
 
-// #include "../timestamping/DetComTimeTag_m.h"
-// #include "../timestamping/TimeChunkInserter.h"
+#include "../../timestamping/DetComTimeTag_m.h"
+
 #include "inet/common/ProtocolUtils.h"
 #include "inet/networklayer/common/TimeTag_m.h"
 
-// #include "inet/common/DirectionTag_m.h"
-
-// #include "inet/common/ProtocolTag_m.h"
-// #include "inet/common/SequenceNumberTag_m.h"
-// #include "inet/linklayer/common/DropEligibleTag_m.h"
-// #include "inet/linklayer/common/InterfaceTag_m.h"
-// #include "inet/linklayer/common/MacAddressTag_m.h"
-#include "inet/linklayer/common/PcpTag_m.h"
-#include "inet/linklayer/common/UserPriorityTag_m.h"
-#include "inet/linklayer/common/VlanTag_m.h"
-// #include "inet/protocolelement/cutthrough/CutthroughTag_m.h"
 #include "inet/protocolelement/redundancy/StreamTag_m.h"
-// #include "inet/protocolelement/shaper/EligibilityTimeTag_m.h"
-// #include "inet/linklayer/ieee8021q/Ieee8021qTagHeader_m.h"
+
 #include "inet/common/packet/Packet.h"
 
 using namespace omnetpp;
@@ -123,43 +111,36 @@ clocktime_t PdcDelayer::computeDelay(Packet *packet) const
     if (!indInterfaceMatch || !reqInterfaceMatch) {
         return 0;
     }
-    // #####
-    auto &tags = packet->getTags();
-    for (int i = 0; i < tags.getNumTags(); i++) {
-        EV << "Tag in PDC Layer: " << tags.getTag(i) << endl;
-    }
 
     clocktime_t timeDifference;
-    auto CreationTimeTag = packet->findTag<inet::IngressTimeTag>();
-    if (CreationTimeTag != nullptr) {
-        clocktime_t timestamp = CreationTimeTag->getReceptionStarted(); // getCreationTime();
-        EV << "Timestamp: " << timestamp << endl;
-        clocktime_t currentTime = clock->getClockTime();
-        timeDifference = currentTime - timestamp.dbl();
+    auto creationTimeTag = packet->findTag<DetComIngressTimeTag>();
+    auto residenceTime = packet->findTag<DetComResidenceTimeTag>();
 
-        // packet->removeTag<inet::CreationTimeTag>();
+    if (creationTimeTag != nullptr && residenceTime != nullptr) {
+        clocktime_t timestamp = creationTimeTag->getReceptionEnded();
+        clocktime_t currentTime = clock->getClockTime();
+        //clocktime_t currentTime = residenceTime->getResidenceTime();
+        timeDifference = currentTime - timestamp;
+
+        double pdc = delayParameter->doubleValue();
 
         auto streamIdTag = packet->findTag<StreamInd>();
         if (streamIdTag != nullptr) {
             auto streamID = streamIdTag->getStreamName();
-            EV << "Stream ID: " << streamID << endl;
             for (auto &mapping : mappings) {
                 if (!strcmp(mapping.stream.c_str(), streamID)) {
-                    const_cast<cPar &>(par("delay")).setDoubleValue(mapping.pdc);
-
-                    EV << "Delay aus Mapping: " << mapping.pdc << endl;
+                    //const_cast<cPar &>(par("delay")).setDoubleValue(mapping.pdc);
+                    pdc = mapping.pdc;
                     break;
                 }
             }
         }
-        if (timeDifference.dbl() > delayParameter->doubleValue()) {
+        if (timeDifference.dbl() > pdc) {
             return 0;
+        } else {
+            return pdc - timeDifference.dbl();
         }
-        else {
-            return (delayParameter->doubleValue()) - timeDifference.dbl();
-        }
-    }
-    else {
+    } else {
         return 0;
     }
 }
@@ -184,8 +165,6 @@ void PdcDelayer::configureMappings()
     for (int i = 0; i < mappingParameter->size(); i++) {
         auto element = check_and_cast<cValueMap *>(mappingParameter->get(i).objectValue());
         Mapping &mapping = mappings[i];
-        // mapping.vlanId = element->containsKey("vlan") ? element->get("vlan").intValue() : -1;
-        mapping.pcp = element->containsKey("pcp") ? element->get("pcp").intValue() : -1;
         mapping.stream = element->get("stream").stringValue();
         mapping.pdc = element->containsKey("pdc") ? simtime_t::parse(element->get("pdc")).dbl() : 0;
     }
