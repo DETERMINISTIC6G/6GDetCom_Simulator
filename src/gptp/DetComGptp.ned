@@ -14,5 +14,5 @@ simple DetComGptp extends Gptp
 {
     parameters:
         @class(DetComGptp);
-        object reqInterfaceTypes = default(["eth"]); // Only send delay requests if the req interface is of specific type (e.g. ["tt"] or ["tt", "eth"], empty means any)
+        object detComInterfaceTypes = default(["tt"]); // Interfaces with 5G specific behavior
 }
