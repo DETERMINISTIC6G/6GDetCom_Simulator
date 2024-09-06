@@ -3079,7 +3079,7 @@ utils.export_data_if_needed(df, props)
                 <property name="yaxis_title" value=""/>
                 <property name="legend_replacements" value="/PDC.device1.//&#10;/.sink//&#10;/app\[/stream/&#10;/\]//"/>
                 <property name="Legend.Border" value="false"/>
-                <property name="title" value="mean bit life time per packet"/>
+                <property name="title" value="Two Streams with different PDC"/>
                 <property name="legend_automatic" value="true"/>
                 <property name="Plot.Title.Font" value="Arial-regular-10"/>
                 <property name="vector_operations" value=""/>
