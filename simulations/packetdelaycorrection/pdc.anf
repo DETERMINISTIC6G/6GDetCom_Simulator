@@ -607,9 +607,9 @@ utils.export_data_if_needed(df, props)
                 <property name="linecolor" value=""/>
                 <property name="Plot.Caching" value="true"/>
                 <property name="legend_prefer_result_titles" value="true"/>
-                <property name="legend_manual" value=""/>
+                <property name="legend_manual" value="false"/>
                 <property name="yaxis_title" value=""/>
-                <property name="legend_replacements" value=""/>
+                <property name="legend_replacements" value="/mean bit life time per packet in PDC.device2.//&#10;/.sink//&#10;/app\[0\]/No PDC/"/>
                 <property name="Legend.Border" value="false"/>
                 <property name="title" value="No PDC"/>
                 <property name="legend_automatic" value="true"/>
@@ -641,7 +641,7 @@ utils.export_data_if_needed(df, props)
                 <property name="drawstyle" value="auto"/>
                 <property name="marker" value="none"/>
                 <property name="legend_show" value="true"/>
-                <property name="simplify" value=""/>
+                <property name="simplify" value="false"/>
                 <property name="yaxis_max" value=""/>
                 <property name="Plot.Antialias" value="true"/>
                 <property name="xaxis_max" value=""/>
@@ -1243,9 +1243,9 @@ utils.export_data_if_needed(df, props)
                 <property name="linecolor" value=""/>
                 <property name="Plot.Caching" value="true"/>
                 <property name="legend_prefer_result_titles" value="true"/>
-                <property name="legend_manual" value=""/>
+                <property name="legend_manual" value="false"/>
                 <property name="yaxis_title" value=""/>
-                <property name="legend_replacements" value=""/>
+                <property name="legend_replacements" value="/mean bit life time per packet in PDC.device2.//&#10;/.sink//&#10;/app\[0\]/PDC/"/>
                 <property name="Legend.Border" value="false"/>
                 <property name="title" value="PDC"/>
                 <property name="legend_automatic" value="true"/>
@@ -1277,7 +1277,7 @@ utils.export_data_if_needed(df, props)
                 <property name="drawstyle" value="auto"/>
                 <property name="marker" value="none"/>
                 <property name="legend_show" value="true"/>
-                <property name="simplify" value=""/>
+                <property name="simplify" value="false"/>
                 <property name="yaxis_max" value=""/>
                 <property name="Plot.Antialias" value="true"/>
                 <property name="xaxis_max" value=""/>
@@ -3075,9 +3075,9 @@ utils.export_data_if_needed(df, props)
                 <property name="linecolor" value=""/>
                 <property name="Plot.Caching" value="true"/>
                 <property name="legend_prefer_result_titles" value="true"/>
-                <property name="legend_manual" value=""/>
+                <property name="legend_manual" value="false"/>
                 <property name="yaxis_title" value=""/>
-                <property name="legend_replacements" value=""/>
+                <property name="legend_replacements" value="/PDC.device1.//&#10;/.sink//&#10;/app\[/stream/&#10;/\]//"/>
                 <property name="Legend.Border" value="false"/>
                 <property name="title" value="mean bit life time per packet"/>
                 <property name="legend_automatic" value="true"/>
@@ -3095,7 +3095,7 @@ utils.export_data_if_needed(df, props)
                 <property name="xaxis_title" value=""/>
                 <property name="Plot.BackgroundColor" value="white"/>
                 <property name="grid_density" value="Major"/>
-                <property name="yaxis_min" value=""/>
+                <property name="yaxis_min" value="0.005"/>
                 <property name="Legend.Font" value="Arial-regular-8"/>
                 <property name="image_export_filename" value=""/>
                 <property name="xaxis_min" value=""/>
@@ -3109,8 +3109,8 @@ utils.export_data_if_needed(df, props)
                 <property name="drawstyle" value="auto"/>
                 <property name="marker" value="none"/>
                 <property name="legend_show" value="true"/>
-                <property name="simplify" value=""/>
-                <property name="yaxis_max" value=""/>
+                <property name="simplify" value="false"/>
+                <property name="yaxis_max" value="0.015"/>
                 <property name="Plot.Antialias" value="true"/>
                 <property name="xaxis_max" value=""/>
                 <property name="image_export_width" value="6"/>
