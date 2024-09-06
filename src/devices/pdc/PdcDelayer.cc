@@ -106,33 +106,26 @@ clocktime_t PdcDelayer::computeDelay(Packet *packet) const
         return 0;
     }
 
-    clocktime_t timeDifference;
-    auto creationTimeTag = packet->findTag<DetComIngressTimeTag>();
-    auto residenceTime = packet->findTag<DetComResidenceTimeTag>();
+    auto residenceTimeTag = packet->findTag<DetComResidenceTimeTag>();
+    auto streamIdTag = packet->findTag<StreamInd>();
 
-    if (creationTimeTag != nullptr && residenceTime != nullptr) {
-        clocktime_t timestamp = creationTimeTag->getReceptionEnded();
-        clocktime_t currentTime = clock->getClockTime();
-        //clocktime_t currentTime = residenceTime->getResidenceTime();
-        timeDifference = currentTime - timestamp;
+    double pdc = delayParameter->doubleValue();
 
-        double pdc = delayParameter->doubleValue();
-
-        auto streamIdTag = packet->findTag<StreamInd>();
+    if (residenceTimeTag != nullptr) {
+        clocktime_t residenceTime = residenceTimeTag->getResidenceTime();
         if (streamIdTag != nullptr) {
             auto streamID = streamIdTag->getStreamName();
             for (auto &mapping : mappings) {
                 if (!strcmp(mapping.stream.c_str(), streamID)) {
-                    //const_cast<cPar &>(par("delay")).setDoubleValue(mapping.pdc);
                     pdc = mapping.pdc;
                     break;
                 }
             }
         }
-        if (timeDifference.dbl() > pdc) {
+        if ((residenceTime.dbl() - pdc) > 1e-9) {
             return 0;
         } else {
-            return pdc - timeDifference.dbl();
+            return pdc - residenceTime.dbl();
         }
     } else {
         return 0;
