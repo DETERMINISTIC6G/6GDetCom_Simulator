@@ -18,6 +18,7 @@
 
 #include <omnetpp.h>
 
+#include "../../utils/InterfaceFilterMixin.h"
 #include "inet/queueing/base/PacketDelayerBase.h"
 #include "inet/clock/contract/IClock.h"
 
@@ -27,7 +28,7 @@ using namespace inet::queueing;
 
 namespace d6g {
 
-class PdcDelayer : public PacketDelayerBase
+class PdcDelayer : public InterfaceFilterMixin<PacketDelayerBase>
 {
 
   protected:
@@ -41,8 +42,8 @@ class PdcDelayer : public PacketDelayerBase
 
   private:
     cPar *delayParameter = nullptr;
-    std::set<int> indInterfaces;
-    std::set<int> reqInterfaces;
+    //std::set<int> indInterfaces;
+    //std::set<int> reqInterfaces;
     std::vector<Mapping> mappings;
 
   protected:
@@ -59,7 +60,7 @@ class PdcDelayer : public PacketDelayerBase
 
     void setDelay(cPar *delay);
 
-    void addInterfacesToSet(std::set<int> &set, const char *interfaceList);
+    //void addInterfacesToSet(std::set<int> &set, const char *interfaceList);
 
     void handleParameterChange(const char *parname) override;
 

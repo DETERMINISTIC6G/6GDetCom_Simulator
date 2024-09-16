@@ -15,8 +15,8 @@
 
 #include "PdcDelayer.h"
 
-#include "inet/linklayer/common/InterfaceTag_m.h"
-#include "inet/networklayer/common/NetworkInterface.h"
+//#include "inet/linklayer/common/InterfaceTag_m.h"
+//#include "inet/networklayer/common/NetworkInterface.h"
 
 #include "../../timestamping/DetComTimeTag_m.h"
 
@@ -31,13 +31,14 @@ Define_Module(PdcDelayer);
 void PdcDelayer::initialize(int stage)
 {
     PacketDelayerBase::initialize(stage);
+    InterfaceFilterMixin::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         clock = check_and_cast<IClock *>(getModuleByPath(par("clockModule").stringValue()));
         setDelay(&par("delay"));
         configureMappings();
     }
 
-    if (stage == INITSTAGE_LAST) {
+    /*if (stage == INITSTAGE_LAST) {
         auto indInterfaceTypes = check_and_cast<cValueArray *>(par("indInterfaceTypes").objectValue());
         for (int i = 0; i < indInterfaceTypes->size(); i++) {
             addInterfacesToSet(indInterfaces, indInterfaceTypes->get(i).stringValue());
@@ -58,10 +59,10 @@ void PdcDelayer::initialize(int stage)
             EV << interfaceId << " ";
         }
         EV << endl;
-    }
+    } */
 }
 
-void PdcDelayer::addInterfacesToSet(std::set<int> &set, const char *interfaceType)
+/*void PdcDelayer::addInterfacesToSet(std::set<int> &set, const char *interfaceType)
 {
     // Check if context has submodule with name interfaceType
     auto node = getContainingNode(this);
@@ -77,11 +78,11 @@ void PdcDelayer::addInterfacesToSet(std::set<int> &set, const char *interfaceTyp
         }
         set.insert(interface->getInterfaceId());
     }
-}
+}*/
 
 clocktime_t PdcDelayer::computeDelay(Packet *packet) const
 {
-    auto context = getContainingNode(this);
+    /*auto context = getContainingNode(this);
 
     bool indInterfaceMatch = false;
     bool reqInterfaceMatch = false;
@@ -104,12 +105,16 @@ clocktime_t PdcDelayer::computeDelay(Packet *packet) const
 
     if (!indInterfaceMatch || !reqInterfaceMatch) {
         return 0;
+    }*/
+
+    if (!matchesInterfaceConfiguration(packet)) {
+        return 0;
     }
 
     auto residenceTimeTag = packet->findTag<DetComResidenceTimeTag>();
     auto streamIdTag = packet->findTag<StreamInd>();
 
-    double pdc = delayParameter->doubleValue();
+    clocktime_t pdc = delayParameter->doubleValue();
 
     if (residenceTimeTag != nullptr) {
         clocktime_t residenceTime = residenceTimeTag->getResidenceTime();
@@ -122,10 +127,10 @@ clocktime_t PdcDelayer::computeDelay(Packet *packet) const
                 }
             }
         }
-        if ((residenceTime.dbl() - pdc) > 1e-9) {
+        if ((residenceTime - pdc) > 0) {
             return 0;
         } else {
-            return pdc - residenceTime.dbl();
+            return pdc - residenceTime;
         }
     } else {
         return 0;
