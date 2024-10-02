@@ -8,6 +8,7 @@
 package d6g.simulations.timesync;
 
 import d6g.devices.DetCom;
+import d6g.distribution.histogram.HistogramContainer;
 import inet.networks.base.TsnNetworkBase;
 import inet.node.ethernet.EthernetLink;
 import inet.node.tsn.TsnClock;
@@ -20,6 +21,9 @@ import inet.node.tsn.TsnDevice;
 network TimeSyncNetwork extends TsnNetworkBase
 {
     submodules:
+        histogramContainer: HistogramContainer {
+            @display("p=100,800");
+        }
         timeTransmitter: TsnClock {
             @display("p=500,150");
         }

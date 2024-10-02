@@ -14,6 +14,7 @@ void DetComGptp::initialize(int stage)
         if (gptpNodeType != BRIDGE_NODE) {
             throw cRuntimeError("DetComGptp is only supported for bridge nodes");
         }
+        detComClock.reference(this, "detComClockModule", true);
     }
     if (stage == INITSTAGE_LINK_LAYER) {
         detComInterfaces.clear();
@@ -28,55 +29,144 @@ void DetComGptp::initialize(int stage)
     }
 }
 
-void DetComGptp::processFollowUp(Packet *packet, const GptpFollowUp *gptp)
-{
-    auto gptpNow = gptp;
-    auto interfaceInd = packet->findTag<InterfaceInd>();
-    if (!interfaceInd) {
-        throw cRuntimeError("InterfaceInd tag not found in packet");
-    }
-    if (idMatchesSet(interfaceInd->getInterfaceId(), detComInterfaces)) {
-        // If meesage was received from a detCom interface, we need to update the correction field
-        // to reflect the residence time
-        auto correctionField = gptp->getCorrectionField();
-        auto detComResidenceTimeTag = packet->findTag<DetComResidenceTimeTag>();
-        if (!detComResidenceTimeTag) {
-            throw cRuntimeError("DetComResidenceTimeTag not found in packet");
-        }
-        correctionField += detComResidenceTimeTag->getResidenceTime();
-        auto gptpDup = gptp->dup();
-        gptpDup->setCorrectionField(correctionField);
-        gptpNow = gptpDup;
-    }
-    Gptp::processFollowUp(packet, gptpNow);
-}
-
-
 void DetComGptp::processSync(Packet *packet, const GptpSync *gptp)
 {
-    auto interfaceInd = packet->findTag<InterfaceInd>();
-    if (!interfaceInd) {
-        throw cRuntimeError("InterfaceInd tag not found in packet");
-    }
-    if (!idMatchesSet(interfaceInd->getInterfaceId(), detComInterfaces)) {
-        // When message is not received from a detCom interface (i.e. it is received from outside the detCom node),
-        // we need to store the detCom ingress time
-        auto detComTimeTag = packet->findTag<DetComIngressTimeTag>();
-        if (!detComTimeTag) {
-            throw cRuntimeError("DetComIngressTimeTag not found in packet");
-        }
-        syncIngressTimestampDetCom = detComTimeTag->getReceptionStarted();
+    auto indInterface = packet->getTag<InterfaceInd>()->getInterfaceId();
+    if (idMatchesSet(indInterface, detComInterfaces)) {
+        // Rcvd. from DetCom interface, set correct ingress times
+        detComEgressTimestamp5G = detComClock->getClockTime();
+        detComEgressTimestampGptp = clock->getClockTime();
+
+        EV_INFO << "detComEgressTimestamp5G          - " << detComEgressTimestamp5G << endl;
+        EV_INFO << "detComEgressTimestampGptp        - " << detComEgressTimestampGptp << endl;
     }
     Gptp::processSync(packet, gptp);
 }
 
-void DetComGptp::sendFollowUp(int portId, const GptpSync *sync, const clocktime_t &syncEgressTimestampOwn)
+void DetComGptp::processFollowUp(Packet *packet, const GptpFollowUp *gptp) {
+    auto indInterface = packet->getTag<InterfaceInd>()->getInterfaceId();
+    if (idMatchesSet(indInterface, detComInterfaces)) {
+        detComIngressTimestamp5GRcvd = packet->getTag<DetComIngressTimeTag>()->getReceptionStarted();
+    } else {
+        detComIngressTimestamp5GRcvd = -1;
+    }
+    EV_INFO << "############## PROCESS FOLLOW_UP DetCom #####################################" << endl;
+    EV_INFO << "detComIngressTimestamp5GRcvd     - " << detComIngressTimestamp5GRcvd << endl;
+    Gptp::processFollowUp(packet, gptp);
+}
+
+void DetComGptp::synchronize()
 {
-    if (!idMatchesSet(portId, detComInterfaces)) {
-        Gptp::sendFollowUp(portId, sync, syncEgressTimestampOwn);
-        return;
+    /************** Time synchronization *****************************************
+     * Local time is adjusted using peer delay, correction field, residence time *
+     * and packet transmission time based departure time of Sync message from GM *
+     *****************************************************************************/
+    simtime_t now = simTime();
+    clocktime_t oldLocalTimeAtTimeSync = clock->getClockTime();
+    emit(timeDifferenceSignal, CLOCKTIME_AS_SIMTIME(oldLocalTimeAtTimeSync) - now);
+
+    clocktime_t residenceTime = CLOCKTIME_ZERO;
+    clocktime_t newTime = CLOCKTIME_ZERO;
+    if (detComIngressTimestamp5GRcvd != -1) {
+        // Received from DetCom interface, residence time is DetComResidenceTime
+        auto detComResidenceTime = detComEgressTimestamp5G - detComIngressTimestamp5GRcvd;
+        auto localResidenceTime = oldLocalTimeAtTimeSync - detComEgressTimestampGptp;
+        residenceTime = detComResidenceTime + localResidenceTime;
+        newTime = preciseOriginTimestamp + correctionField + residenceTime;
+    }
+    else {
+        // Received from normal (e.g. eth) port, calculate as always
+        residenceTime = oldLocalTimeAtTimeSync - syncIngressTimestamp;
+        newTime = preciseOriginTimestamp + correctionField + gmRateRatio * (meanLinkDelay + residenceTime);
+        calculateGmRatio();
     }
 
+    ASSERT(gptpNodeType != MASTER_NODE);
+
+    // preciseOriginTimestamp and correctionField are in the grandmaster's time base
+    // meanLinkDelay and residence time are in the local time base
+    // Thus, we need to multiply the meanLinkDelay and residenceTime with the gmRateRatio
+
+    auto servoClock = check_and_cast<ServoClockBase *>(clock.get());
+
+    // Only change the oscillator if we have new information about our nrr
+    // TODO: We should change this to a clock servo model in the future anyways!
+    //    ppm newOscillatorCompensation;
+    //    if (!hasNewRateRatioForOscillatorCompensation) {
+    //        newOscillatorCompensation = unit(piControlClock->getOscillatorCompensation());
+    //    }
+    //    else {
+    //        newOscillatorCompensation =
+    //            unit(gmRateRatio * (1 + unit(piControlClock->getOscillatorCompensation()).get()) - 1);
+    //        hasNewRateRatioForOscillatorCompensation = false;
+    //    }
+    servoClock->adjustClockTo(newTime);
+    //    EV_INFO << "newOscillatorCompensation " << newOscillatorCompensation << endl;
+
+    newLocalTimeAtTimeSync = clock->getClockTime();
+
+    /************** Rate ratio calculation *************************************
+     * It is calculated based on interval between two successive Sync messages *
+     ***************************************************************************/
+
+    EV_INFO << "############## SYNC #####################################" << endl;
+    EV_INFO << "LOCAL TIME BEFORE SYNC     - " << oldLocalTimeAtTimeSync << endl;
+    EV_INFO << "LOCAL TIME AFTER SYNC      - " << newLocalTimeAtTimeSync << endl;
+    EV_INFO << "CALCULATED NEW TIME        - " << newTime << endl;
+    if (servoClock->referenceClockModule != nullptr) {
+        auto referenceClockTime = servoClock->referenceClockModule->getClockTime();
+        auto diffReferenceToOldLocal = oldLocalTimeAtTimeSync - referenceClockTime;
+        auto diffReferenceToNewTime = newTime - referenceClockTime;
+        EV_INFO << "REFERENCE CLOCK TIME       - " << referenceClockTime << endl;
+        EV_INFO << "DIFF REFERENCE TO OLD TIME - " << diffReferenceToOldLocal << endl;
+        EV_INFO << "DIFF REFERENCE TO NEW TIME - " << diffReferenceToNewTime << endl;
+    }
+    EV_INFO << "CURRENT SIMTIME            - " << now << endl;
+    EV_INFO << "ORIGIN TIME SYNC           - " << preciseOriginTimestamp << endl;
+    EV_INFO << "PREV ORIGIN TIME SYNC      - " << preciseOriginTimestampLast << endl;
+    EV_INFO << "SYNC INGRESS TIME          - " << syncIngressTimestamp << endl;
+    EV_INFO << "SYNC INGRESS TIME LAST     - " << syncIngressTimestampLast << endl;
+    EV_INFO << "RESIDENCE TIME             - " << residenceTime << endl;
+    EV_INFO << "CORRECTION FIELD           - " << correctionField << endl;
+    EV_INFO << "PROPAGATION DELAY          - " << meanLinkDelay << endl;
+    EV_INFO << "TIME DIFFERENCE TO SIMTIME - " << CLOCKTIME_AS_SIMTIME(newLocalTimeAtTimeSync) - now << endl;
+    EV_INFO << "NEIGHBOR RATE RATIO        - " << neighborRateRatio << endl;
+    EV_INFO << "RECIEVED RATE RATIO        - " << receivedRateRatio << endl;
+    EV_INFO << "GM RATE RATIO              - " << gmRateRatio << endl;
+
+    syncIngressTimestampLast = syncIngressTimestamp;
+    preciseOriginTimestampLast = preciseOriginTimestamp;
+
+    emit(receivedRateRatioSignal, receivedRateRatio);
+    emit(gmRateRatioSignal, gmRateRatio);
+    emit(localTimeSignal, CLOCKTIME_AS_SIMTIME(newLocalTimeAtTimeSync));
+    emit(timeDifferenceSignal, CLOCKTIME_AS_SIMTIME(newLocalTimeAtTimeSync) - now);
+}
+void DetComGptp::sendSync()
+{
+    detComIngressTimestamp5G = detComClock->getClockTime();
+    detComIngressTimestampGptp = clock->getClockTime();
+
+    auto packet = new Packet("GptpSync");
+    packet->addTag<MacAddressReq>()->setDestAddress(GPTP_MULTICAST_ADDRESS);
+    auto gptp = makeShared<GptpSync>();
+    gptp->setDomainNumber(domainNumber);
+
+    gptp->setSequenceId(sequenceId++);
+    // Correction field for Sync message is zero for two-step mode
+    // See Table 11-6 in IEEE 802.1AS-2020
+    // Change when implementing CMLDS
+    gptp->setCorrectionField(CLOCKTIME_ZERO);
+    packet->insertAtFront(gptp);
+
+    for (auto port : masterPortIds)
+        sendPacketToNIC(packet->dup(), port);
+    delete packet;
+
+    // The sendFollowUp(portId) called by receiveSignal(), when GptpSync sent
+}
+void DetComGptp::sendFollowUp(int portId, const GptpSync *sync, const clocktime_t &syncEgressTimestampOwn)
+{
     auto packet = new Packet("GptpFollowUp");
     packet->addTag<MacAddressReq>()->setDestAddress(GPTP_MULTICAST_ADDRESS);
     auto gptp = makeShared<GptpFollowUp>();
@@ -84,12 +174,35 @@ void DetComGptp::sendFollowUp(int portId, const GptpSync *sync, const clocktime_
     gptp->setPreciseOriginTimestamp(preciseOriginTimestamp);
     gptp->setSequenceId(sync->getSequenceId());
 
-    // If the message is sent to a detCom interface, don't calculate residence time, but keep correction field
-    // and set the DetComIngressTimeTag
-    auto detComTimeTag = packet->addTag<DetComIngressTimeTag>();
-    detComTimeTag->setReceptionStarted(syncIngressTimestampDetCom);
-    gptp->setCorrectionField(gptp->getCorrectionField());
+    clocktime_t residenceTime;
+    if (detComIngressTimestamp5GRcvd != -1) {
+        // Packet was received from DetCom interface, residence time calulation needs to include DetComResidenceTime
+        residenceTime = (syncEgressTimestampOwn - detComEgressTimestampGptp) +
+                        (detComEgressTimestamp5G - detComIngressTimestamp5GRcvd);
+        EV_INFO << "############## SEND FOLLOW_UP ################################" << endl;
+        EV_INFO << "SYNC EGRESS                   - " << syncEgressTimestampOwn << endl;
+        EV_INFO << "detCom egress gPTP            - " << detComEgressTimestampGptp << endl;
+        EV_INFO << "detCom egress 5G              - " << detComEgressTimestamp5G << endl;
+        EV_INFO << "detCom ingress rcvd.          - " << detComIngressTimestamp5GRcvd << endl;
+        auto newCorrectionField = correctionField + residenceTime;
+        gptp->setCorrectionField(newCorrectionField);
+    }
+    else {
+        residenceTime = detComIngressTimestampGptp - syncIngressTimestamp;
+        auto newCorrectionField = correctionField + gmRateRatio * (meanLinkDelay + residenceTime);
+        gptp->setCorrectionField(newCorrectionField);
 
+        // But we also need to set the detComIngressTime
+    }
+
+    if (idMatchesSet(portId, detComInterfaces)) {
+        // If sending to DetCom interface, we also need to add timestamps to the packets
+        auto ingressTimeTag = packet->addTag<DetComIngressTimeTag>();
+        ingressTimeTag->setReceptionStarted(detComIngressTimestamp5G);
+        ingressTimeTag->setReceptionEnded(detComIngressTimestamp5G);
+    }
+
+    emit(residenceTimeSignal, residenceTime.asSimTime());
     emit(correctionFieldEgressSignal, gptp->getCorrectionField().asSimTime());
     gptp->getFollowUpInformationTLVForUpdate().setRateRatio(gmRateRatio);
     packet->insertAtFront(gptp);
@@ -98,7 +211,24 @@ void DetComGptp::sendFollowUp(int portId, const GptpSync *sync, const clocktime_
     EV_INFO << "Correction Field              - " << gptp->getCorrectionField() << endl;
     EV_INFO << "gmRateRatio                   - " << gmRateRatio << endl;
     EV_INFO << "meanLinkDelay                 - " << meanLinkDelay << endl;
+    EV_INFO << "residenceTime                 - " << residenceTime << endl;
 
     sendPacketToNIC(packet, portId);
+}
+void DetComGptp::handleClockJump(ServoClockBase::ClockJumpDetails *clockJumpDetails)
+{
+    EV_INFO << "############## Adjust local timestamps #################################" << endl;
+    EV_INFO << "BEFORE:" << endl;
+    EV_INFO << "detCom ingress gptp          - " << detComIngressTimestampGptp << endl;
+    EV_INFO << "detCom egress gptp           - " << detComEgressTimestampGptp << endl;
+
+    auto timeDiff = clockJumpDetails->newClockTime - clockJumpDetails->oldClockTime;
+    adjustLocalTimestamp(detComIngressTimestampGptp, timeDiff);
+    adjustLocalTimestamp(detComEgressTimestampGptp, timeDiff);
+
+    EV_INFO << "AFTER:" << endl;
+    EV_INFO << "detCom ingress gptp          - " << detComIngressTimestampGptp << endl;
+    EV_INFO << "detCom egress gptp           - " << detComEgressTimestampGptp << endl;
+    Gptp::handleClockJump(clockJumpDetails);
 }
 } // namespace d6g
