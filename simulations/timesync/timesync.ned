@@ -44,3 +44,30 @@ network TimeSyncNetwork extends TsnNetworkBase
         tsnDevice2.ethg++ <--> EthernetLink <--> detCom.dsttg++;
 
 }
+
+network TimeSyncNetworkUplink extends TsnNetworkBase
+{
+    submodules:
+        histogramContainer: HistogramContainer {
+            @display("p=100,800");
+        }
+        tsnDevice1: TsnDevice {
+            @display("p=500,150");
+        }
+        detCom: DetCom {
+            @display("p=500,300");
+        }
+        timeTransmitter: TsnClock {
+            @display("p=400,450");
+        }
+        tsnDevice2: TsnDevice {
+            @display("p=600,450");
+        }
+
+
+    connections:
+        timeTransmitter.ethg++ <--> EthernetLink <--> detCom.dsttg++;
+        tsnDevice1.ethg++ <--> EthernetLink <--> detCom.nwttg;
+        tsnDevice2.ethg++ <--> EthernetLink <--> detCom.dsttg++;
+
+}
