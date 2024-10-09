@@ -6,6 +6,8 @@
 
 #include "TTDelayerPacketServer.h"
 
+#include "TTDelayerTag_m.h"
+
 namespace d6g {
 
 Define_Module(TTDelayerPacketServer);
@@ -38,6 +40,14 @@ void TTDelayerPacketServer::scheduleProcessingTimer()
     clocktime_t processingTime = computeDelay(packet);
     auto processingBitrate = bps(par("processingBitrate"));
     processingTime += s(packet->getDataLength() / processingBitrate).get();
-    scheduleClockEventAfter(processingTime, processingTimer);
+
+    auto ttDelayerTag = packet->removeTag<TTDelayerTag>();
+    auto enqueueTime = ttDelayerTag->getEnqueueTime();
+    auto timeInQueue = getClockTime() - enqueueTime;
+    auto remainingProcessingTime = processingTime - timeInQueue;
+    if (remainingProcessingTime < 0)
+        remainingProcessingTime = 0;
+
+    scheduleClockEventAfter(remainingProcessingTime, processingTimer);
 }
 } // namespace d6g

@@ -29,6 +29,8 @@ module DetCom
         @display("i=device/antennatower");
         int numUEs = default(0); // Number of connected UEs (specifies number of dstt modules).
         xml delayConfig = default(xml("<delays></delays>")); // XML delay configuration, alternative way to specify the uplink and downlink delays for dstts.
+        bool queueingDelayer = default(false); // Use QueueingTTDelayer instead of TTDelayer
+        dstt[*].queueingDelayer = default(this.queueingDelayer);
         @class(DetCom);
     gates:
         inout dsttg[numUEs];

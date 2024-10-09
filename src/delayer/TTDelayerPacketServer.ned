@@ -11,13 +11,11 @@ import inet.queueing.contract.IPacketServer;
 import inet.queueing.server.PacketServer;
 
 
-//
-// This module repeatedly pulls packets from the connected packet provider and
-// after a processing delay, it pushes the packet into the connected packet
-// consumer. The processing delay is `processingTime` + `packetLength` / `processingBitrate`.
-//
+// TODO: DESCRIPTION
 simple TTDelayerPacketServer extends PacketServer like IPacketServer
 {
     parameters:
         @class(TTDelayerPacketServer);
+        object indInterfaceTypes = default([]); // Only apply delay if the ind interface is of specific type (e.g. ["tt"] or ["tt", "eth"], empty means any)
+        object reqInterfaceTypes = default([]); // Only apply delay if the req interface is of specific type (e.g. ["tt"] or ["tt", "eth"], empty means any)
 }

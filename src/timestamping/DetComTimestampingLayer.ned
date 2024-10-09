@@ -19,25 +19,11 @@ import d6g.timestamping.TimeChunkEnforcer;
 import inet.protocolelement.contract.IProtocolLayer;
 import inet.queueing.contract.IPacketDelayer;
 
-
+// TODO: DESCRIPTION
 module DetComTimestampingLayer like IProtocolLayer
 {
     parameters:
         @display("i=block/layer");
-        // volatile double pdc @mutable @unit(s) = default(0s); // pdc: const delay
-        // object pdcMapping @mutable = default([]); // per stream delay
-
-        // Arrives at tt (ingress, from other UE or NWTT) --> delay --> bridging logic --> eth (egress)
-        ingress.typename = default("");
-        egress.typename = default("");
-         // We do not know the egress interface at the ingress delayer, so only use indInterfaceType
-        // ingress.indInterfaceTypes = ["tt"];
-
-        // ingress.delay = default(this.pdc);
-        // ingress.mapping = default(dup(this.pdcMapping));
-
-    // ingress.clockModule = default(has6gClock ? "^.^.^.clock" : "^.pdcclock");
-    //ingress.clockModule = default("^.pdcclock");
     gates:
         input upperLayerIn;
         output upperLayerOut;
