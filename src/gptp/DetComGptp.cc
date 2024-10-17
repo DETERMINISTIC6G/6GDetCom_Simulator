@@ -235,6 +235,7 @@ void DetComGptp::handleClockJump(ServoClockBase::ClockJumpDetails *clockJumpDeta
     EV_INFO << "BEFORE:" << endl;
     EV_INFO << "detCom ingress gptp          - " << detComIngressTimestampGptp << endl;
     EV_INFO << "detCom egress gptp           - " << detComEgressTimestampGptp << endl;
+    EV_INFO << "detCom egress gptp prev      - " << detComEgressTimestampGptpPrev << endl;
 
     auto timeDiff = clockJumpDetails->newClockTime - clockJumpDetails->oldClockTime;
     adjustLocalTimestamp(detComIngressTimestampGptp, timeDiff);
@@ -244,6 +245,7 @@ void DetComGptp::handleClockJump(ServoClockBase::ClockJumpDetails *clockJumpDeta
     EV_INFO << "AFTER:" << endl;
     EV_INFO << "detCom ingress gptp          - " << detComIngressTimestampGptp << endl;
     EV_INFO << "detCom egress gptp           - " << detComEgressTimestampGptp << endl;
+    EV_INFO << "detCom egress gptp prev      - " << detComEgressTimestampGptpPrev << endl;
     Gptp::handleClockJump(clockJumpDetails);
 }
 } // namespace d6g
