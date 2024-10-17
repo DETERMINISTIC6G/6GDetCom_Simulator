@@ -20,6 +20,10 @@ import inet.protocolelement.contract.IProtocolLayer;
 import inet.queueing.contract.IPacketDelayer;
 
 // TODO: DESCRIPTION
+// This module realize the timestamping.
+// It defines two input gates (from upperlayer and lowerlayer) and two output gates.
+// The submodule residenceTimeCalculator is used to calculate the residence time of the data frame in this layer.
+// The submodule timeChunkEnforcer is used to constrain the handle and transport speed forcely, to ensure it follows time gap and time chunk.
 module DetComTimestampingLayer like IProtocolLayer
 {
     parameters:

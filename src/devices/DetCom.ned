@@ -37,8 +37,8 @@ module DetCom
         dstt[*].queueingDelayer = default(this.queueingDelayer);
         @class(DetCom);
     gates:
-        inout dsttg[numUEs];
-        inout nwttg;
+        inout dsttg[numUEs]; // Device-side TsnTranslator gate
+        inout nwttg; // Network-side TsnTranslator gate
     submodules:
         dstt[sizeof(dsttg)]: TsnTranslator {
             isDstt = default(true);

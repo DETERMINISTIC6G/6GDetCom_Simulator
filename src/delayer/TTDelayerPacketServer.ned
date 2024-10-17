@@ -10,8 +10,8 @@ package d6g.delayer;
 import inet.queueing.contract.IPacketServer;
 import inet.queueing.server.PacketServer;
 
-
 // TODO: DESCRIPTION
+// This module serves as a server, processes and delays packets.
 simple TTDelayerPacketServer extends PacketServer like IPacketServer
 {
     parameters:
