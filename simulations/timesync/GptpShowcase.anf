@@ -13,10 +13,12 @@
         <input pattern="results/OneMasterClock_Uplink_VarDelay-#0.vec"/>
         <input pattern="results/OneMasterClock_Uplink_StaticDelay-#0.sca"/>
         <input pattern="results/OneMasterClock_Uplink_StaticDelay-#0.vec"/>
+        <input pattern="results/OneMasterClock_Uplink_VarDelay-#0.sca"/>
+        <input pattern="results/OneMasterClock_Uplink_VarDelay-#0.vec"/>
     </inputs>
     <charts>
-        <folder id="1176236166" name="Delay">
-            <chart icon="icons/full/obj/linechart.png" id="1013123843" name="Static Delay" template="linechart_native" type="LINE">
+        <folder id="1658942259" name="Delay">
+            <chart icon="icons/full/obj/linechart.png" id="1748904791" name="Static Delay" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils, ideplot, vectorops as ops
 
@@ -598,7 +600,7 @@ utils.export_data_if_needed(df, props)
                 <property name="xaxis_max" value=""/>
                 <property name="image_export_width" value="9"/>
             </chart>
-            <chart icon="icons/full/obj/linechart.png" id="1421199544" name="Variable Delay" template="linechart_native" type="LINE">
+            <chart icon="icons/full/obj/linechart.png" id="966440830" name="Variable Delay" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils, ideplot, vectorops as ops
 
@@ -1180,7 +1182,7 @@ utils.export_data_if_needed(df, props)
                 <property name="xaxis_max" value=""/>
                 <property name="image_export_width" value="9"/>
             </chart>
-            <chart icon="icons/full/obj/linechart.png" id="929725266" name="Variable Delay NonQueueing" template="linechart_native" type="LINE">
+            <chart icon="icons/full/obj/linechart.png" id="460663436" name="Variable Delay NonQueueing" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils, ideplot, vectorops as ops
 
@@ -1762,7 +1764,7 @@ utils.export_data_if_needed(df, props)
                 <property name="xaxis_max" value=""/>
                 <property name="image_export_width" value="9"/>
             </chart>
-            <chart icon="icons/full/obj/linechart.png" id="298414200" name="Static Delay Uplink" template="linechart_native" type="LINE">
+            <chart icon="icons/full/obj/linechart.png" id="654939649" name="Static Delay Uplink" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils, ideplot, vectorops as ops
 
@@ -2344,7 +2346,7 @@ utils.export_data_if_needed(df, props)
                 <property name="xaxis_max" value=""/>
                 <property name="image_export_width" value="9"/>
             </chart>
-            <chart icon="icons/full/obj/linechart.png" id="576133761" name="Variable Delay Uplink" template="linechart_native" type="LINE">
+            <chart icon="icons/full/obj/linechart.png" id="953799393" name="Variable Delay Uplink" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils, ideplot, vectorops as ops
 

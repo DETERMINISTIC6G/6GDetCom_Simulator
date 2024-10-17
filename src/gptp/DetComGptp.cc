@@ -34,8 +34,16 @@ void DetComGptp::processSync(Packet *packet, const GptpSync *gptp)
     auto indInterface = packet->getTag<InterfaceInd>()->getInterfaceId();
     if (idMatchesSet(indInterface, detComInterfaces)) {
         // Rcvd. from DetCom interface, set correct ingress times
+        detComEgressTimestamp5GPrev = detComEgressTimestamp5G;
+        detComEgressTimestampGptpPrev = detComEgressTimestampGptp;
+
         detComEgressTimestamp5G = detComClock->getClockTime();
         detComEgressTimestampGptp = clock->getClockTime();
+
+        if (detComEgressTimestamp5GPrev != -1 && detComEgressTimestampGptpPrev != -1){
+            //clock5GRateRatio = (detComEgressTimestamp5G - detComEgressTimestamp5GPrev) /
+            //                   (detComEgressTimestampGptp - detComEgressTimestampGptpPrev);
+        }
 
         EV_INFO << "detComEgressTimestamp5G          - " << detComEgressTimestamp5G << endl;
         EV_INFO << "detComEgressTimestampGptp        - " << detComEgressTimestampGptp << endl;
@@ -69,7 +77,7 @@ void DetComGptp::synchronize()
     clocktime_t newTime = CLOCKTIME_ZERO;
     if (detComIngressTimestamp5GRcvd != -1) {
         // Received from DetCom interface, residence time is DetComResidenceTime
-        auto detComResidenceTime = detComEgressTimestamp5G - detComIngressTimestamp5GRcvd;
+        auto detComResidenceTime = (detComEgressTimestamp5G - detComIngressTimestamp5GRcvd) * clock5GRateRatio; // change detcom residence time to local domain
         auto localResidenceTime = oldLocalTimeAtTimeSync - detComEgressTimestampGptp;
         residenceTime = detComResidenceTime + localResidenceTime;
         newTime = preciseOriginTimestamp + correctionField + residenceTime;
@@ -178,7 +186,8 @@ void DetComGptp::sendFollowUp(int portId, const GptpSync *sync, const clocktime_
     if (detComIngressTimestamp5GRcvd != -1) {
         // Packet was received from DetCom interface, residence time calulation needs to include DetComResidenceTime
         residenceTime = (syncEgressTimestampOwn - detComEgressTimestampGptp) +
-                        (detComEgressTimestamp5G - detComIngressTimestamp5GRcvd);
+                        (detComEgressTimestamp5G - detComIngressTimestamp5GRcvd) * clock5GRateRatio; // like synchro
+
         EV_INFO << "############## SEND FOLLOW_UP ################################" << endl;
         EV_INFO << "SYNC EGRESS                   - " << syncEgressTimestampOwn << endl;
         EV_INFO << "detCom egress gPTP            - " << detComEgressTimestampGptp << endl;

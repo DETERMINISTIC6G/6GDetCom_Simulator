@@ -25,7 +25,12 @@ class DetComGptp : public InterfaceFilterMixin<Gptp>
 
     clocktime_t detComIngressTimestampGptp = -1;   // Same as above but in TSN clock domain
     clocktime_t detComEgressTimestampGptp = -1;    // Same as above but in TSN clock domain
+
+    clocktime_t detComEgressTimestampGptpPrev = -1;     // To store the 5G egress timestamp for 5G domain and TSN domain
+    clocktime_t detComEgressTimestamp5GPrev = -1;     // To store the 5G egress timestamp for 5G domain and TSN domain
     ModuleRefByPar<IClock> detComClock;
+
+    double clock5GRateRatio = 1.0;
 
   protected:
     void initialize(int stage) override;
