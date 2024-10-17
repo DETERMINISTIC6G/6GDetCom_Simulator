@@ -41,8 +41,8 @@ void DetComGptp::processSync(Packet *packet, const GptpSync *gptp)
         detComEgressTimestampGptp = clock->getClockTime();
 
         if (detComEgressTimestamp5GPrev != -1 && detComEgressTimestampGptpPrev != -1){
-            //clock5GRateRatio = (detComEgressTimestamp5G - detComEgressTimestamp5GPrev) /
-            //                   (detComEgressTimestampGptp - detComEgressTimestampGptpPrev);
+            clock5GRateRatio = (detComEgressTimestamp5G - detComEgressTimestamp5GPrev) /
+                               (detComEgressTimestampGptp - detComEgressTimestampGptpPrev);
         }
 
         EV_INFO << "detComEgressTimestamp5G          - " << detComEgressTimestamp5G << endl;
@@ -51,11 +51,13 @@ void DetComGptp::processSync(Packet *packet, const GptpSync *gptp)
     Gptp::processSync(packet, gptp);
 }
 
-void DetComGptp::processFollowUp(Packet *packet, const GptpFollowUp *gptp) {
+void DetComGptp::processFollowUp(Packet *packet, const GptpFollowUp *gptp)
+{
     auto indInterface = packet->getTag<InterfaceInd>()->getInterfaceId();
     if (idMatchesSet(indInterface, detComInterfaces)) {
         detComIngressTimestamp5GRcvd = packet->getTag<DetComIngressTimeTag>()->getReceptionStarted();
-    } else {
+    }
+    else {
         detComIngressTimestamp5GRcvd = -1;
     }
     EV_INFO << "############## PROCESS FOLLOW_UP DetCom #####################################" << endl;
@@ -173,6 +175,7 @@ void DetComGptp::sendSync()
 
     // The sendFollowUp(portId) called by receiveSignal(), when GptpSync sent
 }
+
 void DetComGptp::sendFollowUp(int portId, const GptpSync *sync, const clocktime_t &syncEgressTimestampOwn)
 {
     auto packet = new Packet("GptpFollowUp");
@@ -185,8 +188,9 @@ void DetComGptp::sendFollowUp(int portId, const GptpSync *sync, const clocktime_
     clocktime_t residenceTime;
     if (detComIngressTimestamp5GRcvd != -1) {
         // Packet was received from DetCom interface, residence time calulation needs to include DetComResidenceTime
-        residenceTime = (syncEgressTimestampOwn - detComEgressTimestampGptp) +
-                        (detComEgressTimestamp5G - detComIngressTimestamp5GRcvd) * clock5GRateRatio; // like synchro
+        auto detComResidenceTime = (detComEgressTimestamp5G - detComIngressTimestamp5GRcvd) * clock5GRateRatio;
+        auto localResidenceTime = syncEgressTimestampOwn - detComEgressTimestampGptp;
+        residenceTime = localResidenceTime + detComResidenceTime;
 
         EV_INFO << "############## SEND FOLLOW_UP ################################" << endl;
         EV_INFO << "SYNC EGRESS                   - " << syncEgressTimestampOwn << endl;
@@ -224,6 +228,7 @@ void DetComGptp::sendFollowUp(int portId, const GptpSync *sync, const clocktime_
 
     sendPacketToNIC(packet, portId);
 }
+
 void DetComGptp::handleClockJump(ServoClockBase::ClockJumpDetails *clockJumpDetails)
 {
     EV_INFO << "############## Adjust local timestamps #################################" << endl;
@@ -234,6 +239,7 @@ void DetComGptp::handleClockJump(ServoClockBase::ClockJumpDetails *clockJumpDeta
     auto timeDiff = clockJumpDetails->newClockTime - clockJumpDetails->oldClockTime;
     adjustLocalTimestamp(detComIngressTimestampGptp, timeDiff);
     adjustLocalTimestamp(detComEgressTimestampGptp, timeDiff);
+    adjustLocalTimestamp(detComEgressTimestampGptpPrev, timeDiff);
 
     EV_INFO << "AFTER:" << endl;
     EV_INFO << "detCom ingress gptp          - " << detComIngressTimestampGptp << endl;
