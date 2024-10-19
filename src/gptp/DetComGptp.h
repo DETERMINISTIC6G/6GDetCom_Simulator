@@ -31,6 +31,7 @@ class DetComGptp : public InterfaceFilterMixin<Gptp>
     ModuleRefByPar<IClock> detComClock;
 
     double clock5GRateRatio = 1.0;
+    bool useC5Grr = false;                 // use clock 5G rate ratio
 
   protected:
     void initialize(int stage) override;

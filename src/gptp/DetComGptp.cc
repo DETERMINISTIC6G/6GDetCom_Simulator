@@ -45,6 +45,10 @@ void DetComGptp::processSync(Packet *packet, const GptpSync *gptp)
                                (detComEgressTimestampGptp - detComEgressTimestampGptpPrev);
         }
 
+        if (!useC5Grr) {
+            clock5GRateRatio = 1.0;
+        }
+
         EV_INFO << "detComEgressTimestamp5G          - " << detComEgressTimestamp5G << endl;
         EV_INFO << "detComEgressTimestampGptp        - " << detComEgressTimestampGptp << endl;
     }
