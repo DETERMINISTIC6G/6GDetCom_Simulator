@@ -40,13 +40,12 @@ void DetComGptp::processSync(Packet *packet, const GptpSync *gptp)
         detComEgressTimestamp5G = detComClock->getClockTime();
         detComEgressTimestampGptp = clock->getClockTime();
 
-        if (detComEgressTimestamp5GPrev != -1 && detComEgressTimestampGptpPrev != -1){
+        if (!useC5Grr || detComEgressTimestamp5GPrev == -1 || detComEgressTimestampGptpPrev == -1){
+            clock5GRateRatio = 1.0;
+        }
+        else {
             clock5GRateRatio = (detComEgressTimestamp5G - detComEgressTimestamp5GPrev) /
                                (detComEgressTimestampGptp - detComEgressTimestampGptpPrev);
-        }
-
-        if (!useC5Grr) {
-            clock5GRateRatio = 1.0;
         }
 
         EV_INFO << "detComEgressTimestamp5G          - " << detComEgressTimestamp5G << endl;
