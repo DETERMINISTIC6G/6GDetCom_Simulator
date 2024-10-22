@@ -14,6 +14,7 @@ void DetComGptp::initialize(int stage)
         if (gptpNodeType != BRIDGE_NODE) {
             throw cRuntimeError("DetComGptp is only supported for bridge nodes");
         }
+        useC5Grr = par("useC5Grr"); // par can't be used
         detComClock.reference(this, "detComClockModule", true);
     }
     if (stage == INITSTAGE_LINK_LAYER) {
@@ -39,11 +40,16 @@ void DetComGptp::processSync(Packet *packet, const GptpSync *gptp)
 
         detComEgressTimestamp5G = detComClock->getClockTime();
         detComEgressTimestampGptp = clock->getClockTime();
-
         if (!useC5Grr || detComEgressTimestamp5GPrev == -1 || detComEgressTimestampGptpPrev == -1){
             clock5GRateRatio = 1.0;
+            EV_INFO << "IF--===============================================" << endl;
+            EV_INFO << "detComEgressTimestamp5GPrev          - " << detComEgressTimestamp5GPrev << endl;
+            EV_INFO << "detComEgressTimestampGptpPrev        - " << detComEgressTimestampGptpPrev << endl;
         }
         else {
+            EV_INFO << "ELSE--===============================================" << endl;
+            EV_INFO << "detComEgressTimestamp5GPrev          - " << detComEgressTimestamp5GPrev << endl;
+            EV_INFO << "detComEgressTimestampGptpPrev        - " << detComEgressTimestampGptpPrev << endl;
             clock5GRateRatio = (detComEgressTimestamp5G - detComEgressTimestamp5GPrev) /
                                (detComEgressTimestampGptp - detComEgressTimestampGptpPrev);
         }

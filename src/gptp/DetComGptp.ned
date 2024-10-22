@@ -14,6 +14,7 @@ simple DetComGptp extends Gptp
 {
     parameters:
         @class(DetComGptp);
+        bool useC5Grr = default(false);
         string detComClockModule = default("^.detComClock");
         object detComInterfaceTypes = default(["tt"]); // Interfaces with 5G specific behavior
 }
