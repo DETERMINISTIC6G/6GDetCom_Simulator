@@ -1772,7 +1772,7 @@ utils.export_data_if_needed(df, props)
                 <property name="xaxis_max" value=""/>
                 <property name="image_export_width" value="9"/>
             </chart>
-            <chart icon="icons/full/obj/linechart.png" id="1776745778" name="Variable Delay (Downlink true)" template="linechart_native" type="LINE">
+            <chart icon="icons/full/obj/linechart.png" id="1776745778" name="Variable Delay (Testing true)" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils, ideplot, vectorops as ops
 
@@ -2354,7 +2354,7 @@ utils.export_data_if_needed(df, props)
                 <property name="xaxis_max" value=""/>
                 <property name="image_export_width" value="9"/>
             </chart>
-            <chart icon="icons/full/obj/linechart.png" id="308772294" name="Variable Delay (Downlink false)" template="linechart_native" type="LINE">
+            <chart icon="icons/full/obj/linechart.png" id="308772294" name="Variable Delay (Testing false)" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils, ideplot, vectorops as ops
 
