@@ -40,6 +40,10 @@ void DetComGptp::processSync(Packet *packet, const GptpSync *gptp)
 
         detComEgressTimestamp5G = detComClock->getClockTime();
         detComEgressTimestampGptp = clock->getClockTime();
+
+        EV_INFO << "detComEgressTimestamp5G          - " << detComEgressTimestamp5G << endl;
+        EV_INFO << "detComEgressTimestampGptp        - " << detComEgressTimestampGptp << endl;
+
         if (!useC5Grr || detComEgressTimestamp5GPrev == -1 || detComEgressTimestampGptpPrev == -1){
             clock5GRateRatio = 1.0;
             EV_INFO << "IF--===============================================" << endl;
@@ -52,10 +56,8 @@ void DetComGptp::processSync(Packet *packet, const GptpSync *gptp)
             EV_INFO << "detComEgressTimestampGptpPrev        - " << detComEgressTimestampGptpPrev << endl;
             clock5GRateRatio = (detComEgressTimestamp5G - detComEgressTimestamp5GPrev) /
                                (detComEgressTimestampGptp - detComEgressTimestampGptpPrev);
+            EV_INFO << "Clock 5G Rate Ratio ================================= : " << clock5GRateRatio << endl;
         }
-
-        EV_INFO << "detComEgressTimestamp5G          - " << detComEgressTimestamp5G << endl;
-        EV_INFO << "detComEgressTimestampGptp        - " << detComEgressTimestampGptp << endl;
     }
     Gptp::processSync(packet, gptp);
 }
