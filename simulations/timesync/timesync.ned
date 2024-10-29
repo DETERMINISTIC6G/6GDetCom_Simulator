@@ -77,49 +77,52 @@ network MultiplehopDualShowcase extends TsnNetworkBase
     parameters:
         int numSwitches1;
         int numSwitches2;
-	submodules:
-		histogramContainer: HistogramContainer {
-			@display("p=100,800");
-		}
-		timeTransmitter: TsnClock {
-			@display("p=500,150");
-		}
-		tsnSwitchnwtt[numSwitches1]: TsnSwitch {
-			@display("p=500,250,col,100");
-		}
-		detCom: DetCom {
-            @display("p=500,{250 + (numSwitches1 * 100) + 50}");
+        string pos1 = string(250 + (numSwitches1 * 100));
+        string pos2 = string(int(pos1) + 100);
+        string pos3 = string(int(pos2) + (numSwitches2 * 100));
+    submodules:
+        histogramContainer: HistogramContainer {
+            @display("p=100,800");
         }
-		tsnSwitch1[numSwitches2]: TsnSwitch {
-			@display("p=400,450,col,100");
-		}
-		tsnSwitch2[numSwitches2]: TsnSwitch {
-			@display("p=600,450,col,100");
-		}
-		tsnDevice1: TsnDevice {
-            @display("p=400,{450 + (numSwitches2 * 100) + 100}");
+        timeTransmitter: TsnClock {
+            @display("p=500,150");
+        }
+        tsnSwitchnwtt[numSwitches1]: TsnSwitch {
+            @display("p=500,250,col,100");
+        }
+        detCom: DetCom {
+            @display("p=500,${pos1}");
+        }
+        tsnSwitch1[numSwitches2]: TsnSwitch {
+            @display("p=400,${pos2},col,100");
+        }
+        tsnSwitch2[numSwitches2]: TsnSwitch {
+            @display("p=600,${pos2},col,100");
+        }
+        tsnDevice1: TsnDevice {
+            @display("p=400,${pos3}");
         }
         tsnDevice2: TsnDevice {
-            @display("p=600,{450 + (numSwitches2 * 100) + 100}");
+            @display("p=600,${pos3}");
         }
 
-		connections:
-		timeTransmitter.ethg++ <--> EthernetLink <--> tsnSwitchnwtt[0].ethg++;
-		for i=0..sizeof(tsnSwitchnwtt)-2 {
-			tsnSwitchnwtt[i].ethg++ <--> EthernetLink <--> tsnSwitchnwtt[i+1].ethg++;
-		}
-		tsnSwitchnwtt[numSwitches1-1].ethg++ <--> EthernetLink <--> detCom.nwttg;
+    connections:
+        timeTransmitter.ethg++ <--> EthernetLink <--> tsnSwitchnwtt[0].ethg++;
+        for i=0..sizeof(tsnSwitchnwtt)-2 {
+            tsnSwitchnwtt[i].ethg++ <--> EthernetLink <--> tsnSwitchnwtt[i+1].ethg++;
+        }
+        tsnSwitchnwtt[numSwitches1-1].ethg++ <--> EthernetLink <--> detCom.nwttg;
 
-		tsnSwitch1[0].ethg++ <--> EthernetLink <--> detCom.dsttg++;
-		for i=0..sizeof(tsnSwitch1)-2 {
-			tsnSwitch1[i].ethg++ <--> EthernetLink <--> tsnSwitch1[i+1].ethg++;
-		}
-		tsnSwitch1[numSwitches2-1].ethg++ <--> EthernetLink <--> tsnDevice1.ethg++; 
+        tsnSwitch1[0].ethg++ <--> EthernetLink <--> detCom.dsttg++;
+        for i=0..sizeof(tsnSwitch1)-2 {
+            tsnSwitch1[i].ethg++ <--> EthernetLink <--> tsnSwitch1[i+1].ethg++;
+        }
+        tsnSwitch1[numSwitches2-1].ethg++ <--> EthernetLink <--> tsnDevice1.ethg++;
 
-		tsnSwitch2[0].ethg++ <--> EthernetLink <--> detCom.dsttg++;
-		for i=0..sizeof(tsnSwitch2)-2 {
-			tsnSwitch2[i].ethg++ <--> EthernetLink <--> tsnSwitch2[i+1].ethg++;
-		}
-		tsnSwitch2[numSwitches2-1].ethg++ <--> EthernetLink <--> tsnDevice2.ethg++;
+        tsnSwitch2[0].ethg++ <--> EthernetLink <--> detCom.dsttg++;
+        for i=0..sizeof(tsnSwitch2)-2 {
+            tsnSwitch2[i].ethg++ <--> EthernetLink <--> tsnSwitch2[i+1].ethg++;
+        }
+        tsnSwitch2[numSwitches2-1].ethg++ <--> EthernetLink <--> tsnDevice2.ethg++;
 
 }
