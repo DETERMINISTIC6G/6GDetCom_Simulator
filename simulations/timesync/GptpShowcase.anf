@@ -23,10 +23,12 @@
         <input pattern="results/OneMasterClock_VarDelay-c5grr=false-#0.vec"/>
         <input pattern="results/OneMasterClock_VarDelay-c5grr=true-#0.sca"/>
         <input pattern="results/OneMasterClock_VarDelay-c5grr=true-#0.vec"/>
+        <input pattern="results/OneMasterClock_VarDelay_NonQueueing-c5grr=false-#0.sca"/>
+        <input pattern="results/OneMasterClock_VarDelay_NonQueueing-c5grr=false-#0.vec"/>
     </inputs>
     <charts>
-        <folder id="1658942259" name="Delay">
-            <chart createdWith="" icon="icons/full/obj/linechart.png" id="1748904791" name="Static Delay" resultTypes="" template="linechart_native" type="LINE">
+        <folder id="58994479" name="Delay">
+            <chart icon="icons/full/obj/linechart.png" id="106064356" name="Static Delay" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils, ideplot, vectorops as ops
 
@@ -608,7 +610,7 @@ utils.export_data_if_needed(df, props)
                 <property name="xaxis_max" value=""/>
                 <property name="image_export_width" value="9"/>
             </chart>
-            <chart createdWith="" icon="icons/full/obj/linechart.png" id="966440830" name="Variable Delay (true)" resultTypes="" template="linechart_native" type="LINE">
+            <chart icon="icons/full/obj/linechart.png" id="1305762881" name="Variable Delay (true)" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils, ideplot, vectorops as ops
 
@@ -1190,7 +1192,7 @@ utils.export_data_if_needed(df, props)
                 <property name="xaxis_max" value=""/>
                 <property name="image_export_width" value="9"/>
             </chart>
-            <chart createdWith="" icon="icons/full/obj/linechart.png" id="305615891" name="Variable Delay (false)" resultTypes="" template="linechart_native" type="LINE">
+            <chart icon="icons/full/obj/linechart.png" id="208333897" name="Variable Delay (false)" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils, ideplot, vectorops as ops
 
@@ -1772,7 +1774,7 @@ utils.export_data_if_needed(df, props)
                 <property name="xaxis_max" value=""/>
                 <property name="image_export_width" value="9"/>
             </chart>
-            <chart createdWith="" icon="icons/full/obj/linechart.png" id="1776745778" name="Variable Delay (Testing true)" resultTypes="" template="linechart_native" type="LINE">
+            <chart icon="icons/full/obj/linechart.png" id="340023374" name="Variable Delay (Testing true)" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils, ideplot, vectorops as ops
 
@@ -2354,7 +2356,7 @@ utils.export_data_if_needed(df, props)
                 <property name="xaxis_max" value=""/>
                 <property name="image_export_width" value="9"/>
             </chart>
-            <chart createdWith="" icon="icons/full/obj/linechart.png" id="308772294" name="Variable Delay (Testing false)" resultTypes="" template="linechart_native" type="LINE">
+            <chart icon="icons/full/obj/linechart.png" id="2034739591" name="Variable Delay (Testing false)" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils, ideplot, vectorops as ops
 
@@ -2936,7 +2938,7 @@ utils.export_data_if_needed(df, props)
                 <property name="xaxis_max" value=""/>
                 <property name="image_export_width" value="9"/>
             </chart>
-            <chart createdWith="" icon="icons/full/obj/linechart.png" id="460663436" name="Variable Delay NonQueueing" resultTypes="" template="linechart_native" type="LINE">
+            <chart icon="icons/full/obj/linechart.png" id="2085540656" name="Variable Delay NonQueueing" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils, ideplot, vectorops as ops
 
@@ -3518,7 +3520,7 @@ utils.export_data_if_needed(df, props)
                 <property name="xaxis_max" value=""/>
                 <property name="image_export_width" value="9"/>
             </chart>
-            <chart createdWith="" icon="icons/full/obj/linechart.png" id="654939649" name="Static Delay Uplink" resultTypes="" template="linechart_native" type="LINE">
+            <chart icon="icons/full/obj/linechart.png" id="113081545" name="Static Delay Uplink" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils, ideplot, vectorops as ops
 
@@ -4100,7 +4102,7 @@ utils.export_data_if_needed(df, props)
                 <property name="xaxis_max" value=""/>
                 <property name="image_export_width" value="9"/>
             </chart>
-            <chart createdWith="" icon="icons/full/obj/linechart.png" id="953799393" name="Variable Delay Uplink" resultTypes="" template="linechart_native" type="LINE">
+            <chart icon="icons/full/obj/linechart.png" id="1227157557" name="Variable Delay Uplink" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils, ideplot, vectorops as ops
 
@@ -4682,7 +4684,7 @@ utils.export_data_if_needed(df, props)
                 <property name="xaxis_max" value=""/>
                 <property name="image_export_width" value="9"/>
             </chart>
-            <chart createdWith="" icon="icons/full/obj/linechart.png" id="122652840" name="Variable Delay Uplink using C5Grr" resultTypes="" template="linechart_native" type="LINE">
+            <chart icon="icons/full/obj/linechart.png" id="1856831933" name="Variable Delay Uplink using C5Grr" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils, ideplot, vectorops as ops
 
