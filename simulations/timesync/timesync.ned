@@ -91,19 +91,19 @@ network MultiplehopDualShowcase extends TsnNetworkBase
             @display("p=500,250,col,100");
         }
         detCom: DetCom {
-            @display("p=500,${pos1}");
+            @display("p=500,${parent.pos1}");
         }
         tsnSwitch1[numSwitches2]: TsnSwitch {
-            @display("p=400,${pos2},col,100");
+            @display("p=400,${parent.pos2},col,100");
         }
         tsnSwitch2[numSwitches2]: TsnSwitch {
-            @display("p=600,${pos2},col,100");
+            @display("p=600,${parent.pos2},col,100");
         }
         tsnDevice1: TsnDevice {
-            @display("p=400,${pos3}");
+            @display("p=400,${parent.pos3}");
         }
         tsnDevice2: TsnDevice {
-            @display("p=600,${pos3}");
+            @display("p=600,${parent.pos3}");
         }
 
     connections:
