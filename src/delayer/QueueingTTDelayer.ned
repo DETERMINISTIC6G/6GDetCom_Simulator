@@ -11,11 +11,9 @@ import inet.queueing.common.BackPressureBarrier;
 import inet.queueing.common.QueueingPacketDelayer;
 import inet.queueing.contract.IPacketDelayer;
 
-// TODO: DESCRIPTION
 //This module uses a queue to ensure the sequence of packets.
-//Also in the TTDelayerPacketServer, it calculates the delay which the packet stays in the queue and compensates for it to meet the total delay distribution.
-
-
+//Also in the TTDelayerPacketServer, it calculates the delay which the packet stays in the TTDelayerQueue and compensates for it to meet the total delay distribution.
+//The delay will shift to right.
 module QueueingTTDelayer extends QueueingPacketDelayer like IPacketDelayer
 {
     parameters:

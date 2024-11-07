@@ -10,7 +10,6 @@ package d6g.delayer;
 import inet.queueing.base.PacketDelayerBase;
 import inet.queueing.contract.IPacketDelayer;
 
-//
 // The module is designed to delay packets based on the type of involved interfaces.
 // It can be used in combination with the DetCom node to specify an uplink and downlink delay for a given device.
 // See DetCom, TsnTranslator and TTDelayLayer module description for configuration details.

@@ -23,8 +23,6 @@ import d6g.devices.tsntranslator.TsnTranslator;
 // module.
 // The TTChannel is a perfect channel with no delay, jitter or loss, as the delay should be defined in the TsnTranslator
 // modules.
-//
-// TODO: Add description of gptp and queueingDelayer parameters
 module DetCom
 {
     parameters:
