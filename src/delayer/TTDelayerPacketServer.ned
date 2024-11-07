@@ -11,7 +11,10 @@ import inet.queueing.contract.IPacketServer;
 import inet.queueing.server.PacketServer;
 
 // TODO: DESCRIPTION
-// This module serves as a server, processes and delays packets.
+//This module:
+//Initializes the packet server. Calculates the delay for a packet based on whether it matchesInterfaceConfiguration: if it does, it uses delayParameter; otherwise, the delay is 0.
+//Then sets the delay parameter. Compensates for the delay the packet has already spent in the queue by comparing the current clock time with the enqueue time obtained from the TTDelayerTag.
+
 simple TTDelayerPacketServer extends PacketServer like IPacketServer
 {
     parameters:
