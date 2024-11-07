@@ -13,7 +13,7 @@ import inet.networks.base.TsnNetworkBase;
 import inet.node.ethernet.EthernetLink;
 import inet.node.tsn.TsnClock;
 import inet.node.tsn.TsnDevice;
-
+import inet.node.tsn.TsnSwitch;
 
 // 
 // Base network derived from INETs gPTP example.
@@ -69,5 +69,60 @@ network TimeSyncNetworkUplink extends TsnNetworkBase
         timeTransmitter.ethg++ <--> EthernetLink <--> detCom.dsttg++;
         tsnDevice1.ethg++ <--> EthernetLink <--> detCom.nwttg;
         tsnDevice2.ethg++ <--> EthernetLink <--> detCom.dsttg++;
+
+}
+
+network MultiplehopDualShowcase extends TsnNetworkBase
+{
+    parameters:
+        int numSwitches1;
+        int numSwitches2;
+        string pos1 = string(250 + (numSwitches1 * 100));
+        string pos2 = string(int(pos1) + 100);
+        string pos3 = string(int(pos2) + (numSwitches2 * 100));
+    submodules:
+        histogramContainer: HistogramContainer {
+            @display("p=100,800");
+        }
+        timeTransmitter: TsnClock {
+            @display("p=500,150");
+        }
+        tsnSwitchnwtt[numSwitches1]: TsnSwitch {
+            @display("p=500,250,col,100");
+        }
+        detCom: DetCom {
+            @display("p=500,${parent.pos1}");
+        }
+        tsnSwitch1[numSwitches2]: TsnSwitch {
+            @display("p=400,${parent.pos2},col,100");
+        }
+        tsnSwitch2[numSwitches2]: TsnSwitch {
+            @display("p=600,${parent.pos2},col,100");
+        }
+        tsnDevice1: TsnDevice {
+            @display("p=400,${parent.pos3}");
+        }
+        tsnDevice2: TsnDevice {
+            @display("p=600,${parent.pos3}");
+        }
+
+    connections:
+        timeTransmitter.ethg++ <--> EthernetLink <--> tsnSwitchnwtt[0].ethg++;
+        for i=0..sizeof(tsnSwitchnwtt)-2 {
+            tsnSwitchnwtt[i].ethg++ <--> EthernetLink <--> tsnSwitchnwtt[i+1].ethg++;
+        }
+        tsnSwitchnwtt[numSwitches1-1].ethg++ <--> EthernetLink <--> detCom.nwttg;
+
+        tsnSwitch1[0].ethg++ <--> EthernetLink <--> detCom.dsttg++;
+        for i=0..sizeof(tsnSwitch1)-2 {
+            tsnSwitch1[i].ethg++ <--> EthernetLink <--> tsnSwitch1[i+1].ethg++;
+        }
+        tsnSwitch1[numSwitches2-1].ethg++ <--> EthernetLink <--> tsnDevice1.ethg++;
+
+        tsnSwitch2[0].ethg++ <--> EthernetLink <--> detCom.dsttg++;
+        for i=0..sizeof(tsnSwitch2)-2 {
+            tsnSwitch2[i].ethg++ <--> EthernetLink <--> tsnSwitch2[i+1].ethg++;
+        }
+        tsnSwitch2[numSwitches2-1].ethg++ <--> EthernetLink <--> tsnDevice2.ethg++;
 
 }

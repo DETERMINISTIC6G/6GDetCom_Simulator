@@ -28,6 +28,10 @@ void DetComGptp::initialize(int stage)
             cancelClockEvent(selfMsgDelayReq);
         }
     }
+    if (stage == INITSTAGE_LAST) {
+        detComEgressTimestamp5G = detComClock->getClockTime();
+        detComEgressTimestampGptp = clock->getClockTime();
+    }
 }
 
 void DetComGptp::processSync(Packet *packet, const GptpSync *gptp)
@@ -40,6 +44,10 @@ void DetComGptp::processSync(Packet *packet, const GptpSync *gptp)
 
         detComEgressTimestamp5G = detComClock->getClockTime();
         detComEgressTimestampGptp = clock->getClockTime();
+
+        EV_INFO << "detComEgressTimestamp5G          - " << detComEgressTimestamp5G << endl;
+        EV_INFO << "detComEgressTimestampGptp        - " << detComEgressTimestampGptp << endl;
+
         if (!useC5Grr || detComEgressTimestamp5GPrev == -1 || detComEgressTimestampGptpPrev == -1){
             clock5GRateRatio = 1.0;
             EV_INFO << "IF--===============================================" << endl;
@@ -52,10 +60,8 @@ void DetComGptp::processSync(Packet *packet, const GptpSync *gptp)
             EV_INFO << "detComEgressTimestampGptpPrev        - " << detComEgressTimestampGptpPrev << endl;
             clock5GRateRatio = (detComEgressTimestamp5G - detComEgressTimestamp5GPrev) /
                                (detComEgressTimestampGptp - detComEgressTimestampGptpPrev);
+            EV_INFO << "Clock 5G Rate Ratio ================================= : " << clock5GRateRatio << endl;
         }
-
-        EV_INFO << "detComEgressTimestamp5G          - " << detComEgressTimestamp5G << endl;
-        EV_INFO << "detComEgressTimestampGptp        - " << detComEgressTimestampGptp << endl;
     }
     Gptp::processSync(packet, gptp);
 }
@@ -88,7 +94,7 @@ void DetComGptp::synchronize()
     clocktime_t newTime = CLOCKTIME_ZERO;
     if (detComIngressTimestamp5GRcvd != -1) {
         // Received from DetCom interface, residence time is DetComResidenceTime
-        auto detComResidenceTime = (detComEgressTimestamp5G - detComIngressTimestamp5GRcvd) * clock5GRateRatio; // change detcom residence time to local domain
+        auto detComResidenceTime = (detComEgressTimestamp5G - detComIngressTimestamp5GRcvd) / clock5GRateRatio; // change detcom residence time to local domain
         auto localResidenceTime = oldLocalTimeAtTimeSync - detComEgressTimestampGptp;
         residenceTime = detComResidenceTime + localResidenceTime;
         newTime = preciseOriginTimestamp + correctionField + residenceTime;
@@ -197,7 +203,7 @@ void DetComGptp::sendFollowUp(int portId, const GptpSync *sync, const clocktime_
     clocktime_t residenceTime;
     if (detComIngressTimestamp5GRcvd != -1) {
         // Packet was received from DetCom interface, residence time calulation needs to include DetComResidenceTime
-        auto detComResidenceTime = (detComEgressTimestamp5G - detComIngressTimestamp5GRcvd) * clock5GRateRatio;
+        auto detComResidenceTime = (detComEgressTimestamp5G - detComIngressTimestamp5GRcvd) / clock5GRateRatio;
         auto localResidenceTime = syncEgressTimestampOwn - detComEgressTimestampGptp;
         residenceTime = localResidenceTime + detComResidenceTime;
 
