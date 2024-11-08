@@ -37,11 +37,13 @@ class PdcDelayer : public InterfaceFilterMixin<PacketDelayerBase>
       public:
         std::string stream;
         double pdc = 0;
+        double jitter = 0;
     };
     IClock *clock;
 
   private:
     cPar *delayParameter = nullptr;
+    cPar *jitterParameter = nullptr;
     //std::set<int> indInterfaces;
     //std::set<int> reqInterfaces;
     std::vector<Mapping> mappings;
@@ -60,11 +62,14 @@ class PdcDelayer : public InterfaceFilterMixin<PacketDelayerBase>
 
     void setDelay(cPar *delay);
 
+    void setJitter(cPar *jitter);
+
     //void addInterfacesToSet(std::set<int> &set, const char *interfaceList);
 
     void handleParameterChange(const char *parname) override;
 
     void configureMappings();
+
 };
 
 } // namespace d6g

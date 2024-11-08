@@ -26,9 +26,10 @@ simple PdcDelayer extends PacketDelayerBase like IPacketDelayer
 {
     parameters:
         volatile double delay @unit(s) @mutable = default(0s); // specifies default pdc delay
+        volatile double jitter @unit(s) @mutable = default(0us);
         // array of objects, where each object maps
-        // a PDC value to a stream name, 
-        //for example [{stream: "stream1", pdc: "5ms"}, ...]
+        // a PDC value, a jitter value to a stream name, 
+        //for example [{stream: "stream1", pdc: "5ms", jitter: "100us"}, ...]
         volatile object mapping @mutable = default([]);
          
         object indInterfaceTypes = default([]); // Only apply delay if the ind interface is of specific type (e.g. ["tt"] or ["tt", "eth"], empty means any)
