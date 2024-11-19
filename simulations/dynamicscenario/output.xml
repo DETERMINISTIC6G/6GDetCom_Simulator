@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<script>
+  <set-histogram t="30" module="histogramContainer" key="Downlink" histogram="../../../deterministic6g_data/PD-Wireless-5G-1/test.xml"/>
+  <set-param t="30" module="detCom.dstt[1]" par="delayDownlink" expr="rngProvider(&quot;histogramContainer&quot;,&quot;Downlink&quot;)"/>
+  <set-histogram t="60" module="histogramContainer" key="DownlinkOld" histogram="../../../deterministic6g_data/PD-Wireless-5G-1/s10-DL_wall.xml"/>
+  <set-param t="60" module="detCom.dstt[1]" par="delayDownlink" expr="rngProvider(&quot;histogramContainer&quot;,&quot;DownlinkOld&quot;)"/>
+  <set-param t="90" module="detCom.dstt[1]" par="delayDownlink" expr="truncnormal(0.3,0.1)*1ms"/>
+</script>

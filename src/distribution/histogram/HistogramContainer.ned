@@ -20,7 +20,7 @@ package d6g.distribution.histogram;
 simple HistogramContainer
 {
     parameters:
-        object histograms = default({});
+        volatile object histograms @mutable = default({});
         @class(HistogramContainer);
         @display("i=block/delay");
 }
