@@ -126,3 +126,31 @@ network MultiplehopDualShowcase extends TsnNetworkBase
         tsnSwitch2[numSwitches2-1].ethg++ <--> EthernetLink <--> tsnDevice2.ethg++;
 
 }
+
+network TwoMasterClocksMultiGptpShowcase extends TsnNetworkBase
+{
+    submodules:
+        histogramContainer: HistogramContainer {
+            @display("p=100,800");
+        }
+        tsnClock1: TsnClock {
+            @display("p=500,150");
+        }
+        tsnClock2: TsnClock {
+            @display("p=350,450");
+        }
+        detCom: DetCom {
+            @display("p=500,300");
+        }
+        tsnDevice1: TsnDevice {
+            @display("p=500,450");
+        }
+        tsnDevice2: TsnDevice {
+            @display("p=650,450");
+        }
+	connections:
+	    tsnClock1.ethg++ <--> EthernetLink <--> detCom.nwttg;
+	    detCom.dsttg++ <--> EthernetLink <--> tsnClock2.ethg++;
+	    detCom.dsttg++ <--> EthernetLink <--> tsnDevice1.ethg++;
+	    detCom.dsttg++ <--> EthernetLink <--> tsnDevice2.ethg++;
+}
