@@ -13,101 +13,36 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-
 #include "DynamicPacketSource.h"
 
-
-namespace inet {
 namespace d6g {
-
-using namespace omnetpp;
-using namespace inet;
-using namespace queueing;
-
 
 Define_Module(DynamicPacketSource);
 
 void DynamicPacketSource::initialize(int stage)
 {
-    ClockUserModuleMixin::initialize(stage);
-    if (stage == INITSTAGE_LOCAL) {
-        initialProductionOffset = par("initialProductionOffset");
-        productionIntervalParameter = &par("productionInterval");
-        productionTimer = new ClockEvent("ProductionTimer");
-        scheduleForAbsoluteTime = par("scheduleForAbsoluteTime");
-    }
-    else if (stage == INITSTAGE_QUEUEING) {
-        checkPacketOperationSupport(outputGate);
-        if (!productionTimer->isScheduled())
-            scheduleProductionTimerAndProducePacket();
-    }
+    ActivePacketSource::initialize(stage);
 }
 
-void DynamicPacketSource::handleMessage(cMessage *message)
+void DynamicPacketSource::handleMessage(cMessage *msg)
 {
-    if (message == productionTimer) {
-        if (consumer == nullptr || consumer->canPushSomePacket(outputGate->getPathEndGate())) {
-            scheduleProductionTimer(productionIntervalParameter->doubleValue());
-            producePacket();
-        }
-    }
-    else
-        throw cRuntimeError("Unknown message");
+    ActivePacketSource::handleMessage(msg);
 }
 
 void DynamicPacketSource::handleParameterChange(const char *name)
 {
     if (!strcmp(name, "initialProductionOffset")) {
         initialProductionOffset = par("initialProductionOffset");
-    //test
         cancelEvent(productionTimer);
         initialProductionOffsetScheduled = false;
         scheduleProductionTimerAndProducePacket();
-        //scheduleProductionTimer(initialProductionOffset);
-    //
     }
-}
-
-void DynamicPacketSource::scheduleProductionTimer(clocktime_t delay)
-{
-    if (scheduleForAbsoluteTime)
-        scheduleClockEventAt(getClockTime() + delay, productionTimer);
-    else
-        scheduleClockEventAfter(delay, productionTimer);
-}
-
-void DynamicPacketSource::scheduleProductionTimerAndProducePacket()
-{
-    if (!initialProductionOffsetScheduled && initialProductionOffset >= CLOCKTIME_ZERO) {
-        scheduleProductionTimer(initialProductionOffset);
-        initialProductionOffsetScheduled = true;
+    if (!strcmp(name, "productionInterval")) {
+        productionIntervalParameter = &par("productionInterval");
     }
-    else if (consumer == nullptr || consumer->canPushSomePacket(outputGate->getPathEndGate())) {
-        scheduleProductionTimer(productionIntervalParameter->doubleValue());
-        producePacket();
+    if (!strcmp(name, "packetLength")) {
+        packetLengthParameter = &par("packetLength");
     }
-}
-
-void DynamicPacketSource::producePacket()
-{
-    auto packet = createPacket();
-    EV_INFO << "Producing packet" << EV_FIELD(packet) << EV_ENDL;
-    emit(packetPushedSignal, packet);
-    pushOrSendPacket(packet, outputGate, consumer);
-    updateDisplayString();
-}
-
-void DynamicPacketSource::handleCanPushPacketChanged(cGate *gate)
-{
-    Enter_Method("handleCanPushPacketChanged");
-    if (!productionTimer->isScheduled())
-        scheduleProductionTimerAndProducePacket();
-}
-
-void DynamicPacketSource::handlePushPacketProcessed(Packet *packet, cGate *gate, bool successful)
-{
-    Enter_Method("handlePushPacketProcessed");
 }
 
 } //namespace
-}

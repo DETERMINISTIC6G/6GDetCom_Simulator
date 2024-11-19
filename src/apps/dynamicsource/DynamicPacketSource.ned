@@ -15,21 +15,16 @@
 
 package d6g.apps.dynamicsource;
 
-import inet.queueing.base.ActivePacketSourceBase;
-import inet.queueing.contract.IActivePacketSource;
+import inet.queueing.source.ActivePacketSource;
 
 
 //
 // TODO auto-generated module
 //
-simple DynamicPacketSource extends ActivePacketSourceBase like IActivePacketSource
+simple DynamicPacketSource extends ActivePacketSource
 {
     parameters:
-        string clockModule = default(""); // relative path of a module that implements IClock; optional
-        double initialProductionOffset @mutable @unit(s) = default(-1s); // initial duration before which packets are not produced. When negative, then produce packet in initialize()
-        volatile double productionInterval @unit(s); // elapsed time between subsequent packets pushed to the connected packet consumer
-        bool scheduleForAbsoluteTime = default(true); // when a clock is used relative means that setting the clock will not affect the simulation time of the event
-        @class(DynamicPacketSource);
-    gates:
-        output out @labels(push);
+      productionInterval  @mutable;
+      packetLength @mutable;
+      @class(DynamicPacketSource);
 }

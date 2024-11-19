@@ -35,7 +35,7 @@ network Dynamicscenario extends DetComNetworkBase
             @display("p=100,800");
         }
         wirelessdevice1: TsnDevice {
-            @display("p=350,400");
+            @display("p=350,506");
         }
         detCom: DetCom { // DetCom module (deterministic communication).
             @display("p=350,315");
@@ -53,7 +53,7 @@ network Dynamicscenario extends DetComNetworkBase
             @display("p=580,54");
         }
         wirelessdevice2: TsnDevice {
-            @display("p=491,400");
+            @display("p=523,500");
         }
 
         distributionScenarioManager: ScenarioManager {

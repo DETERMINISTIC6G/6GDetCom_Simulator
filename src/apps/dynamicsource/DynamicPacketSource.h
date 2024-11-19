@@ -17,49 +17,31 @@
 #define __DYNAMIC_SCENARIO_DYNAMICPACKETSOURCE_H_
 
 #include <omnetpp.h>
-#include "inet/common/clock/ClockUserModuleMixin.h"
-#include "inet/queueing/base/ActivePacketSourceBase.h"
-
-namespace inet {
-
-extern template class ClockUserModuleMixin<queueing::ActivePacketSourceBase>;
+#include "inet/queueing/source/ActivePacketSource.h"
 
 using namespace omnetpp;
 using namespace inet;
-using namespace queueing;
+using namespace inet::queueing;
 
 namespace d6g {
 
 /**
  * TODO - Generated class
  */
-class DynamicPacketSource : public ClockUserModuleMixin<ActivePacketSourceBase>
-{
+class DynamicPacketSource: public ActivePacketSource {
 protected:
-    bool initialProductionOffsetScheduled = false;
-    clocktime_t initialProductionOffset;
-    cPar *productionIntervalParameter = nullptr;
-    ClockEvent *productionTimer = nullptr;
-    bool scheduleForAbsoluteTime = false;
-
-  protected:
     virtual void initialize(int stage) override;
-    virtual void handleMessage(cMessage *message) override;
+    virtual void handleMessage(cMessage *msg) override;
     virtual void handleParameterChange(const char *name) override;
 
-    virtual void scheduleProductionTimer(clocktime_t delay);
-    virtual void scheduleProductionTimerAndProducePacket();
-    virtual void producePacket();
 
-  public:
-    virtual ~DynamicPacketSource() { cancelAndDeleteClockEvent(productionTimer); }
+/*public:
+    virtual ~DynamicPacketSource() {
+        cancelAndDeleteClockEvent(productionTimer);
+    }*/
 
-    virtual void handleCanPushPacketChanged(cGate *gate) override;
-    virtual void handlePushPacketProcessed(Packet *packet, cGate *gate, bool successful) override;
 };
 
 } //namespace
-}
-
 
 #endif

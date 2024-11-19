@@ -78,6 +78,10 @@ void HistogramContainer::processCommand(const cXMLElement &node) {
         auto pathToHistogram = xmlutils::getMandatoryAttribute(node,
                 "histogram");
 
+        auto it = histograms.find(key);
+        if (it != histograms.end()) {
+            delete it->second;
+        }
         histograms[key] = loadHistogramFromFile(pathToHistogram);
 
     } else
