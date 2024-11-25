@@ -26,5 +26,6 @@ simple DynamicPacketSource extends ActivePacketSource
     parameters:
       productionInterval  @mutable;
       packetLength @mutable;
+      volatile bool isStarted @mutable = default(true);
       @class(DynamicPacketSource);
 }

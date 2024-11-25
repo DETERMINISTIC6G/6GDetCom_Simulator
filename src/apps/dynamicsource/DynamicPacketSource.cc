@@ -22,6 +22,9 @@ Define_Module(DynamicPacketSource);
 void DynamicPacketSource::initialize(int stage)
 {
     ActivePacketSource::initialize(stage);
+    if (stage == INITSTAGE_LOCAL) {
+        isStartedParameter = par("isStarted");
+    }
 }
 
 void DynamicPacketSource::handleMessage(cMessage *msg)
@@ -29,11 +32,24 @@ void DynamicPacketSource::handleMessage(cMessage *msg)
     ActivePacketSource::handleMessage(msg);
 }
 
-void DynamicPacketSource::handleParameterChange(const char *name)
-{
+void DynamicPacketSource::handleParameterChange(const char *name) {
+    if (!strcmp(name, "isStarted")) {
+        isStartedParameter = par("isStarted");
+        if (!isStartedParameter) {
+            if (productionTimer->isScheduled()) {
+                cancelEvent(productionTimer);
+            }
+        } else {
+            if (!productionTimer->isScheduled()) {
+                scheduleProductionTimerAndProducePacket();
+            }
+        }
+    }
     if (!strcmp(name, "initialProductionOffset")) {
         initialProductionOffset = par("initialProductionOffset");
-        cancelEvent(productionTimer);
+        if (productionTimer->isScheduled()) {
+            cancelEvent(productionTimer);
+        }
         initialProductionOffsetScheduled = false;
         scheduleProductionTimerAndProducePacket();
     }
@@ -42,6 +58,27 @@ void DynamicPacketSource::handleParameterChange(const char *name)
     }
     if (!strcmp(name, "packetLength")) {
         packetLengthParameter = &par("packetLength");
+    }
+}
+
+
+void DynamicPacketSource::scheduleProductionTimer(clocktime_t delay){
+    if (!isStartedParameter) return;
+    if (scheduleForAbsoluteTime)
+        scheduleClockEventAt(getClockTime() + delay, productionTimer);
+    else
+        scheduleClockEventAfter(delay, productionTimer);
+}
+
+void DynamicPacketSource::scheduleProductionTimerAndProducePacket() {
+    if (!isStartedParameter) return;
+
+    if (!initialProductionOffsetScheduled && initialProductionOffset >= CLOCKTIME_ZERO) {
+        scheduleProductionTimer(initialProductionOffset);
+        initialProductionOffsetScheduled = true;
+    }else if (consumer == nullptr || consumer->canPushSomePacket(outputGate->getPathEndGate())) {
+        scheduleProductionTimer(productionIntervalParameter->doubleValue());
+        producePacket();
     }
 }
 

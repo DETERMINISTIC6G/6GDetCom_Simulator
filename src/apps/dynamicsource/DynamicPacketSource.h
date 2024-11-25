@@ -29,11 +29,17 @@ namespace d6g {
  * TODO - Generated class
  */
 class DynamicPacketSource: public ActivePacketSource {
+
+protected:
+    bool isStartedParameter = true;
+
 protected:
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *msg) override;
     virtual void handleParameterChange(const char *name) override;
 
+    virtual void scheduleProductionTimer(clocktime_t delay) override;
+    virtual void scheduleProductionTimerAndProducePacket() override;
 
 /*public:
     virtual ~DynamicPacketSource() {
