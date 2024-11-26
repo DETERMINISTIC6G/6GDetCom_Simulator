@@ -25,8 +25,6 @@ import inet.protocolelement.processing.ProcessingDelayLayer;
 // (i.e. a tt interface) are uplink frames.
 // Therefore, we set the ingress interface type to "eth" and the egress interface type to "tt"
 // and the delay to delayUplink.
-//
-// TODO: ADD DESCRIPTION OF ALL queueingDelayer PARAMETERS
 module TTDelayLayer extends ProcessingDelayLayer like IProcessingDelayLayer
 {
     parameters:

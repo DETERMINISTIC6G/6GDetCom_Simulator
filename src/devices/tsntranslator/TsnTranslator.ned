@@ -23,7 +23,7 @@ module TsnTranslator extends TsnSwitch
     parameters:
         int numTtInterfaces = default(0); // Number of other TT interfaces connected to this TSN Translator.
         bool isDstt = default(false); // Specifies whether the TSN Translator is a DS-TT (otherwise it is a NW-TT).
-        bool queueingDelayer = default(false);
+        bool queueingDelayer = default(false);/////////////
 
         clock.typename = default("PiServoClock");
         

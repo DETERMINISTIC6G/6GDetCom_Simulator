@@ -9,9 +9,7 @@ package d6g.delayer;
 
 import inet.queueing.queue.PacketQueue;
 
-// TODO: DESCRIPTION
-// This module is a type of packet queue and can synchronize its operation with external
-// clock using clockModule.
+// This module adds the tag TTDelayerTag to the packet which records the enqueue time of the packet and uses it for compensation.
 simple TTDelayerQueue extends PacketQueue
 {
     parameters:
