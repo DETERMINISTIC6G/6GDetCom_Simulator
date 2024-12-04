@@ -22,7 +22,8 @@ package d6g.simulations.dynamicscenario;
 import d6g.devices.DetCom;
 import d6g.distribution.histogram.HistogramContainer;
 import d6g.networks.DetComNetworkBase;
-import inet.common.scenario.ScenarioManager;
+import d6g.scenariomanager.ChangeMonitor;
+import d6g.scenariomanager.ObservedScenarioManager;
 import inet.node.ethernet.EthernetLink;
 import inet.node.tsn.TsnDevice;
 import inet.node.tsn.TsnSwitch;
@@ -56,12 +57,16 @@ network Dynamicscenario extends DetComNetworkBase
             @display("p=523,500");
         }
 
-        distributionScenarioManager: ScenarioManager {
+        distributionScenarioManager: ObservedScenarioManager {
             @display("p=290,800");
         }
-        streamScenarioManager: ScenarioManager {
+        streamScenarioManager: ObservedScenarioManager {
             @display("p=429,800");
         }
+        monitor: ChangeMonitor {
+            @display("p=619,800");
+        }
+
     connections:
         wirelessdevice1.ethg++ <--> EthernetLink <--> detCom.dsttg++;
         wirelessdevice2.ethg++ <--> EthernetLink <--> detCom.dsttg++;

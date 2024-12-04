@@ -13,19 +13,16 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package d6g.apps.dynamicsource;
-
-import inet.queueing.source.ActivePacketSource;
-
+package d6g.scenariomanager;
 
 //
 // TODO auto-generated module
 //
-simple DynamicPacketSource extends ActivePacketSource
+simple ChangeMonitor
 {
     parameters:
-      productionInterval  @mutable;
-      packetLength @mutable;
-      volatile bool enabled @mutable = default(true);
-      @class(DynamicPacketSource);
+    string clockModule = default("");
+    volatile double schedulerCallDelay @unit(s) = default(3s);     
+    @class(ChangeMonitor);
+        
 }

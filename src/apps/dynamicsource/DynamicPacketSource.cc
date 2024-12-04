@@ -23,19 +23,31 @@ void DynamicPacketSource::initialize(int stage)
 {
     ActivePacketSource::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-        isStartedParameter = par("isStarted");
+        enabledParameter = par("enabled");
+        parameterChangeEvent = new ClockEvent("parameter-change");
     }
 }
 
 void DynamicPacketSource::handleMessage(cMessage *msg)
 {
-    ActivePacketSource::handleMessage(msg);
+    //ActivePacketSource::handleMessage(msg);
+    if (msg == productionTimer) {
+            if (consumer == nullptr || consumer->canPushSomePacket(outputGate->getPathEndGate())) {
+                scheduleProductionTimer(productionIntervalParameter->doubleValue());
+                producePacket();
+            }
+        } else if (msg == parameterChangeEvent) {
+            EV << "Self-Message received immediately!\n";
+            emit(DynamicScenarioObserver::parameterChangeSignal, msg);
+        }
+        else
+            throw cRuntimeError("Unknown message");
 }
 
 void DynamicPacketSource::handleParameterChange(const char *name) {
-    if (!strcmp(name, "isStarted")) {
-        isStartedParameter = par("isStarted");
-        if (!isStartedParameter) {
+    if (!strcmp(name, "enabled")) {
+        enabledParameter = par("enabled");
+        if (!enabledParameter) {
             if (productionTimer->isScheduled()) {
                 cancelEvent(productionTimer);
             }
@@ -59,11 +71,16 @@ void DynamicPacketSource::handleParameterChange(const char *name) {
     if (!strcmp(name, "packetLength")) {
         packetLengthParameter = &par("packetLength");
     }
+
+    /*  */
+    if (!parameterChangeEvent->isScheduled())
+        //scheduleAt(simTime(), parameterChangeEvent);
+        scheduleClockEventAt(getClockTime(), parameterChangeEvent);
 }
 
 
 void DynamicPacketSource::scheduleProductionTimer(clocktime_t delay){
-    if (!isStartedParameter) return;
+    if (!enabledParameter) return;
     if (scheduleForAbsoluteTime)
         scheduleClockEventAt(getClockTime() + delay, productionTimer);
     else
@@ -71,7 +88,7 @@ void DynamicPacketSource::scheduleProductionTimer(clocktime_t delay){
 }
 
 void DynamicPacketSource::scheduleProductionTimerAndProducePacket() {
-    if (!isStartedParameter) return;
+    if (!enabledParameter) return;
 
     if (!initialProductionOffsetScheduled && initialProductionOffset >= CLOCKTIME_ZERO) {
         scheduleProductionTimer(initialProductionOffset);
@@ -81,5 +98,14 @@ void DynamicPacketSource::scheduleProductionTimerAndProducePacket() {
         producePacket();
     }
 }
+
+void DynamicPacketSource::test() {
+    EV << " test call "  << endl;
+}
+
+DynamicPacketSource::~DynamicPacketSource() {
+        cancelAndDeleteClockEvent(parameterChangeEvent);
+       // cancelAndDelete(parameterChangeEvent);
+    }
 
 } //namespace

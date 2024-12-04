@@ -13,44 +13,37 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#ifndef __DYNAMIC_SCENARIO_DYNAMICPACKETSOURCE_H_
-#define __DYNAMIC_SCENARIO_DYNAMICPACKETSOURCE_H_
+#ifndef __DYNAMIC_SCENARIO_OBSERVEDSCENARIOMANAGER_H_
+#define __DYNAMIC_SCENARIO_OBSERVEDSCENARIOMANAGER_H_
 
 #include <omnetpp.h>
-#include "inet/queueing/source/ActivePacketSource.h"
-#include "../../scenariomanager/DynamicScenarioObserver.h"
+#include "inet/common/scenario/ScenarioManager.h"
+//#include "ChangeMonitor.h"
+#include "DynamicScenarioObserver.h"
 
-#include "inet/common/clock/ClockUserModuleMixin.h"
+#include "inet/common/scenario/ScenarioTimer_m.h"
 
 using namespace omnetpp;
 using namespace inet;
-using namespace inet::queueing;
+using namespace inet::common;
 
 namespace d6g {
 
 /**
  * TODO - Generated class
  */
-class DynamicPacketSource: public ActivePacketSource {
+class ObservedScenarioManager : public ScenarioManager
+{
+/*private:
+    DynamicScenarioObserver *observer;*/
 
-protected:
-    bool enabledParameter = true;
-    ClockEvent *parameterChangeEvent = nullptr;
-
-protected:
-    virtual void initialize(int stage) override;
+  protected:
+    virtual void initialize() override;
     virtual void handleMessage(cMessage *msg) override;
-    virtual void handleParameterChange(const char *name) override;
 
-    virtual void scheduleProductionTimer(clocktime_t delay) override;
-    virtual void scheduleProductionTimerAndProducePacket() override;
-
-
-public:
-    virtual void test();
-
-    ~DynamicPacketSource() override;
-
+/*  public:
+    // Destructor
+        ~ObservedScenarioManager() override; */
 };
 
 } //namespace

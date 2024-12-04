@@ -13,19 +13,16 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package d6g.apps.dynamicsource;
+package d6g.scenariomanager;
 
-import inet.queueing.source.ActivePacketSource;
+import inet.common.scenario.ScenarioManager;
 
 
 //
 // TODO auto-generated module
 //
-simple DynamicPacketSource extends ActivePacketSource
+simple ObservedScenarioManager extends ScenarioManager
 {
     parameters:
-      productionInterval  @mutable;
-      packetLength @mutable;
-      volatile bool enabled @mutable = default(true);
-      @class(DynamicPacketSource);
+        @class(ObservedScenarioManager);
 }

@@ -18,6 +18,7 @@ import inet.linklayer.contract.IEthernetInterface;
 module TsnTranslator extends TsnSwitch
 {
     parameters:
+        @class(TsnTranslator);
         int numTtInterfaces = default(0); // Number of other TT interfaces connected to this TSN Translator.
         bool isDstt = default(false); // Specifies whether the TSN Translator is a DS-TT (otherwise it is a NW-TT).
         
