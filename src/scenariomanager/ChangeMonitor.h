@@ -17,29 +17,72 @@
 #define __DYNAMIC_SCENARIO_CHANGEMONITOR_H_
 
 #include <omnetpp.h>
+//#include <zmq.h>
+
 #include "DynamicScenarioObserver.h"
 //#include "ObservedScenarioManager.h"
 #include "../apps/dynamicsource/DynamicPacketSource.h"
-#include "inet/common/clock/ClockUserModuleMixin.h"
 
+#include "inet/linklayer/configurator/gatescheduling/base/GateScheduleConfiguratorBase.h"
+#include "inet/linklayer/configurator/gatescheduling/common/TSNschedGateScheduleConfigurator.h"
+#include "inet/common/clock/ClockUserModuleMixin.h"
 #include "inet/common/scenario/ScenarioTimer_m.h"
 
 using namespace omnetpp;
 using namespace inet;
-//using namespace inet::common;
+using namespace inet::common;
+
+
+
 
 namespace d6g {
+
+
 
 /**
  * TODO - Generated class
  */
-class ChangeMonitor : public ClockUserModuleMixin<cSimpleModule> // public cSimpleModule
+class ChangeMonitor : public inet::ClockUserModuleMixin<cSimpleModule>  // public TSNschedGateScheduleConfigurator
 {
+
+protected:
+    class Mapping {
+    public:
+        std::string name;
+        int pcp = 0;
+        int gateIndex = 0;
+        std::string application;
+        std::string source;
+        std::string destination;
+        /* b packetLength;
+         simtime_t packetInterval;
+         simtime_t maxLatency;
+         simtime_t maxJitter;*/
+        cValue packetLength;
+        cValue packetInterval;
+        cValue maxLatency;
+        //   cValue maxJitter;
+        //std::string pathFragments;
+
+        friend std::ostream& operator<<(std::ostream &os,
+                const Mapping &mapping) {
+            os << "name: " << mapping.name << ", pcp: " << mapping.pcp
+                    << ", gateIndex: " << mapping.gateIndex << ", application: "
+                    << mapping.application;
+            return os;
+        }
+    };
+
+    std::vector<Mapping> configMappings;
+
 
   private:
     DynamicScenarioObserver *observer;
     ClockEvent *timer = nullptr;
     cPar *schedulerCallDelayParameter = nullptr;
+    GateScheduleConfiguratorBase *gateScheduleConfigurator;
+
+
 
 
   protected:
@@ -47,11 +90,15 @@ class ChangeMonitor : public ClockUserModuleMixin<cSimpleModule> // public cSimp
     virtual void handleMessage(cMessage *msg) override;
     void subscribe();
     void prepaireChangesForProcessing();
+    void configureMappings();
+    cValueArray* convertToCValueArray(const std::vector<Mapping>& configMappings);
+    cValue convertMappingToCValue(const Mapping& mapping);
 
 
   public:
+    //virtual void executeTSNsched(std::string fileName) const override;
 
-    virtual void externalSchedulerCall();
+    virtual void externalSchedulerCall() const;
     void notify(std::string source);
     ~ChangeMonitor() override;
 };

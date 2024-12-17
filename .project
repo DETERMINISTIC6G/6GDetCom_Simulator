@@ -4,6 +4,7 @@
 	<comment></comment>
 	<projects>
 		<project>inet</project>
+		<project>zeromq-4.3.5</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>

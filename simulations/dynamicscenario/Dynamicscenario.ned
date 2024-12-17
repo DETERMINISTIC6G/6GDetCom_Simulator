@@ -24,6 +24,7 @@ import d6g.distribution.histogram.HistogramContainer;
 import d6g.networks.DetComNetworkBase;
 import d6g.scenariomanager.ChangeMonitor;
 import d6g.scenariomanager.ObservedScenarioManager;
+import inet.linklayer.configurator.gatescheduling.contract.IGateScheduleConfigurator;
 import inet.node.ethernet.EthernetLink;
 import inet.node.tsn.TsnDevice;
 import inet.node.tsn.TsnSwitch;
@@ -31,9 +32,12 @@ import inet.node.tsn.TsnSwitch;
 
 network Dynamicscenario extends DetComNetworkBase
 {
+    parameters:
+        *.gateScheduleConfigurator.typename = "ExternalGateScheduleConfigurator";//> like IGateScheduleConfigurator; 
+
     submodules:
         histogramContainer: HistogramContainer {
-            @display("p=100,800");
+            @display("p=100,795");
         }
         wirelessdevice1: TsnDevice {
             @display("p=350,506");
@@ -58,13 +62,14 @@ network Dynamicscenario extends DetComNetworkBase
         }
 
         distributionScenarioManager: ObservedScenarioManager {
-            @display("p=290,800");
+            @display("p=779,431");
         }
         streamScenarioManager: ObservedScenarioManager {
-            @display("p=429,800");
+            @display("p=779,600");
         }
+
         monitor: ChangeMonitor {
-            @display("p=619,800");
+            @display("p=779,292");
         }
 
     connections:

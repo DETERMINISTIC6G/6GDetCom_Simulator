@@ -13,44 +13,32 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#ifndef __DYNAMIC_SCENARIO_DYNAMICPACKETSOURCE_H_
-#define __DYNAMIC_SCENARIO_DYNAMICPACKETSOURCE_H_
+#ifndef __DYNAMIC_SCENARIO_EXTERNALGATESCHEDULECONFIGURATOR_H_
+#define __DYNAMIC_SCENARIO_EXTERNALGATESCHEDULECONFIGURATOR_H_
 
 #include <omnetpp.h>
-#include "inet/queueing/source/ActivePacketSource.h"
-#include "../../scenariomanager/DynamicScenarioObserver.h"
-
-#include "inet/common/clock/ClockUserModuleMixin.h"
+#include "inet/linklayer/configurator/gatescheduling/common/TSNschedGateScheduleConfigurator.h"
 
 using namespace omnetpp;
+
 using namespace inet;
-using namespace inet::queueing;
+//using namespace inet::common;
 
 namespace d6g {
 
 /**
  * TODO - Generated class
  */
-class DynamicPacketSource: public ActivePacketSource {
-
-protected:
-    bool enabledParameter = true;
-    ClockEvent *parameterChangeEvent = nullptr;
-
-protected:
+class ExternalGateScheduleConfigurator : public TSNschedGateScheduleConfigurator //TSNschedGateScheduleConfigurator
+{
+  protected:
     virtual void initialize(int stage) override;
-    virtual void handleMessage(cMessage *msg) override;
+    //virtual void handleMessage(cMessage *msg) override;
     virtual void handleParameterChange(const char *name) override;
 
-    virtual void scheduleProductionTimer(clocktime_t delay) override;
-    virtual void scheduleProductionTimerAndProducePacket() override;
+    virtual void executeTSNsched(std::string fileName)  const override;
 
-
-public:
-    virtual cValueMap* getConfiguration();
-
-    ~DynamicPacketSource() override;
-
+    virtual Output *computeGateScheduling(const Input& input) const override;
 };
 
 } //namespace

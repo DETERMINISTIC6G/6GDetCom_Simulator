@@ -16,18 +16,14 @@
 package d6g.scenariomanager;
 
 import inet.linklayer.configurator.gatescheduling.base.GateScheduleConfiguratorBase;
+import inet.linklayer.configurator.gatescheduling.contract.IGateScheduleConfigurator;
 
 
 //
 // TODO auto-generated module
 //
-simple ChangeMonitor
+simple ExternalGateScheduleConfigurator extends GateScheduleConfiguratorBase like IGateScheduleConfigurator
 {
     parameters:
-        string clockModule = default("");
-        volatile double schedulerCallDelay @unit(s) = default(3s);
-        string gateScheduleConfigurator = default("gateScheduleConfigurator");
-        @class(ChangeMonitor);
-
-
+        @class(ExternalGateScheduleConfigurator);
 }

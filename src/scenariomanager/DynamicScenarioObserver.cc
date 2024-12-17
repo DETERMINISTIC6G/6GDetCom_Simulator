@@ -35,26 +35,41 @@ const simsignal_t DynamicScenarioObserver::distributionChangeSignal =
 void DynamicScenarioObserver::receiveSignal(cComponent *source,
         simsignal_t signalID, cObject *obj, cObject *details) {
 
+    ChangeMonitor *monitor = (dynamic_cast<ChangeMonitor*>(this->monitor));
+
     cMessage *msg = check_and_cast<cMessage*>(obj);
     if (signalID == scenarioEventSignal) {
+
         auto node = check_and_cast<ScenarioTimer*>(msg)->getXmlNode();
-        EV << "Received message (scenariomanager): " << msg->getName()
-                  << " from source: " << source->getFullName() << endl;
+
+        EV << "Received message (scenariomanager): " << msg->getName() << " from source: " << source->getFullName() << endl;
 
     }
     if (signalID == parameterChangeSignal) {
 
-        EV << "Received message (app): " << msg->getName() << " from source: "
-                  << source->getFullPath() << endl;
-        (dynamic_cast<ChangeMonitor*>(this->monitor))->notify(
-                source->getFullPath());
+        EV << "Received message (app): " << msg->getName() << " from source: " << source->getFullPath() << endl;
+
+
+        DynamicPacketSource *sourceModule = dynamic_cast<DynamicPacketSource *>(source);
+        if (sourceModule) {
+           cValueMap* value = sourceModule->getConfiguration();
+           EV << value->get("application").stringValue() << " !!  " <<
+                   value->get("destination").stringValue() << "  !!  " <<  value->get("packetInterval").str()
+                   << endl;
+
+           delete value;
+        }
+
+        monitor->notify(source->getFullPath());
+
+
 
     }
     if (signalID == distributionChangeSignal) {
-        EV << "Received message (distribution): " << msg->getName() << " from source: "
-                         << source->getFullPath() << endl;
-        (dynamic_cast<ChangeMonitor*>(this->monitor))->notify(
-                source->getFullPath());
+
+        EV << "Received message (distribution): " << msg->getName() << " from source: " << source->getFullPath() << endl;
+
+        (dynamic_cast<ChangeMonitor*>(this->monitor))->notify(source->getFullPath());
     }
 
 }

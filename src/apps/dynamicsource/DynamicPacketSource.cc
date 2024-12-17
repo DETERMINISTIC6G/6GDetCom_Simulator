@@ -14,6 +14,7 @@
 // 
 
 #include "DynamicPacketSource.h"
+#include "inet/applications/udpapp/UdpSocketIo.h"
 
 namespace d6g {
 
@@ -44,6 +45,18 @@ void DynamicPacketSource::handleMessage(cMessage *msg)
             throw cRuntimeError("Unknown message");
 }
 
+
+/*  if (!strcmp(name, "delayDownlink") || !strcmp(name, "delayUplink") ) {
+        cMsgPar *details = new cMsgPar("details");
+        details->setStringValue(name);
+        emit(DynamicScenarioObserver::distributionChangeSignal,
+                distributionChangeEvent, details);
+        delete details;
+    }
+
+ * */
+
+
 void DynamicPacketSource::handleParameterChange(const char *name) {
     if (!strcmp(name, "enabled")) {
         enabledParameter = par("enabled");
@@ -51,6 +64,11 @@ void DynamicPacketSource::handleParameterChange(const char *name) {
             if (productionTimer->isScheduled()) {
                 cancelEvent(productionTimer);
             }
+            cMsgPar *details = new cMsgPar("details");
+            details->setStringValue("notEnabled");
+            emit(DynamicScenarioObserver::parameterChangeSignal,
+                    parameterChangeEvent, details);
+             delete details;
         } else {
             if (!productionTimer->isScheduled()) {
                 scheduleProductionTimerAndProducePacket();
@@ -99,8 +117,33 @@ void DynamicPacketSource::scheduleProductionTimerAndProducePacket() {
     }
 }
 
-void DynamicPacketSource::test() {
-    EV << " test call "  << endl;
+cValueMap* DynamicPacketSource::getConfiguration() {
+
+    cModule *appModule = this->getParentModule();
+    cModule *deviceModule = appModule->getParentModule();
+
+    UdpSocketIo *socketModule = dynamic_cast<UdpSocketIo*>(appModule->getSubmodule("io"));
+
+    cValueMap *map = new cValueMap();
+
+
+    map->set("name", cValue(""));
+    map->set("pcp", cValue(4));
+    map->set("gateIndex", cValue(1));
+
+    map->set("application", cValue(appModule->getFullName()));
+    map->set("source", cValue(deviceModule->getFullName()));
+
+    map->set("destination", socketModule->par("destAddress").stringValue());
+
+    map->set("packetLength", par("packetLength").intValue());
+    map->set("packetInterval", par("productionInterval").doubleValue());
+    map->set("maxLatency", cValue(0));
+
+    //delete map;
+
+    return map;//cValue(map);
+
 }
 
 DynamicPacketSource::~DynamicPacketSource() {
