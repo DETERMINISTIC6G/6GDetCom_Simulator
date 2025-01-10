@@ -41,6 +41,7 @@ class DetComGptp : public InterfaceFilterMixin<Gptp>
     virtual void synchronize() override;
     virtual void sendSync() override;
     virtual void handleClockJump(ServoClockBase::ClockJumpDetails *clockJumpDetails) override;
+    virtual void scheduleMessageOnTopologyChange() override;
 };
 
 } // namespace d6g

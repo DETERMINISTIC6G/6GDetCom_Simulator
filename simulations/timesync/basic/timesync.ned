@@ -5,7 +5,7 @@
 //
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-package d6g.simulations.timesync;
+package d6g.simulations.timesync.basic;
 
 import d6g.devices.DetCom;
 import d6g.distribution.histogram.HistogramContainer;
@@ -69,6 +69,33 @@ network TimeSyncNetworkUplink extends TsnNetworkBase
         timeTransmitter.ethg++ <--> EthernetLink <--> detCom.dsttg++;
         tsnDevice1.ethg++ <--> EthernetLink <--> detCom.nwttg;
         tsnDevice2.ethg++ <--> EthernetLink <--> detCom.dsttg++;
+
+}
+
+network TimeSyncNetworkNwttMaster extends TsnNetworkBase
+{
+    submodules:
+        histogramContainer: HistogramContainer {
+            @display("p=100,800");
+        }
+        tsnDevice1: TsnDevice {
+            @display("p=500,150");
+        }
+        detCom: DetCom {
+            @display("p=500,300");
+        }
+        tsnDevice2: TsnDevice {
+            @display("p=400,450");
+        }
+        tsnDevice3: TsnDevice {
+            @display("p=600,450");
+        }
+
+
+    connections:
+        tsnDevice1.ethg++ <--> EthernetLink <--> detCom.nwttg;
+        tsnDevice2.ethg++ <--> EthernetLink <--> detCom.dsttg++;
+        tsnDevice3.ethg++ <--> EthernetLink <--> detCom.dsttg++;
 
 }
 

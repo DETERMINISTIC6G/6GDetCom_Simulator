@@ -11,9 +11,6 @@ void DetComGptp::initialize(int stage)
 {
     InterfaceFilterMixin::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-        if (gptpNodeType != BRIDGE_NODE) {
-            throw cRuntimeError("DetComGptp is only supported for bridge nodes");
-        }
         useC5Grr = par("useC5Grr"); // par can't be used
         detComClock.reference(this, "detComClockModule", true);
     }
@@ -31,6 +28,15 @@ void DetComGptp::initialize(int stage)
     if (stage == INITSTAGE_LAST) {
         detComEgressTimestamp5G = detComClock->getClockTime();
         detComEgressTimestampGptp = clock->getClockTime();
+    }
+}
+
+
+void DetComGptp::scheduleMessageOnTopologyChange() {
+    Gptp::scheduleMessageOnTopologyChange();
+    if (selfMsgDelayReq && slavePortId != -1 && idMatchesSet(slavePortId, detComInterfaces)) {
+        // Don't send DelayReq messages on DetCom interfaces (between TsnTranslators)
+        cancelClockEvent(selfMsgDelayReq);
     }
 }
 
@@ -86,6 +92,9 @@ void DetComGptp::synchronize()
      * Local time is adjusted using peer delay, correction field, residence time *
      * and packet transmission time based departure time of Sync message from GM *
      *****************************************************************************/
+
+    EV_INFO << "############## SYNC #####################################" << endl;
+
     simtime_t now = simTime();
     clocktime_t oldLocalTimeAtTimeSync = clock->getClockTime();
     emit(timeDifferenceSignal, CLOCKTIME_AS_SIMTIME(oldLocalTimeAtTimeSync) - now);
@@ -97,7 +106,10 @@ void DetComGptp::synchronize()
         auto detComResidenceTime = (detComEgressTimestamp5G - detComIngressTimestamp5GRcvd) / clock5GRateRatio; // change detcom residence time to local domain
         auto localResidenceTime = oldLocalTimeAtTimeSync - detComEgressTimestampGptp;
         residenceTime = detComResidenceTime + localResidenceTime;
-        newTime = preciseOriginTimestamp + correctionField + residenceTime;
+        EV_INFO << "detComResidenceTime          - " << detComResidenceTime << endl;
+        EV_INFO << "localResidenceTime           - " << localResidenceTime << endl;
+        EV_INFO << "residenceTime                - " << residenceTime << endl;
+            newTime = preciseOriginTimestamp + correctionField + residenceTime;
     }
     else {
         // Received from normal (e.g. eth) port, calculate as always
@@ -130,11 +142,12 @@ void DetComGptp::synchronize()
 
     newLocalTimeAtTimeSync = clock->getClockTime();
 
+    updateSyncStateAndRescheduleSyncTimeout(servoClock);
+
     /************** Rate ratio calculation *************************************
      * It is calculated based on interval between two successive Sync messages *
      ***************************************************************************/
 
-    EV_INFO << "############## SYNC #####################################" << endl;
     EV_INFO << "LOCAL TIME BEFORE SYNC     - " << oldLocalTimeAtTimeSync << endl;
     EV_INFO << "LOCAL TIME AFTER SYNC      - " << newLocalTimeAtTimeSync << endl;
     EV_INFO << "CALCULATED NEW TIME        - " << newTime << endl;
@@ -172,6 +185,11 @@ void DetComGptp::sendSync()
     detComIngressTimestamp5G = detComClock->getClockTime();
     detComIngressTimestampGptp = clock->getClockTime();
 
+    if (isGM()) {
+        // When we are selected as the GM, we use the 5G time as the origin timestamp
+        preciseOriginTimestamp = detComClock->getClockTime();
+    }
+
     auto packet = new Packet("GptpSync");
     packet->addTag<MacAddressReq>()->setDestAddress(GPTP_MULTICAST_ADDRESS);
     auto gptp = makeShared<GptpSync>();
@@ -184,8 +202,13 @@ void DetComGptp::sendSync()
     gptp->setCorrectionField(CLOCKTIME_ZERO);
     packet->insertAtFront(gptp);
 
-    for (auto port : masterPortIds)
+    for (auto port : masterPortIds) {
+        if (idMatchesSet(slavePortId, detComInterfaces) && idMatchesSet(port, detComInterfaces)) {
+            // When we are a slave to another TsnTranslator, we don't send the Sync message to other TsnTranlators
+            continue;
+        }
         sendPacketToNIC(packet->dup(), port);
+    }
     delete packet;
 
     // The sendFollowUp(portId) called by receiveSignal(), when GptpSync sent
@@ -202,7 +225,13 @@ void DetComGptp::sendFollowUp(int portId, const GptpSync *sync, const clocktime_
 
     clocktime_t residenceTime;
     if (detComIngressTimestamp5GRcvd != -1) {
+        if (idMatchesSet(portId, detComInterfaces)) {
+            // ttInterface -> ttInterface (not supported)
+            throw cRuntimeError("DetCom interface to DetCom interface communication is not supported");
+        }
+        // ttInterface -> ethInterface
         // Packet was received from DetCom interface, residence time calulation needs to include DetComResidenceTime
+
         auto detComResidenceTime = (detComEgressTimestamp5G - detComIngressTimestamp5GRcvd) / clock5GRateRatio;
         auto localResidenceTime = syncEgressTimestampOwn - detComEgressTimestampGptp;
         residenceTime = localResidenceTime + detComResidenceTime;
@@ -215,19 +244,35 @@ void DetComGptp::sendFollowUp(int portId, const GptpSync *sync, const clocktime_
         auto newCorrectionField = correctionField + residenceTime;
         gptp->setCorrectionField(newCorrectionField);
     }
-    else {
-        residenceTime = detComIngressTimestampGptp - syncIngressTimestamp;
-        auto newCorrectionField = correctionField + gmRateRatio * (meanLinkDelay + residenceTime);
-        gptp->setCorrectionField(newCorrectionField);
+    else if (idMatchesSet(portId, detComInterfaces)) {
+        if (isGM()) {
+            // local -> ttInterface
+            residenceTime = detComIngressTimestampGptp - preciseOriginTimestamp;
+            gptp->setCorrectionField(residenceTime);
+        } else {
+            // ethInterface -> ttInterface
+            residenceTime = detComIngressTimestampGptp - syncIngressTimestamp;
+            auto newCorrectionField = correctionField + gmRateRatio * (meanLinkDelay + residenceTime);
+            gptp->setCorrectionField(newCorrectionField);
+        }
 
-        // But we also need to set the detComIngressTime
-    }
-
-    if (idMatchesSet(portId, detComInterfaces)) {
-        // If sending to DetCom interface, we also need to add timestamps to the packets
         auto ingressTimeTag = packet->addTag<DetComIngressTimeTag>();
         ingressTimeTag->setReceptionStarted(detComIngressTimestamp5G);
         ingressTimeTag->setReceptionEnded(detComIngressTimestamp5G);
+
+        // But we also need to set the detComIngressTime
+    }
+    else {
+        if (isGM()) {
+            // local -> ethInterface
+            residenceTime = syncEgressTimestampOwn - preciseOriginTimestamp;
+            gptp->setCorrectionField(residenceTime);
+        } else {
+            // ethInterface -> ethInterface
+            residenceTime = syncEgressTimestampOwn - syncIngressTimestamp;
+            auto newCorrectionField = correctionField + gmRateRatio * (meanLinkDelay + residenceTime);
+            gptp->setCorrectionField(newCorrectionField);
+        }
     }
 
     emit(residenceTimeSignal, residenceTime.asSimTime());
