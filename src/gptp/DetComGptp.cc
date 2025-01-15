@@ -91,6 +91,7 @@ void DetComGptp::synchronize()
     /************** Time synchronization *****************************************
      * Local time is adjusted using peer delay, correction field, residence time *
      * and packet transmission time based departure time of Sync message from GM *
+     * and packet transmission time based departure time of Sync message from GM *
      *****************************************************************************/
 
     EV_INFO << "############## SYNC #####################################" << endl;
@@ -186,8 +187,7 @@ void DetComGptp::sendSync()
     detComIngressTimestampGptp = clock->getClockTime();
 
     if (isGM()) {
-        // When we are selected as the GM, we use the 5G time as the origin timestamp
-        preciseOriginTimestamp = detComClock->getClockTime();
+        preciseOriginTimestamp = clock->getClockTime();
     }
 
     auto packet = new Packet("GptpSync");

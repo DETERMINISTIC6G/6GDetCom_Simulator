@@ -12,7 +12,7 @@
 namespace d6g {
 using namespace inet;
 
-class INET_API TimeChunkDissector : public DefaultProtocolDissector
+class TimeChunkDissector : public DefaultProtocolDissector
 {
   public:
     virtual void dissect(Packet *packet, const Protocol *protocol, ICallback &callback) const override;
