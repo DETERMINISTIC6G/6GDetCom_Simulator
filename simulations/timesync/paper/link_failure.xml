@@ -1,14 +1,16 @@
 <scenario>
 	<!-- dstt1 becomes disconnected -->
-    <set-channel-param t="3.1s" src-module="detCom.dstt[0]" dest-module="detCom.nwtt" par="disabled" value="true"/>
-    <set-channel-param t="3.1s" src-module="detCom.dstt[0]" dest-module="detCom.dstt[1]" par="disabled" value="true"/>
-    <set-channel-param t="7.1s" src-module="detCom.dstt[0]" dest-module="detCom.nwtt" par="disabled" value="false"/>
-    <set-channel-param t="7.1s" src-module="detCom.dstt[0]" dest-module="detCom.dstt[1]" par="disabled" value="false"/>
+    <set-channel-param t="2.1s" src-module="detCom.dstt[0]" dest-module="detCom.nwtt" par="disabled" value="true"/>
+    <set-channel-param t="2.1s" src-module="detCom.dstt[0]" dest-module="detCom.dstt[1]" par="disabled" value="true"/>
+    <set-channel-param t="8.1s" src-module="detCom.dstt[0]" dest-module="detCom.nwtt" par="disabled" value="false"/>
+    <set-channel-param t="8.1s" src-module="detCom.dstt[0]" dest-module="detCom.dstt[1]" par="disabled" value="false"/>
     
     
     <!-- nwtt <-> dstt breaks -->
-    <set-channel-param t="10.1s" src-module="detCom.dstt[0]" dest-module="detCom.nwtt" par="disabled" value="true"/>
-    <set-channel-param t="10.1s" src-module="detCom.dstt[1]" dest-module="detCom.nwtt" par="disabled" value="true"/>
-    <set-channel-param t="14.1s" src-module="detCom.dstt[0]" dest-module="detCom.nwtt" par="disabled" value="false"/>
-    <set-channel-param t="14.1s" src-module="detCom.dstt[1]" dest-module="detCom.nwtt" par="disabled" value="false"/>
+    <set-channel-param t="12.1s" src-module="detCom.dstt[0]" dest-module="detCom.nwtt" par="disabled" value="true"/>
+    <set-channel-param t="12.1s" src-module="detCom.dstt[1]" dest-module="detCom.nwtt" par="disabled" value="true"/>
+    <set-channel-param t="18.1s" src-module="detCom.dstt[0]" dest-module="detCom.nwtt" par="disabled" value="false"/>
+    <set-channel-param t="18.1s" src-module="detCom.dstt[1]" dest-module="detCom.nwtt" par="disabled" value="false"/>
+    
+    <!--  5G clock unavailable (master goes offline) -->
 </scenario>

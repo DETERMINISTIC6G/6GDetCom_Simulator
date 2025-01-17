@@ -14,15 +14,11 @@ void DetComGptp::initialize(int stage)
         useC5Grr = par("useC5Grr"); // par can't be used
         detComClock.reference(this, "detComClockModule", true);
     }
-    if (stage == INITSTAGE_LINK_LAYER) {
+    if (stage == INITSTAGE_NETWORK_INTERFACE_CONFIGURATION) {
         detComInterfaces.clear();
         auto detComInterfaceTypes = check_and_cast<cValueArray *>(par("detComInterfaceTypes").objectValue());
         for (int i = 0; i < detComInterfaceTypes->size(); i++) {
             addInterfacesToSet(detComInterfaces, detComInterfaceTypes->get(i).stringValue());
-        }
-
-        if (idMatchesSet(slavePortId, detComInterfaces)) {
-            cancelClockEvent(selfMsgDelayReq);
         }
     }
     if (stage == INITSTAGE_LAST) {
@@ -31,8 +27,8 @@ void DetComGptp::initialize(int stage)
     }
 }
 
-
-void DetComGptp::scheduleMessageOnTopologyChange() {
+void DetComGptp::scheduleMessageOnTopologyChange()
+{
     Gptp::scheduleMessageOnTopologyChange();
     if (selfMsgDelayReq && slavePortId != -1 && idMatchesSet(slavePortId, detComInterfaces)) {
         // Don't send DelayReq messages on DetCom interfaces (between TsnTranslators)
@@ -54,7 +50,7 @@ void DetComGptp::processSync(Packet *packet, const GptpSync *gptp)
         EV_INFO << "detComEgressTimestamp5G          - " << detComEgressTimestamp5G << endl;
         EV_INFO << "detComEgressTimestampGptp        - " << detComEgressTimestampGptp << endl;
 
-        if (!useC5Grr || detComEgressTimestamp5GPrev == -1 || detComEgressTimestampGptpPrev == -1){
+        if (!useC5Grr || detComEgressTimestamp5GPrev == -1 || detComEgressTimestampGptpPrev == -1) {
             clock5GRateRatio = 1.0;
             EV_INFO << "IF--===============================================" << endl;
             EV_INFO << "detComEgressTimestamp5GPrev          - " << detComEgressTimestamp5GPrev << endl;
@@ -104,13 +100,14 @@ void DetComGptp::synchronize()
     clocktime_t newTime = CLOCKTIME_ZERO;
     if (detComIngressTimestamp5GRcvd != -1) {
         // Received from DetCom interface, residence time is DetComResidenceTime
-        auto detComResidenceTime = (detComEgressTimestamp5G - detComIngressTimestamp5GRcvd) / clock5GRateRatio; // change detcom residence time to local domain
+        auto detComResidenceTime = (detComEgressTimestamp5G - detComIngressTimestamp5GRcvd) /
+                                   clock5GRateRatio; // change detcom residence time to local domain
         auto localResidenceTime = oldLocalTimeAtTimeSync - detComEgressTimestampGptp;
         residenceTime = detComResidenceTime + localResidenceTime;
         EV_INFO << "detComResidenceTime          - " << detComResidenceTime << endl;
         EV_INFO << "localResidenceTime           - " << localResidenceTime << endl;
         EV_INFO << "residenceTime                - " << residenceTime << endl;
-            newTime = preciseOriginTimestamp + correctionField + residenceTime;
+        newTime = preciseOriginTimestamp + correctionField + residenceTime;
     }
     else {
         // Received from normal (e.g. eth) port, calculate as always
@@ -249,7 +246,8 @@ void DetComGptp::sendFollowUp(int portId, const GptpSync *sync, const clocktime_
             // local -> ttInterface
             residenceTime = detComIngressTimestampGptp - preciseOriginTimestamp;
             gptp->setCorrectionField(residenceTime);
-        } else {
+        }
+        else {
             // ethInterface -> ttInterface
             residenceTime = detComIngressTimestampGptp - syncIngressTimestamp;
             auto newCorrectionField = correctionField + gmRateRatio * (meanLinkDelay + residenceTime);
@@ -267,7 +265,8 @@ void DetComGptp::sendFollowUp(int portId, const GptpSync *sync, const clocktime_
             // local -> ethInterface
             residenceTime = syncEgressTimestampOwn - preciseOriginTimestamp;
             gptp->setCorrectionField(residenceTime);
-        } else {
+        }
+        else {
             // ethInterface -> ethInterface
             residenceTime = syncEgressTimestampOwn - syncIngressTimestamp;
             auto newCorrectionField = correctionField + gmRateRatio * (meanLinkDelay + residenceTime);
