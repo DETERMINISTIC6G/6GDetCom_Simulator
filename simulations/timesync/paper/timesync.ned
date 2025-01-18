@@ -22,8 +22,11 @@ import inet.node.tsn.TsnSwitch;
 network TimeSyncNetwork extends TsnNetworkBase
 {
     submodules:
-        scenarioManager: ScenarioManager {
+        scenarioManagerLink: ScenarioManager {
             @display("p=100,500;is=s");
+        }
+        scenarioManagerGm: ScenarioManager {
+            @display("p=100,550;is=s");
         }
         histogramContainer: HistogramContainer {
             @display("p=100,800");

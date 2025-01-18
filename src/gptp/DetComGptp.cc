@@ -9,12 +9,11 @@ Define_Module(DetComGptp);
 
 void DetComGptp::initialize(int stage)
 {
-    InterfaceFilterMixin::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         useC5Grr = par("useC5Grr"); // par can't be used
         detComClock.reference(this, "detComClockModule", true);
     }
-    if (stage == INITSTAGE_NETWORK_INTERFACE_CONFIGURATION) {
+    if (stage == INITSTAGE_LINK_LAYER) {
         detComInterfaces.clear();
         auto detComInterfaceTypes = check_and_cast<cValueArray *>(par("detComInterfaceTypes").objectValue());
         for (int i = 0; i < detComInterfaceTypes->size(); i++) {
@@ -25,6 +24,7 @@ void DetComGptp::initialize(int stage)
         detComEgressTimestamp5G = detComClock->getClockTime();
         detComEgressTimestampGptp = clock->getClockTime();
     }
+    InterfaceFilterMixin::initialize(stage);
 }
 
 void DetComGptp::scheduleMessageOnTopologyChange()
@@ -124,17 +124,6 @@ void DetComGptp::synchronize()
 
     auto servoClock = check_and_cast<ServoClockBase *>(clock.get());
 
-    // Only change the oscillator if we have new information about our nrr
-    // TODO: We should change this to a clock servo model in the future anyways!
-    //    ppm newOscillatorCompensation;
-    //    if (!hasNewRateRatioForOscillatorCompensation) {
-    //        newOscillatorCompensation = unit(piControlClock->getOscillatorCompensation());
-    //    }
-    //    else {
-    //        newOscillatorCompensation =
-    //            unit(gmRateRatio * (1 + unit(piControlClock->getOscillatorCompensation()).get()) - 1);
-    //        hasNewRateRatioForOscillatorCompensation = false;
-    //    }
     servoClock->adjustClockTo(newTime);
     //    EV_INFO << "newOscillatorCompensation " << newOscillatorCompensation << endl;
 
@@ -178,13 +167,24 @@ void DetComGptp::synchronize()
     emit(localTimeSignal, CLOCKTIME_AS_SIMTIME(newLocalTimeAtTimeSync));
     emit(timeDifferenceSignal, CLOCKTIME_AS_SIMTIME(newLocalTimeAtTimeSync) - now);
 }
+
 void DetComGptp::sendSync()
 {
     detComIngressTimestamp5G = detComClock->getClockTime();
     detComIngressTimestampGptp = clock->getClockTime();
 
     if (isGM()) {
+        auto servoClock = check_and_cast<ServoClockBase *>(clock.get());
+        servoClock->adjustClockTo(detComClock->getClockTime());
         preciseOriginTimestamp = clock->getClockTime();
+
+        if (!par("gmCapable").boolValue()) {
+            // If we are selected as a GM, but are not master capable (e.g. loss of sync to 5G clock) => return
+            // - In BMCA, if this parameter is changed, clockAccuracy or priority1/2 should be changed as well
+            // - In HotStandby, if this parameter is changed, the HotStandby algorithm of other nodes will switch to the
+            // next best GM
+            return;
+        }
     }
 
     auto packet = new Packet("GptpSync");
