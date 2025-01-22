@@ -36,6 +36,21 @@ void DetComGptp::scheduleMessageOnTopologyChange()
     }
 }
 
+void DetComGptp::executeBmca()
+{
+    Gptp::executeBmca();
+
+    // If we are a slave to a DetCom interface, we move other DetCom interfaces to the passive state
+    if (slavePortId != -1 && idMatchesSet(slavePortId, detComInterfaces)) {
+        for (auto &portId : detComInterfaces) {
+            if (masterPortIds.find(portId) != masterPortIds.end()) {
+                masterPortIds.erase(portId);
+                passivePortIds.insert(portId);
+            }
+        }
+    }
+}
+
 void DetComGptp::processSync(Packet *packet, const GptpSync *gptp)
 {
     auto indInterface = packet->getTag<InterfaceInd>()->getInterfaceId();
@@ -177,6 +192,7 @@ void DetComGptp::sendSync()
         auto servoClock = check_and_cast<ServoClockBase *>(clock.get());
         servoClock->adjustClockTo(detComClock->getClockTime());
         preciseOriginTimestamp = clock->getClockTime();
+        detComIngressTimestamp5GRcvd = -1;
 
         if (!par("gmCapable").boolValue()) {
             // If we are selected as a GM, but are not master capable (e.g. loss of sync to 5G clock) => return

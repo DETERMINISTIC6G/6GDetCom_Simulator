@@ -1,0 +1,5 @@
+<scenario>
+    <!-- GM fails -->
+    <set-param t="10.1s" module="detCom.nwtt.gptp.domain[0]" par="gmCapable" value="false"/>
+    <set-param t="50s" module="detCom.nwtt.gptp.domain[0]" par="gmCapable" value="true"/>
+</scenario>
