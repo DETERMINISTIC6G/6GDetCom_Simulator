@@ -12,7 +12,7 @@
     </inputs>
     <charts>
         <folder id="1622512953" name="Uplink">
-            <chart icon="icons/full/obj/linechart.png" id="769836611" name="No PDC" template="linechart_native" type="LINE">
+            <chart createdWith="" icon="icons/full/obj/linechart.png" id="769836611" name="No PDC" resultTypes="" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 
@@ -648,7 +648,7 @@ utils.export_data_if_needed(df, props)
                 <property name="image_export_width" value="6"/>
                 <property name="include_fields" value="false"/>
             </chart>
-            <chart icon="icons/full/obj/linechart.png" id="382337143" name="PDC" template="linechart_native" type="LINE">
+            <chart createdWith="" icon="icons/full/obj/linechart.png" id="382337143" name="PDC" resultTypes="" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 
@@ -1284,7 +1284,7 @@ utils.export_data_if_needed(df, props)
                 <property name="image_export_width" value="6"/>
                 <property name="include_fields" value="false"/>
             </chart>
-            <chart icon="icons/full/obj/linechart.png" id="1300505773" name="Comparison" template="linechart_native" type="LINE">
+            <chart createdWith="" icon="icons/full/obj/linechart.png" id="1300505773" name="Comparison" resultTypes="" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 
@@ -1920,7 +1920,7 @@ utils.export_data_if_needed(df, props)
                 <property name="image_export_width" value="6"/>
                 <property name="include_fields" value="false"/>
             </chart>
-            <chart icon="icons/full/obj/histogramchart.png" id="185849941" name="Histogram Comparison" template="histogramchart_native" type="HISTOGRAM">
+            <chart createdWith="" icon="icons/full/obj/histogramchart.png" id="185849941" name="Histogram Comparison" resultTypes="" template="histogramchart_native" type="HISTOGRAM">
                 <script><![CDATA[from omnetpp.scave import results, chart, utils
 
 # get chart properties
@@ -2480,7 +2480,7 @@ Show over_underflow cell?
             </chart>
         </folder>
         <folder id="1133042377" name="Downlink">
-            <chart icon="icons/full/obj/linechart.png" id="581788895" name="Comparison 2 different PDCs" template="linechart_native" type="LINE">
+            <chart createdWith="" icon="icons/full/obj/linechart.png" id="581788895" name="Comparison 2 different PDCs" resultTypes="" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 
@@ -3077,7 +3077,7 @@ utils.export_data_if_needed(df, props)
                 <property name="legend_prefer_result_titles" value="true"/>
                 <property name="legend_manual" value="false"/>
                 <property name="yaxis_title" value=""/>
-                <property name="legend_replacements" value="/PDC.device1.//&#10;/.sink//&#10;/app\[/stream/&#10;/\]//"/>
+                <property name="legend_replacements" value=""/>
                 <property name="Legend.Border" value="false"/>
                 <property name="title" value="Two Streams with different PDC"/>
                 <property name="legend_automatic" value="true"/>

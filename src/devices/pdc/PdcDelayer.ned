@@ -25,8 +25,8 @@ import inet.queueing.contract.IPacketDelayer;
 simple PdcDelayer extends PacketDelayerBase like IPacketDelayer
 {
     parameters:
-        volatile double delay @unit(s) @mutable = default(0s); // specifies default pdc delay
-        volatile double jitter @unit(s) @mutable = default(0us);
+        volatile double defaultPdc @unit(s) @mutable = default(0s); // specifies default pdc
+        volatile double defaultJitter @unit(s) @mutable = default(0us); // specifies default jitter
         // array of objects, where each object maps
         // a PDC value, a jitter value to a stream name, 
         //for example [{stream: "stream1", pdc: "5ms", jitter: "100us"}, ...]

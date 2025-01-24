@@ -8,7 +8,7 @@
 package d6g.devices.tsntranslator;
 
 import d6g.timestamping.TimeTagger;
-import inet.linklayer.ethernet.modular.LayeredEthernetInterface;
+import inet.linklayer.ethernet.LayeredEthernetInterface;
 
 
 // This module extends the LayeredEthernetInterface module.

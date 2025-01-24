@@ -19,8 +19,8 @@
 #include <omnetpp.h>
 
 #include "../../utils/InterfaceFilterMixin.h"
-#include "inet/queueing/base/PacketDelayerBase.h"
 #include "inet/clock/contract/IClock.h"
+#include "inet/queueing/base/PacketDelayerBase.h"
 
 using namespace omnetpp;
 using namespace inet;
@@ -30,23 +30,26 @@ namespace d6g {
 
 class PdcDelayer : public InterfaceFilterMixin<PacketDelayerBase>
 {
+    ~PdcDelayer() override;
 
   protected:
-    class Mapping
-    {
-      public:
-        std::string stream;
-        double pdc = 0;
-        double jitter = 0;
+    struct Mapping {
+        cDynamicExpression *pdc = nullptr;
+        cDynamicExpression *jitter = nullptr;
+
+        ~Mapping()
+        {
+            delete pdc;
+            delete jitter;
+        }
     };
-    IClock *clock;
 
   private:
-    cPar *delayParameter = nullptr;
-    cPar *jitterParameter = nullptr;
-    //std::set<int> indInterfaces;
-    //std::set<int> reqInterfaces;
-    std::vector<Mapping> mappings;
+    cPar *defaultPdc = nullptr;
+    cPar *defaultJitter = nullptr;
+    // std::set<int> indInterfaces;
+    // std::set<int> reqInterfaces;
+    std::map<std::string, Mapping *> mappings;
 
   protected:
     void initialize(int stage) override;
@@ -60,16 +63,15 @@ class PdcDelayer : public InterfaceFilterMixin<PacketDelayerBase>
      */
     clocktime_t computeDelay(Packet *packet) const override;
 
-    void setDelay(cPar *delay);
+    void setDefaultPdc(cPar *delay);
 
-    void setJitter(cPar *jitter);
+    void setDefaultJitter(cPar *jitter);
 
-    //void addInterfacesToSet(std::set<int> &set, const char *interfaceList);
+    // void addInterfacesToSet(std::set<int> &set, const char *interfaceList);
 
     void handleParameterChange(const char *parname) override;
 
     void configureMappings();
-
 };
 
 } // namespace d6g

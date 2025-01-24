@@ -14,81 +14,29 @@
 //
 
 #include "PdcDelayer.h"
+
 #include "../../timestamping/DetComTimeTag_m.h"
 #include "inet/protocolelement/redundancy/StreamTag_m.h"
 
 using namespace omnetpp;
 using namespace inet;
-namespace d6g {
 
+namespace d6g {
 Define_Module(PdcDelayer);
+
+PdcDelayer::~PdcDelayer()
+{
+    for (auto &mapping : mappings) {
+        delete mapping.second;
+    }
+}
 
 void PdcDelayer::initialize(int stage)
 {
-    PacketDelayerBase::initialize(stage);
     InterfaceFilterMixin::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-        clock = check_and_cast<IClock *>(getModuleByPath(par("clockModule").stringValue()));
-        setDelay(&par("delay"));
-        setJitter(&par("jitter"));
-        configureMappings();
-    }
-
-}
-
-
-clocktime_t PdcDelayer::computeDelay(Packet *packet) const
-{
-
-    if (!matchesInterfaceConfiguration(packet)) {
-        return 0;
-    }
-
-    //auto detComIngressTag = packet->findTag<DetComIngressTimeTag>();
-
-    auto residenceTimeTag = packet->findTag<DetComResidenceTimeTag>();
-    auto streamIdTag = packet->findTag<StreamInd>();
-
-    clocktime_t pdc = delayParameter->doubleValue();
-    clocktime_t jitter = jitterParameter->doubleValue();
-
-    if (residenceTimeTag != nullptr) {
-        clocktime_t residenceTime = residenceTimeTag->getResidenceTime();
-        if (streamIdTag != nullptr) {
-            auto streamID = streamIdTag->getStreamName();
-            for (auto &mapping : mappings) {
-                if (!strcmp(mapping.stream.c_str(), streamID)) {
-                    pdc = mapping.pdc;
-                    jitter = mapping.jitter;
-                    break;
-                }
-            }
-        }
-        if (residenceTime > pdc - jitter) {
-            return 0;
-        } else {
-            clocktime_t maxDeadline = pdc - residenceTime;
-            clocktime_t minDeadline = maxDeadline - jitter;
-            return uniform(minDeadline, maxDeadline);
-        }
-    } else {
-        return 0;
-    }
-}
-
-void PdcDelayer::setDelay(cPar *delay) { delayParameter = delay; }
-
-void PdcDelayer::setJitter(cPar *jitter) { jitterParameter = jitter; }
-
-void PdcDelayer::handleParameterChange(const char *parname)
-{
-    if (!strcmp(parname, "delay")) {
-        setDelay(&par("delay"));
-    }
-    if (!strcmp(parname, "jitter")) {
-            setJitter(&par("jitter"));
-        }
-    if (!strcmp(parname, "mapping")) {
+        setDefaultPdc(&par("defaultPdc"));
+        setDefaultJitter(&par("defaultJitter"));
         configureMappings();
     }
 }
@@ -97,14 +45,77 @@ void PdcDelayer::configureMappings()
 {
     auto mappingParameter = check_and_cast<cValueArray *>(par("mapping").objectValue());
 
-    mappings.resize(mappingParameter->size());
+    mappings.clear();
     for (int i = 0; i < mappingParameter->size(); i++) {
         auto element = check_and_cast<cValueMap *>(mappingParameter->get(i).objectValue());
-        Mapping &mapping = mappings[i];
-        mapping.stream = element->get("stream").stringValue();
-        mapping.pdc = element->containsKey("pdc") ? simtime_t::parse(element->get("pdc")).dbl() : delayParameter->doubleValue();
-        mapping.jitter = element->containsKey("jitter") ? simtime_t::parse(element->get("jitter")).dbl() : jitterParameter->doubleValue();
+        auto mapping = new Mapping();
+        if (element->containsKey("pdc")) {
+            mapping->pdc = new cDynamicExpression();
+            mapping->pdc->parseNedExpr(element->get("pdc").stringValue());
+        }
+        if (element->containsKey("jitter")) {
+            mapping->jitter = new cDynamicExpression();
+            mapping->jitter->parseNedExpr(element->get("jitter").stringValue());
+        }
+        auto streamName = element->get("stream").stringValue();
+        mappings[streamName] = mapping;
     }
 }
 
+clocktime_t PdcDelayer::computeDelay(Packet *packet) const
+{
+    if (!matchesInterfaceConfiguration(packet)) {
+        return 0;
+    }
+
+    // auto detComIngressTag = packet->findTag<DetComIngressTimeTag>();
+
+    auto residenceTimeTag = packet->findTag<DetComResidenceTimeTag>();
+    auto streamIdTag = packet->findTag<StreamInd>();
+
+    clocktime_t pdc = defaultPdc->doubleValue();
+    clocktime_t jitter = defaultJitter->doubleValue();
+
+    if (residenceTimeTag == nullptr) {
+        return 0;
+    }
+    clocktime_t residenceTime = residenceTimeTag->getResidenceTime();
+    if (streamIdTag != nullptr) {
+        auto streamID = streamIdTag->getStreamName();
+        auto mapping = mappings.find(streamID);
+        // This is ugly, I could call getModuleByPath(".") instead, but the implementation of that also uses const_cast
+        //  so it does not matter...
+        auto nonConstThis = const_cast<PdcDelayer *>(this);
+        if (mapping != mappings.end()) {
+            if (mapping->second->pdc != nullptr) {
+                pdc = mapping->second->pdc->doubleValue(nonConstThis, "s");
+            }
+            if (mapping->second->jitter != nullptr) {
+                jitter = mapping->second->jitter->doubleValue(nonConstThis, "s");
+            }
+        }
+    }
+    if (residenceTime > pdc + jitter) {
+        return 0;
+    }
+    auto delay = pdc + jitter - residenceTime;
+    return delay;
+}
+
+void PdcDelayer::setDefaultPdc(cPar *delay) { defaultPdc = delay; }
+
+void PdcDelayer::setDefaultJitter(cPar *jitter) { defaultJitter = jitter; }
+
+void PdcDelayer::handleParameterChange(const char *parname)
+{
+    if (!strcmp(parname, "defaultPdc")) {
+        setDefaultPdc(&par("defaultPdc"));
+    }
+    if (!strcmp(parname, "defaultJitter")) {
+        setDefaultJitter(&par("defaultJitter"));
+    }
+    if (!strcmp(parname, "mapping")) {
+        configureMappings();
+    }
+}
 } /* namespace d6g */

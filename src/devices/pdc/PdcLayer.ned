@@ -19,12 +19,13 @@ import inet.protocolelement.processing.IProcessingDelayLayer;
 import inet.protocolelement.processing.ProcessingDelayLayer;
 
 
-module PDCLayer extends ProcessingDelayLayer like IProcessingDelayLayer
+module PdcLayer extends ProcessingDelayLayer like IProcessingDelayLayer
 {
     parameters:
         @display("i=block/layer");
-        volatile double pdcDefault @mutable @unit(s) = default(0s); // const default delay
-        object pdcMapping @mutable = default([]); // per stream delay
+        volatile double defaultPdc @mutable @unit(s) = default(0s); // const default delay
+        volatile double defaultJitter @mutable @unit(s) = default(0s); // const default delay
+        object mapping @mutable = default([]); // per stream delay
 
         ingress.typename = default("PdcDelayer");
         egress.typename = default("");
@@ -32,7 +33,8 @@ module PDCLayer extends ProcessingDelayLayer like IProcessingDelayLayer
         // Arrives at tt (ingress, from other UE or NWTT) --> delay --> bridging logic --> eth (egress)
         // We do not know the egress interface at the ingress delayer, so only use indInterfaceType
         ingress.indInterfaceTypes = ["tt"];
-        ingress.delay = default(this.pdcDefault);
-        ingress.mapping = default(dup(this.pdcMapping));
+        ingress.delay = default(this.delay);
+        ingress.jitter = default(this.jitter);
+        ingress.mapping = default(dup(this.mapping));
         ingress.clockModule = default("^.^.^.detComClock");
 }

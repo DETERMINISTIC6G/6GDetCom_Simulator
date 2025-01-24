@@ -23,6 +23,7 @@ module TsnTranslator extends TsnSwitch
     parameters:
         int numTtInterfaces = default(0); // Number of other TT interfaces connected to this TSN Translator.
         bool isDstt = default(false); // Specifies whether the TSN Translator is a DS-TT (otherwise it is a NW-TT).
+        bool hasPdc = default(false);
 
         clock.typename = "IdealClock";
         
@@ -47,6 +48,7 @@ module TsnTranslator extends TsnSwitch
         tt[*].phyLayer.typename = default("EthernetStreamingPhyLayer");
 
         bridging.typename = default("TTBridgingLayer");
+        bridging.pdc.typename = default(hasPdc ? "PdcLayer" : "");
 
         bridging.delayLayer.typename = default("TTDelayLayer");
         bridging.delayLayer.delayUplink = default(this.delayUplink);
