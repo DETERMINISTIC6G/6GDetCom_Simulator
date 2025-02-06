@@ -15,8 +15,8 @@
         <input pattern="results/HotStandby2_Repeat-*.vec"/>
     </inputs>
     <charts>
-        <folder id="2025190859" name="BMCA  w/ wireless delay">
-            <chart createdWith="" icon="icons/full/obj/linechart.png" id="1249452959" name="Total Drift (all)" resultTypes="" template="linechart_native" type="LINE">
+        <folder id="2113431050" name="BMCA  w/ wireless delay">
+            <chart createdWith="" icon="icons/full/obj/linechart.png" id="1495031087" name="Total Drift (all)" resultTypes="" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils, ideplot, vectorops as ops
 
@@ -598,7 +598,7 @@ utils.export_data_if_needed(df, props)
                 <property name="xaxis_max" value=""/>
                 <property name="image_export_width" value="9"/>
             </chart>
-            <chart createdWith="" icon="icons/full/obj/linechart.png" id="1627552983" name="Total Drift (only end stations)" resultTypes="" template="linechart_native" type="LINE">
+            <chart createdWith="" icon="icons/full/obj/linechart.png" id="1678135548" name="Total Drift (only end stations)" resultTypes="" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils, ideplot, vectorops as ops
 
@@ -1180,7 +1180,7 @@ utils.export_data_if_needed(df, props)
                 <property name="xaxis_max" value=""/>
                 <property name="image_export_width" value="9"/>
             </chart>
-            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="2106227777" name="Diff to Ref (only end stations)" resultTypes="vector" template="linechart_native" type="LINE">
+            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="541843065" name="Diff to Ref (only end stations)" resultTypes="vector" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 
@@ -1910,7 +1910,7 @@ utils.export_data_if_needed(df, props)
                 <property name="Plot.Antialias" value="true"/>
                 <property name="include_fields" value="false"/>
             </chart>
-            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="1778846844" name="Diff to Ref (all)" resultTypes="vector" template="linechart_native" type="LINE">
+            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="1141265908" name="Diff to Ref (all)" resultTypes="vector" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 
@@ -2640,7 +2640,7 @@ utils.export_data_if_needed(df, props)
                 <property name="Plot.Antialias" value="true"/>
                 <property name="include_fields" value="false"/>
             </chart>
-            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="1045117052" name="DetCom clocks" resultTypes="vector" template="linechart_native" type="LINE">
+            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="946605643" name="DetCom clocks" resultTypes="vector" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 
@@ -3370,7 +3370,7 @@ utils.export_data_if_needed(df, props)
                 <property name="Plot.Antialias" value="true"/>
                 <property name="include_fields" value="false"/>
             </chart>
-            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="46279044" name="Det ComDiff to Ref" resultTypes="vector" template="linechart_native" type="LINE">
+            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="426374946" name="Det ComDiff to Ref" resultTypes="vector" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 
@@ -4099,7 +4099,7 @@ utils.export_data_if_needed(df, props)
                 <property name="Plot.Antialias" value="true"/>
                 <property name="include_fields" value="false"/>
             </chart>
-            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="112052046" name="BTCA" resultTypes="vector" template="linechart_native" type="LINE">
+            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="1947218747" name="BTCA" resultTypes="vector" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils, ideplot
 import pandas as pd
@@ -4830,7 +4830,7 @@ utils.export_data_if_needed(df, props)
                 <property name="Plot.Antialias" value="true"/>
                 <property name="include_fields" value="false"/>
             </chart>
-            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="1243149562" name="BTCA (only TSN)" resultTypes="vector" template="linechart_native" type="LINE">
+            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="921646840" name="BTCA (only TSN)" resultTypes="vector" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils, ideplot
 import pandas as pd
@@ -5561,7 +5561,7 @@ utils.export_data_if_needed(df, props)
                 <property name="Plot.Antialias" value="true"/>
                 <property name="include_fields" value="false"/>
             </chart>
-            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="1391692204" name="BTCA (only TSN) (cropped)" resultTypes="vector" template="linechart_native" type="LINE">
+            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="1869819162" name="BTCA (only TSN) (cropped)" resultTypes="vector" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils, ideplot
 import pandas as pd
@@ -6293,8 +6293,8 @@ utils.export_data_if_needed(df, props)
                 <property name="include_fields" value="false"/>
             </chart>
         </folder>
-        <folder id="669587129" name="HotStandby 1">
-            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="1228903232" name="Domain 0" resultTypes="vector" template="linechart_native" type="LINE">
+        <folder id="396834031" name="HotStandby 1">
+            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="18782888" name="Domain 0" resultTypes="vector" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 
@@ -7024,7 +7024,7 @@ utils.export_data_if_needed(df, props)
                 <property name="Plot.Antialias" value="true"/>
                 <property name="include_fields" value="false"/>
             </chart>
-            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="456215106" name="Domain 1" resultTypes="vector" template="linechart_native" type="LINE">
+            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="2075258501" name="Domain 1" resultTypes="vector" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 
@@ -7754,7 +7754,7 @@ utils.export_data_if_needed(df, props)
                 <property name="Plot.Antialias" value="true"/>
                 <property name="include_fields" value="false"/>
             </chart>
-            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="83692943" name="Active Clock" resultTypes="vector" template="linechart_native" type="LINE">
+            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="1105237229" name="Active Clock" resultTypes="vector" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 
@@ -8484,7 +8484,7 @@ utils.export_data_if_needed(df, props)
                 <property name="Plot.Antialias" value="true"/>
                 <property name="include_fields" value="false"/>
             </chart>
-            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="1078562500" name="DetCom clocks" resultTypes="vector" template="linechart_native" type="LINE">
+            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="790646487" name="DetCom clocks" resultTypes="vector" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 
@@ -9214,7 +9214,7 @@ utils.export_data_if_needed(df, props)
                 <property name="Plot.Antialias" value="true"/>
                 <property name="include_fields" value="false"/>
             </chart>
-            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="186349222" name="DetCom clocks diff to ref" resultTypes="vector" template="linechart_native" type="LINE">
+            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="1518658751" name="DetCom clocks diff to ref" resultTypes="vector" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 
@@ -9944,7 +9944,7 @@ utils.export_data_if_needed(df, props)
                 <property name="Plot.Antialias" value="true"/>
                 <property name="include_fields" value="false"/>
             </chart>
-            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="651509726" name="Hot Standby" resultTypes="vector" template="linechart_native" type="LINE">
+            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="1485756401" name="Hot Standby" resultTypes="vector" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils, ideplot
 import pandas as pd
@@ -10675,7 +10675,7 @@ utils.export_data_if_needed(df, props)
                 <property name="Plot.Antialias" value="true"/>
                 <property name="include_fields" value="false"/>
             </chart>
-            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="46460018" name="HS 1 (only TSN)" resultTypes="vector" template="linechart_native" type="LINE">
+            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="2108767020" name="HS 1 (only TSN)" resultTypes="vector" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils, ideplot
 import pandas as pd
@@ -11406,7 +11406,7 @@ utils.export_data_if_needed(df, props)
                 <property name="Plot.Antialias" value="true"/>
                 <property name="include_fields" value="false"/>
             </chart>
-            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="880591418" name="HS 1 (only TSN) cropped" resultTypes="vector" template="linechart_native" type="LINE">
+            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="1491587668" name="HS 1 (only TSN) cropped" resultTypes="vector" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils, ideplot
 import pandas as pd
@@ -12137,7 +12137,7 @@ utils.export_data_if_needed(df, props)
                 <property name="Plot.Antialias" value="true"/>
                 <property name="include_fields" value="false"/>
             </chart>
-            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="1409267091" name="HS 1 (only TSN) cropped in2" resultTypes="vector" template="linechart_native" type="LINE">
+            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="434800289" name="HS 1 (only TSN) cropped in2" resultTypes="vector" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils, ideplot
 import pandas as pd
@@ -12869,8 +12869,8 @@ utils.export_data_if_needed(df, props)
                 <property name="include_fields" value="false"/>
             </chart>
         </folder>
-        <folder id="624516551" name="HotStandby 2">
-            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="26853169" name="Domain 0" resultTypes="vector" template="linechart_native" type="LINE">
+        <folder id="2106227232" name="HotStandby 2">
+            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="784745656" name="Domain 0" resultTypes="vector" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 
@@ -13600,7 +13600,7 @@ utils.export_data_if_needed(df, props)
                 <property name="Plot.Antialias" value="true"/>
                 <property name="include_fields" value="false"/>
             </chart>
-            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="1875771124" name="HotStandby Domain 1" resultTypes="vector" template="linechart_native" type="LINE">
+            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="926268575" name="HotStandby Domain 1" resultTypes="vector" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 
@@ -14330,7 +14330,7 @@ utils.export_data_if_needed(df, props)
                 <property name="Plot.Antialias" value="true"/>
                 <property name="include_fields" value="false"/>
             </chart>
-            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="539976195" name="HotStandby Domain 2" resultTypes="vector" template="linechart_native" type="LINE">
+            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="1370829768" name="HotStandby Domain 2" resultTypes="vector" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 
@@ -15060,7 +15060,7 @@ utils.export_data_if_needed(df, props)
                 <property name="Plot.Antialias" value="true"/>
                 <property name="include_fields" value="false"/>
             </chart>
-            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="1688260852" name="Active Clock" resultTypes="vector" template="linechart_native" type="LINE">
+            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="364752336" name="Active Clock" resultTypes="vector" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 
@@ -15790,7 +15790,7 @@ utils.export_data_if_needed(df, props)
                 <property name="Plot.Antialias" value="true"/>
                 <property name="include_fields" value="false"/>
             </chart>
-            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="249878006" name="DetCom clocks" resultTypes="vector" template="linechart_native" type="LINE">
+            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="2024001391" name="DetCom clocks" resultTypes="vector" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 
@@ -16520,7 +16520,7 @@ utils.export_data_if_needed(df, props)
                 <property name="Plot.Antialias" value="true"/>
                 <property name="include_fields" value="false"/>
             </chart>
-            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="2067274921" name="DetCom clocks diff to ref" resultTypes="vector" template="linechart_native" type="LINE">
+            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="881201931" name="DetCom clocks diff to ref" resultTypes="vector" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 
@@ -17250,7 +17250,7 @@ utils.export_data_if_needed(df, props)
                 <property name="Plot.Antialias" value="true"/>
                 <property name="include_fields" value="false"/>
             </chart>
-            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="1621474689" name="HS 2 (only TSN)" resultTypes="vector" template="linechart_native" type="LINE">
+            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="1223202904" name="HS 2 (only TSN)" resultTypes="vector" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils, ideplot
 import pandas as pd
@@ -17981,7 +17981,7 @@ utils.export_data_if_needed(df, props)
                 <property name="Plot.Antialias" value="true"/>
                 <property name="include_fields" value="false"/>
             </chart>
-            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="1129118339" name="HS 2 (only TSN) cropped" resultTypes="vector" template="linechart_native" type="LINE">
+            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="647339648" name="HS 2 (only TSN) cropped" resultTypes="vector" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils, ideplot
 import pandas as pd
@@ -18712,7 +18712,7 @@ utils.export_data_if_needed(df, props)
                 <property name="Plot.Antialias" value="true"/>
                 <property name="include_fields" value="false"/>
             </chart>
-            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="323674590" name="HS 2 (only TSN) cropped int3" resultTypes="vector" template="linechart_native" type="LINE">
+            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="1765511629" name="HS 2 (only TSN) cropped int3" resultTypes="vector" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils, ideplot
 import pandas as pd
@@ -19444,8 +19444,8 @@ utils.export_data_if_needed(df, props)
                 <property name="include_fields" value="false"/>
             </chart>
         </folder>
-        <folder id="478275871" name="Repeat">
-            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="335468841" name="BTCA (only TSN)" resultTypes="vector" template="linechart_native" type="LINE">
+        <folder id="1956800254" name="Repeat">
+            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="524166798" name="BTCA (only TSN)" resultTypes="vector" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils, ideplot
 import pandas as pd
@@ -20176,7 +20176,7 @@ utils.export_data_if_needed(df, props)
                 <property name="Plot.Antialias" value="true"/>
                 <property name="include_fields" value="false"/>
             </chart>
-            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="200593862" name="BTCA (all)" resultTypes="vector" template="linechart_native" type="LINE">
+            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="295874555" name="BTCA (all)" resultTypes="vector" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 
@@ -20906,7 +20906,7 @@ utils.export_data_if_needed(df, props)
                 <property name="Plot.Antialias" value="true"/>
                 <property name="include_fields" value="false"/>
             </chart>
-            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="1687256486" name="BTCA (all) int2" resultTypes="vector" template="linechart_native" type="LINE">
+            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="1735824047" name="BTCA (all) int2" resultTypes="vector" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 
@@ -21636,7 +21636,7 @@ utils.export_data_if_needed(df, props)
                 <property name="Plot.Antialias" value="true"/>
                 <property name="include_fields" value="false"/>
             </chart>
-            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="1591653472" name="BTCA (all) int3" resultTypes="vector" template="linechart_native" type="LINE">
+            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="1127571340" name="BTCA (all) int3" resultTypes="vector" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 
@@ -22358,7 +22358,7 @@ utils.export_data_if_needed(df, props)
                 <property name="image_export_filename" value=""/>
                 <property name="linewidth" value="1.5"/>
                 <property name="legend_format" value=""/>
-                <property name="filter" value="* AND runattr:experiment =~ BMCA_Repeat AND module =~ &quot;*.tsnSwitchA2.*&quot; AND name =~ timeDifferenceToReference:vector"/>
+                <property name="filter" value="* AND runattr:experiment =~ BMCA_Repeat AND module =~ &quot;*.tsnSwitchA[0].*&quot; AND name =~ timeDifferenceToReference:vector"/>
                 <property name="X.Label.Wrap" value="true"/>
                 <property name="secondary_ordering_regex_list" value=""/>
                 <property name="simplify" value="false"/>
@@ -22366,7 +22366,7 @@ utils.export_data_if_needed(df, props)
                 <property name="Plot.Antialias" value="true"/>
                 <property name="include_fields" value="false"/>
             </chart>
-            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="1337886595" name="HS 1 (all)" resultTypes="vector" template="linechart_native" type="LINE">
+            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="1435437397" name="HS 1 (all)" resultTypes="vector" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 
@@ -23096,7 +23096,7 @@ utils.export_data_if_needed(df, props)
                 <property name="Plot.Antialias" value="true"/>
                 <property name="include_fields" value="false"/>
             </chart>
-            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="432292099" name="HS 1 (all) int2" resultTypes="vector" template="linechart_native" type="LINE">
+            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="339473029" name="HS 1 (all) int2" resultTypes="vector" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 
@@ -23826,7 +23826,7 @@ utils.export_data_if_needed(df, props)
                 <property name="Plot.Antialias" value="true"/>
                 <property name="include_fields" value="false"/>
             </chart>
-            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="2000876740" name="HS 1 (all) int3" resultTypes="vector" template="linechart_native" type="LINE">
+            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="1759730484" name="HS 1 (all) int3" resultTypes="vector" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 
@@ -24556,7 +24556,7 @@ utils.export_data_if_needed(df, props)
                 <property name="Plot.Antialias" value="true"/>
                 <property name="include_fields" value="false"/>
             </chart>
-            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="1376630334" name="HS 2 (all)" resultTypes="vector" template="linechart_native" type="LINE">
+            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="1746862769" name="HS 2 (all)" resultTypes="vector" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 
@@ -25286,7 +25286,7 @@ utils.export_data_if_needed(df, props)
                 <property name="Plot.Antialias" value="true"/>
                 <property name="include_fields" value="false"/>
             </chart>
-            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="915536508" name="HS 2 (all) int2" resultTypes="vector" template="linechart_native" type="LINE">
+            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="1022979575" name="HS 2 (all) int2" resultTypes="vector" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 
@@ -26016,7 +26016,7 @@ utils.export_data_if_needed(df, props)
                 <property name="Plot.Antialias" value="true"/>
                 <property name="include_fields" value="false"/>
             </chart>
-            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="1393641015" name="HS 2 (all) int3" resultTypes="vector" template="linechart_native" type="LINE">
+            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="1722642336" name="HS 2 (all) int3" resultTypes="vector" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 
@@ -26746,11 +26746,14 @@ utils.export_data_if_needed(df, props)
                 <property name="Plot.Antialias" value="true"/>
                 <property name="include_fields" value="false"/>
             </chart>
-            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="389917685" name="cdf" resultTypes="vector" template="linechart_mpl" type="MATPLOTLIB">
+            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="1201808572" name="cdf" resultTypes="vector" template="linechart_mpl" type="MATPLOTLIB">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 import matplotlib.pyplot as plt
 import numpy as np
+from cmath import isnan
+from builtins import list
+from _cffi_backend import typeof
 
 # get chart properties
 props = chart.get_properties()
@@ -26792,6 +26795,10 @@ grouped = grouped.reindex(index=["Hot Standby 1", "Hot Standby 2", "BMCA"])
 print(grouped)
 
 for name, values in grouped.items():
+    if isinstance(values, (int, float)) and isnan(values):
+        continue
+    
+    print (values)
     #print(values)
     # Sort values for CDF
     sorted_values = np.sort(values)
@@ -27477,7 +27484,7 @@ utils.export_data_if_needed(df, props)
                 <property name="matplotlibrc.axes.facecolor" value=""/>
                 <property name="linewidth" value="1.5"/>
                 <property name="legend_format" value=""/>
-                <property name="filter" value="type =~ vector AND runattr:experiment =~*_Repeat AND module =~ &quot;TimeSyncNetwork.tsnSwitchA1.clock&quot; AND name =~ timeDifferenceToReference:vector"/>
+                <property name="filter" value="type =~ vector AND runattr:experiment =~*_Repeat AND module =~ &quot;*.tsnSwitchA[0].clock&quot; AND name =~ timeDifferenceToReference:vector"/>
                 <property name="vector_start_time" value="125"/>
                 <property name="linestyle" value="solid"/>
                 <property name="markersize" value="5"/>

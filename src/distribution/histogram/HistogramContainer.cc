@@ -27,8 +27,6 @@ void HistogramContainer::initialize(int stage) {
             auto streamName = histogramsField.first;
             auto xmlFile = histogramsField.second.stringValue();
             histograms[streamName] = loadHistogramFromFile(xmlFile);
-            EV << histograms[streamName] << std::endl;
-
         }
     }
 }
