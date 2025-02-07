@@ -1,0 +1,5 @@
+<scenario>
+    <!-- dstt1 becomes disconnected -->
+    <set-channel-param t="60.1s" src-module="detCom" dest-module="tsnSwitchA[0]" par="disabled" value="true"/>
+    <set-channel-param t="120s" src-module="detCom" dest-module="tsnSwitchA[0]" par="disabled" value="false"/>
+</scenario>
