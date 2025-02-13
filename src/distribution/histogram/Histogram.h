@@ -79,6 +79,15 @@ public:
 
     BinEntry *getBinFromTargetValue(int target) const;
 
+    std::vector<BinEntry *> getBins() const;
+
+    /*
+     *
+     * */
+    void convertHistogramToJSONBins(cValueArray *jsonBins);
+
+    cXMLElement *createHistogramEntity(const std::vector<double>& bin_edges, const std::vector<int>& frequencies, int num_bins);
+
 private:
     /*!
      * Self check to make sure that the histogram is correct

@@ -64,11 +64,11 @@ void DynamicPacketSource::handleParameterChange(const char *name) {
             if (productionTimer->isScheduled()) {
                 cancelEvent(productionTimer);
             }
-            cMsgPar *details = new cMsgPar("details");
+           /* cMsgPar *details = new cMsgPar("details");
             details->setStringValue("notEnabled");
             emit(DynamicScenarioObserver::parameterChangeSignal,
                     parameterChangeEvent, details);
-             delete details;
+             delete details;*/
         } else {
             if (!productionTimer->isScheduled()) {
                 scheduleProductionTimerAndProducePacket();
@@ -125,24 +125,43 @@ cValueMap* DynamicPacketSource::getConfiguration() {
     UdpSocketIo *socketModule = dynamic_cast<UdpSocketIo*>(appModule->getSubmodule("io"));
 
     cValueMap *map = new cValueMap();
+    cValue tmp;
 
 
-    map->set("name", cValue(""));
-    map->set("pcp", cValue(4));
-    map->set("gateIndex", cValue(1));
+        map->set("enabled", par("enabled").boolValue());
 
-    map->set("application", cValue(appModule->getFullName()));
-    map->set("source", cValue(deviceModule->getFullName()));
+        if (flowName != "") {
+            map->set("name", cValue(flowName));
+        }
+        map->set("pcp", cValue(4));
+        map->set("gateIndex", cValue(2));
 
-    map->set("destination", socketModule->par("destAddress").stringValue());
+        map->set("application", cValue(appModule->getFullName()));
+        map->set("source", cValue(deviceModule->getFullName()));
 
-    map->set("packetLength", par("packetLength").intValue());
-    map->set("packetInterval", par("productionInterval").doubleValue());
-    map->set("maxLatency", cValue(0));
+        map->set("destination", socketModule->par("destAddress").stringValue());
 
-    //delete map;
+        tmp.set(par("packetLength").intValue(),"B");
+        map->set("packetLength", tmp);
 
-    return map;//cValue(map);
+
+       cValue a =  par("productionInterval").getValue();
+
+        tmp.set(par("productionInterval").doubleValue(),"s");
+        map->set("packetInterval", tmp);
+
+        //map->set("packetInterval", par("productionInterval").getValue());
+
+        tmp.set(par("initialProductionOffset").doubleValue(),"s");
+        map->set("offset", tmp);
+
+        tmp.set(0,"s");
+        map->set("maxLatency", tmp);
+
+        tmp.set(0,"s");
+        map->set("maxJitter", tmp);
+
+    return map;
 
 }
 

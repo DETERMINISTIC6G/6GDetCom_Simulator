@@ -1,0 +1,479 @@
+{
+  "devices": [
+    {
+      "name": "wirelessdevice1"
+    },
+    {
+      "name": "device1"
+    },
+    {
+      "name": "device2"
+    },
+    {
+      "name": "wirelessdevice2"
+    },
+    {
+      "name": "wirelessdevice3"
+    }
+  ],
+  "switches": [
+    {
+      "name": "bridge1",
+      "ports": [
+        {
+          "connects_to": "detComOne.nwtt",
+          "cycle_start": 0,
+          "cycle_start_unit": "us",
+          "data_rate": 1000,
+          "data_rate_size_unit": "bit",
+          "data_rate_time_unit": "us",
+          "max_slot_duration": 100000,
+          "max_slot_duration_unit": "us",
+          "port_name": "bridge1-eth[0]",
+          "propagation_delay": 0.05,
+          "propagation_delay_unit": "us",
+          "schedule_type": "Hypercycle"
+        },
+        {
+          "connects_to": "bridge2",
+          "cycle_start": 0,
+          "cycle_start_unit": "us",
+          "data_rate": 1000,
+          "data_rate_size_unit": "bit",
+          "data_rate_time_unit": "us",
+          "max_slot_duration": 100000,
+          "max_slot_duration_unit": "us",
+          "port_name": "bridge1-eth[1]",
+          "propagation_delay": 0.05,
+          "propagation_delay_unit": "us",
+          "schedule_type": "Hypercycle"
+        }
+      ],
+      "processing_delay": 0,
+      "processing_delay_unit": "us",
+      "type": 1
+    },
+    {
+      "name": "bridge2",
+      "ports": [
+        {
+          "connects_to": "bridge1",
+          "cycle_start": 0,
+          "cycle_start_unit": "us",
+          "data_rate": 1000,
+          "data_rate_size_unit": "bit",
+          "data_rate_time_unit": "us",
+          "max_slot_duration": 100000,
+          "max_slot_duration_unit": "us",
+          "port_name": "bridge2-eth[0]",
+          "propagation_delay": 0.05,
+          "propagation_delay_unit": "us",
+          "schedule_type": "Hypercycle"
+        },
+        {
+          "connects_to": "detComTwo.nwtt",
+          "cycle_start": 0,
+          "cycle_start_unit": "us",
+          "data_rate": 1000,
+          "data_rate_size_unit": "bit",
+          "data_rate_time_unit": "us",
+          "max_slot_duration": 100000,
+          "max_slot_duration_unit": "us",
+          "port_name": "bridge2-eth[1]",
+          "propagation_delay": 0.05,
+          "propagation_delay_unit": "us",
+          "schedule_type": "Hypercycle"
+        },
+        {
+          "connects_to": "detComThree.nwtt",
+          "cycle_start": 0,
+          "cycle_start_unit": "us",
+          "data_rate": 1000,
+          "data_rate_size_unit": "bit",
+          "data_rate_time_unit": "us",
+          "max_slot_duration": 100000,
+          "max_slot_duration_unit": "us",
+          "port_name": "bridge2-eth[2]",
+          "propagation_delay": 0.05,
+          "propagation_delay_unit": "us",
+          "schedule_type": "Hypercycle"
+        }
+      ],
+      "processing_delay": 0,
+      "processing_delay_unit": "us",
+      "type": 1
+    },
+    {
+      "name": "detComOne.dstt[0]",
+      "ports": [
+        {
+          "connects_to": "wirelessdevice1",
+          "cycle_start": 0,
+          "cycle_start_unit": "us",
+          "data_rate": 1000,
+          "data_rate_size_unit": "bit",
+          "data_rate_time_unit": "us",
+          "max_slot_duration": 100000,
+          "max_slot_duration_unit": "us",
+          "port_name": "detComOne.dstt[0]-eth[0]",
+          "propagation_delay": 0.05,
+          "propagation_delay_unit": "us",
+          "schedule_type": "Hypercycle"
+        },
+        {
+          "connects_to": "detComOne.nwtt",
+          "cycle_start": 0,
+          "cycle_start_unit": "us",
+          "data_rate": 1e+308,
+          "data_rate_size_unit": "bit",
+          "data_rate_time_unit": "us",
+          "max_slot_duration": 100000,
+          "max_slot_duration_unit": "us",
+          "port_name": "detComOne.dstt[0]-tt[0]",
+          "propagation_delay": 0,
+          "propagation_delay_unit": "us",
+          "schedule_type": "Hypercycle"
+        },
+        {
+          "connects_to": "detComOne.dstt[1]",
+          "cycle_start": 0,
+          "cycle_start_unit": "us",
+          "data_rate": 1e+308,
+          "data_rate_size_unit": "bit",
+          "data_rate_time_unit": "us",
+          "max_slot_duration": 100000,
+          "max_slot_duration_unit": "us",
+          "port_name": "detComOne.dstt[0]-tt[1]",
+          "propagation_delay": 0,
+          "propagation_delay_unit": "us",
+          "schedule_type": "Hypercycle"
+        }
+      ],
+      "processing_delay": 0,
+      "processing_delay_unit": "us",
+      "type": 1
+    },
+    {
+      "name": "detComOne.dstt[1]",
+      "ports": [
+        {
+          "connects_to": "wirelessdevice2",
+          "cycle_start": 0,
+          "cycle_start_unit": "us",
+          "data_rate": 1000,
+          "data_rate_size_unit": "bit",
+          "data_rate_time_unit": "us",
+          "max_slot_duration": 100000,
+          "max_slot_duration_unit": "us",
+          "port_name": "detComOne.dstt[1]-eth[0]",
+          "propagation_delay": 0.05,
+          "propagation_delay_unit": "us",
+          "schedule_type": "Hypercycle"
+        },
+        {
+          "connects_to": "detComOne.nwtt",
+          "cycle_start": 0,
+          "cycle_start_unit": "us",
+          "data_rate": 1e+308,
+          "data_rate_size_unit": "bit",
+          "data_rate_time_unit": "us",
+          "max_slot_duration": 100000,
+          "max_slot_duration_unit": "us",
+          "port_name": "detComOne.dstt[1]-tt[0]",
+          "propagation_delay": 0,
+          "propagation_delay_unit": "us",
+          "schedule_type": "Hypercycle"
+        },
+        {
+          "connects_to": "detComOne.dstt[0]",
+          "cycle_start": 0,
+          "cycle_start_unit": "us",
+          "data_rate": 1e+308,
+          "data_rate_size_unit": "bit",
+          "data_rate_time_unit": "us",
+          "max_slot_duration": 100000,
+          "max_slot_duration_unit": "us",
+          "port_name": "detComOne.dstt[1]-tt[1]",
+          "propagation_delay": 0,
+          "propagation_delay_unit": "us",
+          "schedule_type": "Hypercycle"
+        }
+      ],
+      "processing_delay": 0,
+      "processing_delay_unit": "us",
+      "type": 1
+    },
+    {
+      "name": "detComOne.nwtt",
+      "ports": [
+        {
+          "connects_to": "bridge1",
+          "cycle_start": 0,
+          "cycle_start_unit": "us",
+          "data_rate": 1000,
+          "data_rate_size_unit": "bit",
+          "data_rate_time_unit": "us",
+          "max_slot_duration": 100000,
+          "max_slot_duration_unit": "us",
+          "port_name": "detComOne.nwtt-eth[0]",
+          "propagation_delay": 0.05,
+          "propagation_delay_unit": "us",
+          "schedule_type": "Hypercycle"
+        },
+        {
+          "connects_to": "detComOne.dstt[0]",
+          "cycle_start": 0,
+          "cycle_start_unit": "us",
+          "data_rate": 1e+308,
+          "data_rate_size_unit": "bit",
+          "data_rate_time_unit": "us",
+          "max_slot_duration": 100000,
+          "max_slot_duration_unit": "us",
+          "port_name": "detComOne.nwtt-tt[0]",
+          "propagation_delay": 0,
+          "propagation_delay_unit": "us",
+          "schedule_type": "Hypercycle"
+        },
+        {
+          "connects_to": "detComOne.dstt[1]",
+          "cycle_start": 0,
+          "cycle_start_unit": "us",
+          "data_rate": 1e+308,
+          "data_rate_size_unit": "bit",
+          "data_rate_time_unit": "us",
+          "max_slot_duration": 100000,
+          "max_slot_duration_unit": "us",
+          "port_name": "detComOne.nwtt-tt[1]",
+          "propagation_delay": 0,
+          "propagation_delay_unit": "us",
+          "schedule_type": "Hypercycle"
+        }
+      ],
+      "processing_delay": 0,
+      "processing_delay_unit": "us",
+      "type": 1
+    },
+    {
+      "name": "detComTwo.dstt[0]",
+      "ports": [
+        {
+          "connects_to": "device1",
+          "cycle_start": 0,
+          "cycle_start_unit": "us",
+          "data_rate": 1000,
+          "data_rate_size_unit": "bit",
+          "data_rate_time_unit": "us",
+          "max_slot_duration": 100000,
+          "max_slot_duration_unit": "us",
+          "port_name": "detComTwo.dstt[0]-eth[0]",
+          "propagation_delay": 0.05,
+          "propagation_delay_unit": "us",
+          "schedule_type": "Hypercycle"
+        },
+        {
+          "connects_to": "detComTwo.nwtt",
+          "cycle_start": 0,
+          "cycle_start_unit": "us",
+          "data_rate": 1e+308,
+          "data_rate_size_unit": "bit",
+          "data_rate_time_unit": "us",
+          "max_slot_duration": 100000,
+          "max_slot_duration_unit": "us",
+          "port_name": "detComTwo.dstt[0]-tt[0]",
+          "propagation_delay": 0,
+          "propagation_delay_unit": "us",
+          "schedule_type": "Hypercycle"
+        },
+        {
+          "connects_to": "detComTwo.dstt[1]",
+          "cycle_start": 0,
+          "cycle_start_unit": "us",
+          "data_rate": 1e+308,
+          "data_rate_size_unit": "bit",
+          "data_rate_time_unit": "us",
+          "max_slot_duration": 100000,
+          "max_slot_duration_unit": "us",
+          "port_name": "detComTwo.dstt[0]-tt[1]",
+          "propagation_delay": 0,
+          "propagation_delay_unit": "us",
+          "schedule_type": "Hypercycle"
+        }
+      ],
+      "processing_delay": 0,
+      "processing_delay_unit": "us",
+      "type": 1
+    },
+    {
+      "name": "detComTwo.dstt[1]",
+      "ports": [
+        {
+          "connects_to": "device2",
+          "cycle_start": 0,
+          "cycle_start_unit": "us",
+          "data_rate": 1000,
+          "data_rate_size_unit": "bit",
+          "data_rate_time_unit": "us",
+          "max_slot_duration": 100000,
+          "max_slot_duration_unit": "us",
+          "port_name": "detComTwo.dstt[1]-eth[0]",
+          "propagation_delay": 0.05,
+          "propagation_delay_unit": "us",
+          "schedule_type": "Hypercycle"
+        },
+        {
+          "connects_to": "detComTwo.nwtt",
+          "cycle_start": 0,
+          "cycle_start_unit": "us",
+          "data_rate": 1e+308,
+          "data_rate_size_unit": "bit",
+          "data_rate_time_unit": "us",
+          "max_slot_duration": 100000,
+          "max_slot_duration_unit": "us",
+          "port_name": "detComTwo.dstt[1]-tt[0]",
+          "propagation_delay": 0,
+          "propagation_delay_unit": "us",
+          "schedule_type": "Hypercycle"
+        },
+        {
+          "connects_to": "detComTwo.dstt[0]",
+          "cycle_start": 0,
+          "cycle_start_unit": "us",
+          "data_rate": 1e+308,
+          "data_rate_size_unit": "bit",
+          "data_rate_time_unit": "us",
+          "max_slot_duration": 100000,
+          "max_slot_duration_unit": "us",
+          "port_name": "detComTwo.dstt[1]-tt[1]",
+          "propagation_delay": 0,
+          "propagation_delay_unit": "us",
+          "schedule_type": "Hypercycle"
+        }
+      ],
+      "processing_delay": 0,
+      "processing_delay_unit": "us",
+      "type": 1
+    },
+    {
+      "name": "detComTwo.nwtt",
+      "ports": [
+        {
+          "connects_to": "bridge2",
+          "cycle_start": 0,
+          "cycle_start_unit": "us",
+          "data_rate": 1000,
+          "data_rate_size_unit": "bit",
+          "data_rate_time_unit": "us",
+          "max_slot_duration": 100000,
+          "max_slot_duration_unit": "us",
+          "port_name": "detComTwo.nwtt-eth[0]",
+          "propagation_delay": 0.05,
+          "propagation_delay_unit": "us",
+          "schedule_type": "Hypercycle"
+        },
+        {
+          "connects_to": "detComTwo.dstt[0]",
+          "cycle_start": 0,
+          "cycle_start_unit": "us",
+          "data_rate": 1e+308,
+          "data_rate_size_unit": "bit",
+          "data_rate_time_unit": "us",
+          "max_slot_duration": 100000,
+          "max_slot_duration_unit": "us",
+          "port_name": "detComTwo.nwtt-tt[0]",
+          "propagation_delay": 0,
+          "propagation_delay_unit": "us",
+          "schedule_type": "Hypercycle"
+        },
+        {
+          "connects_to": "detComTwo.dstt[1]",
+          "cycle_start": 0,
+          "cycle_start_unit": "us",
+          "data_rate": 1e+308,
+          "data_rate_size_unit": "bit",
+          "data_rate_time_unit": "us",
+          "max_slot_duration": 100000,
+          "max_slot_duration_unit": "us",
+          "port_name": "detComTwo.nwtt-tt[1]",
+          "propagation_delay": 0,
+          "propagation_delay_unit": "us",
+          "schedule_type": "Hypercycle"
+        }
+      ],
+      "processing_delay": 0,
+      "processing_delay_unit": "us",
+      "type": 1
+    },
+    {
+      "name": "detComThree.dstt[0]",
+      "ports": [
+        {
+          "connects_to": "wirelessdevice3",
+          "cycle_start": 0,
+          "cycle_start_unit": "us",
+          "data_rate": 1000,
+          "data_rate_size_unit": "bit",
+          "data_rate_time_unit": "us",
+          "max_slot_duration": 100000,
+          "max_slot_duration_unit": "us",
+          "port_name": "detComThree.dstt[0]-eth[0]",
+          "propagation_delay": 0.05,
+          "propagation_delay_unit": "us",
+          "schedule_type": "Hypercycle"
+        },
+        {
+          "connects_to": "detComThree.nwtt",
+          "cycle_start": 0,
+          "cycle_start_unit": "us",
+          "data_rate": 1e+308,
+          "data_rate_size_unit": "bit",
+          "data_rate_time_unit": "us",
+          "max_slot_duration": 100000,
+          "max_slot_duration_unit": "us",
+          "port_name": "detComThree.dstt[0]-tt[0]",
+          "propagation_delay": 0,
+          "propagation_delay_unit": "us",
+          "schedule_type": "Hypercycle"
+        }
+      ],
+      "processing_delay": 0,
+      "processing_delay_unit": "us",
+      "type": 1
+    },
+    {
+      "name": "detComThree.nwtt",
+      "ports": [
+        {
+          "connects_to": "bridge2",
+          "cycle_start": 0,
+          "cycle_start_unit": "us",
+          "data_rate": 1000,
+          "data_rate_size_unit": "bit",
+          "data_rate_time_unit": "us",
+          "max_slot_duration": 100000,
+          "max_slot_duration_unit": "us",
+          "port_name": "detComThree.nwtt-eth[0]",
+          "propagation_delay": 0.05,
+          "propagation_delay_unit": "us",
+          "schedule_type": "Hypercycle"
+        },
+        {
+          "connects_to": "detComThree.dstt[0]",
+          "cycle_start": 0,
+          "cycle_start_unit": "us",
+          "data_rate": 1e+308,
+          "data_rate_size_unit": "bit",
+          "data_rate_time_unit": "us",
+          "max_slot_duration": 100000,
+          "max_slot_duration_unit": "us",
+          "port_name": "detComThree.nwtt-tt[0]",
+          "propagation_delay": 0,
+          "propagation_delay_unit": "us",
+          "schedule_type": "Hypercycle"
+        }
+      ],
+      "processing_delay": 0,
+      "processing_delay_unit": "us",
+      "type": 1
+    }
+  ]
+}

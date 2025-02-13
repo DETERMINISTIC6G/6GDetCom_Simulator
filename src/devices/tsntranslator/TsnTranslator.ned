@@ -45,6 +45,8 @@ module TsnTranslator extends TsnSwitch
         bridging.delayLayer.typename = default(isDstt ? "TTDelayLayer" : "");
         bridging.delayLayer.delayUplink = default(this.delayUplink);
         bridging.delayLayer.delayDownlink = default(this.delayDownlink);
+        
+        @signal[distribution-event](type=cMessage);
     gates:
         inout ttg[numTtInterfaces] @labels(EtherFrame-conn);
     submodules:

@@ -3,8 +3,8 @@
 	<name>deterministic6g</name>
 	<comment></comment>
 	<projects>
+		<project>cppzmq-4.10.0</project>
 		<project>inet</project>
-		<project>zeromq-4.3.5</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>

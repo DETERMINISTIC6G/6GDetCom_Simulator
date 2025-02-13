@@ -19,6 +19,7 @@
 #include <omnetpp.h>
 #include "inet/queueing/source/ActivePacketSource.h"
 #include "../../scenariomanager/DynamicScenarioObserver.h"
+#include "../../devices/tsntranslator/TsnTranslator.h"
 
 #include "inet/common/clock/ClockUserModuleMixin.h"
 
@@ -33,9 +34,15 @@ namespace d6g {
  */
 class DynamicPacketSource: public ActivePacketSource {
 
+//public:
+//    std::string flowName = "";
+
 protected:
     bool enabledParameter = true;
     ClockEvent *parameterChangeEvent = nullptr;
+    std::string flowName = "";
+
+    friend class ChangeMonitor;
 
 protected:
     virtual void initialize(int stage) override;

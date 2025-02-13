@@ -52,12 +52,12 @@ void DynamicScenarioObserver::receiveSignal(cComponent *source,
 
         DynamicPacketSource *sourceModule = dynamic_cast<DynamicPacketSource *>(source);
         if (sourceModule) {
-           cValueMap* value = sourceModule->getConfiguration();
-           EV << value->get("application").stringValue() << " !!  " <<
-                   value->get("destination").stringValue() << "  !!  " <<  value->get("packetInterval").str()
-                   << endl;
 
-           delete value;
+           cValueMap* element = sourceModule->getConfiguration();
+
+           monitor->updateMappings(element);
+
+           delete element;
         }
 
         monitor->notify(source->getFullPath());
@@ -67,9 +67,36 @@ void DynamicScenarioObserver::receiveSignal(cComponent *source,
     }
     if (signalID == distributionChangeSignal) {
 
-        EV << "Received message (distribution): " << msg->getName() << " from source: " << source->getFullPath() << endl;
+        std::cout << "Received message (distribution): " << msg->getName() << " from source: " << source->getFullPath() << endl;
 
-        (dynamic_cast<ChangeMonitor*>(this->monitor))->notify(source->getFullPath());
+        TsnTranslator *sourceModule = dynamic_cast<TsnTranslator *>(source);
+        if (sourceModule) {
+            std::string link = details->str();
+
+            link.erase(0, 1);
+            link.erase(link.size() - 1);
+
+
+            cValueArray* element = sourceModule->getDistribution(link.c_str(), 1000000);
+
+            link.erase(0, 5);
+
+            //element->add(link);
+            for (int i = 0; i < element->size(); ++i) {
+                std::cout << "Element " << i << ": " << element->get(i).str() << endl;
+                }
+            auto bridge = std::string(source->getParentModule()->getName()) + "."
+                    + source->getFullName() + "_" + link;
+
+            //const char* bridgeName = bridge.c_str();
+            std::cout << "Observer " << bridge << endl;
+
+            monitor->updateDistributions(bridge,  element);
+
+
+        }
+
+        monitor->notify(source->getFullPath());
     }
 
 }

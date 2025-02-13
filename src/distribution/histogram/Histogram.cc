@@ -51,6 +51,7 @@ void Histogram::parseHistogramConfig(cXMLElement *histogramEntity) {
 
     if (previousBinEntry != nullptr) {
         previousBinEntry->rightBoundary = std::numeric_limits<double>::infinity();
+        previousBinEntry->rightBoundary.setUnit("ms"); //
     }
 
     // Print the bins
@@ -133,6 +134,46 @@ Histogram::BinEntry::BinEntry(cXMLElement *binEntity, cModule *context) {
     lowerBoundPar.parse(lowAttr);
     this->leftBoundary = lowerBoundPar.evaluate(context);
     this->count = atoi(binEntity->getNodeValue());
+}
+
+std::vector<Histogram::BinEntry *> Histogram::getBins() const {
+    return bins;
+}
+
+
+void Histogram::convertHistogramToJSONBins(cValueArray *jsonBins) {
+    for (const auto *bin : getBins()) {
+        cValueMap *jsonBin = new cValueMap();
+
+        double left = bin->leftBoundary.doubleValueInUnit("ms");
+        jsonBin->set("lower_bound", left);
+
+        double right = bin->rightBoundary.doubleValueInUnit("ms");
+        jsonBin->set("upper_bound", right);
+
+        jsonBin->set("unit", cValue("ms"));
+        jsonBin->set("count", cValue(bin->count));
+        //jsonBin->set("accumulatedCount",  cValue(bin->accumulatedCount));
+
+        jsonBins->add(cValue(jsonBin));
+    }
+}
+
+
+cXMLElement* Histogram::createHistogramEntity(const std::vector<double> &bin_edges, const std::vector<int> &frequencies, int num_bins) {
+    cXMLElement *histogramEntity = new cXMLElement("histogram", nullptr);
+    cXMLElement *bin = new cXMLElement("bin", histogramEntity);
+    bin->setAttribute("low", "-inf ms");
+    bin->setNodeValue(0);
+    histogramEntity->appendChild(bin);
+
+    for (int i = 0; i <= num_bins; ++i) {
+        cXMLElement *bin = new cXMLElement("bin", histogramEntity);
+        bin->setAttribute("low", (std::to_string(bin_edges[i]) + " ms").c_str());
+        bin->setNodeValue(std::to_string(frequencies[i]).c_str());
+        histogramEntity->appendChild(bin);
+    }
+    return histogramEntity;
 }
 
 } //namespace

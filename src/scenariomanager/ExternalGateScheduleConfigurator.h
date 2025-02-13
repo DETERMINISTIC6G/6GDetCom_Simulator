@@ -29,16 +29,45 @@ namespace d6g {
 /**
  * TODO - Generated class
  */
-class ExternalGateScheduleConfigurator : public TSNschedGateScheduleConfigurator //TSNschedGateScheduleConfigurator
+class ExternalGateScheduleConfigurator : public TSNschedGateScheduleConfigurator
 {
+
+
+private:
+    std::map<std::string, cValueArray*> *distribution;
+
   protected:
     virtual void initialize(int stage) override;
-    //virtual void handleMessage(cMessage *msg) override;
     virtual void handleParameterChange(const char *name) override;
 
+    /*GateScheduleConfiguratorBase*/
+    virtual void addFlows(Input& input) const override;
+
+
+    /*ExternalGateScheduleConfigurator*/
+    virtual void printJson(std::ostream& stream, const cValue& value, int level = 0) const;
+    virtual bool isDetComLink(cModule *source, cModule *target) const;
+    virtual bool hasDistribution(std::string key, std::string &hist) const;
+    /*
+     * Create separate JSON files for Streams and Network and Distributions
+     * */
+    virtual void writeInputToFile(const Input& input, std::string fileNameStreams, std::string fileNameNetwork) const;
+    virtual cValueMap *convertInputToJsonStreams(const Input& input) const;
+    virtual cValueMap *convertInputToJsonNetwork(const Input& input) const;
+    virtual void writeDistributionsToFile(std::string fileName) const;
+
+
+    /* TSNschedGateScheduleConfigurator*/
     virtual void executeTSNsched(std::string fileName)  const override;
 
     virtual Output *computeGateScheduling(const Input& input) const override;
+
+  private:
+    virtual void write(std::string fileName, cValueMap *json) const;
+
+  public:
+    ~ExternalGateScheduleConfigurator() override;
+
 };
 
 } //namespace

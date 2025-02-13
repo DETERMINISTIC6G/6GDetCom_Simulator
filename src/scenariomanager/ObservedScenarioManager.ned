@@ -16,6 +16,7 @@
 package d6g.scenariomanager;
 
 import inet.common.scenario.ScenarioManager;
+//import DynamicScenarioObserver;
 
 
 //
@@ -25,4 +26,8 @@ simple ObservedScenarioManager extends ScenarioManager
 {
     parameters:
         @class(ObservedScenarioManager);
+        
+     	@signal[scenario-event](type=cMessage);
+     	
+    
 }

@@ -27,5 +27,7 @@ simple DynamicPacketSource extends ActivePacketSource
       productionInterval  @mutable;
       packetLength @mutable;
       volatile bool enabled @mutable = default(true);
+      int pcp = default(0);
       @class(DynamicPacketSource);
+      @signal[parameter-change-event](type=cMessage);
 }

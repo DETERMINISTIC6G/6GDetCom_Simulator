@@ -28,6 +28,7 @@ import inet.linklayer.configurator.gatescheduling.contract.IGateScheduleConfigur
 import inet.node.ethernet.EthernetLink;
 import inet.node.tsn.TsnDevice;
 import inet.node.tsn.TsnSwitch;
+import ned.IdealChannel;
 
 
 network Dynamicscenario extends DetComNetworkBase
@@ -42,14 +43,14 @@ network Dynamicscenario extends DetComNetworkBase
         wirelessdevice1: TsnDevice {
             @display("p=350,506");
         }
-        detCom: DetCom { // DetCom module (deterministic communication).
+        detComOne: DetCom { // DetCom module (deterministic communication).
             @display("p=350,315");
         }
         bridge1: TsnSwitch { // A DetCom Adapter.
-            @display("p=350,224");
+            @display("p=484,268");
         }
         bridge2: TsnSwitch { // A TSN switch with a bridge function.
-            @display("p=350,147");
+            @display("p=629,199");
         }
         device1: TsnDevice { // A TSN device acting as a talker (data sender).
             @display("p=350,54");
@@ -58,7 +59,7 @@ network Dynamicscenario extends DetComNetworkBase
             @display("p=580,54");
         }
         wirelessdevice2: TsnDevice {
-            @display("p=523,500");
+            @display("p=514,506");
         }
 
         distributionScenarioManager: ObservedScenarioManager {
@@ -72,12 +73,28 @@ network Dynamicscenario extends DetComNetworkBase
             @display("p=779,292");
         }
 
+        detComTwo: DetCom { // DetCom module (deterministic communication).
+            @display("p=445,169");
+        }
+        detComThree: DetCom { // DetCom module (deterministic communication).
+            @display("p=629,315");
+        }
+        wirelessdevice3: TsnDevice {
+            @display("p=635,506");
+        }
+
     connections:
-        wirelessdevice1.ethg++ <--> EthernetLink <--> detCom.dsttg++;
-        wirelessdevice2.ethg++ <--> EthernetLink <--> detCom.dsttg++;
-        detCom.nwttg <--> EthernetLink <--> bridge1.ethg++;
+        wirelessdevice1.ethg++ <--> EthernetLink { @icon("radio");@display("ls=red,,da"); } <--> detComOne.dsttg++;
+        wirelessdevice2.ethg++ <--> EthernetLink { @icon("radio");@display("ls=red,,da"); } <--> detComOne.dsttg++;
+        detComOne.nwttg <--> EthernetLink <--> bridge1.ethg++;
         bridge1.ethg++ <--> EthernetLink <--> bridge2.ethg++;
-        bridge2.ethg++ <--> EthernetLink <--> device1.ethg++;
-        bridge2.ethg++ <--> EthernetLink <--> device2.ethg++;
+        detComTwo.dsttg++ <--> EthernetLink { @icon("radio");@display("ls=red,,da"); } <--> device1.ethg++;
+        detComTwo.dsttg++ <--> EthernetLink { @icon("radio");@display("ls=red,,da"); } <--> device2.ethg++;
+
+        bridge2.ethg++ <--> EthernetLink <--> detComTwo.nwttg;
+        detComThree.nwttg <--> EthernetLink <--> bridge2.ethg++;
+        detComThree.dsttg++ <--> EthernetLink { @icon("radio");@display("ls=red,,da"); } <--> wirelessdevice3.ethg++;
+
+
 
 }

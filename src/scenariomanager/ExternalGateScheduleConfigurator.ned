@@ -25,5 +25,6 @@ import inet.linklayer.configurator.gatescheduling.contract.IGateScheduleConfigur
 simple ExternalGateScheduleConfigurator extends GateScheduleConfiguratorBase like IGateScheduleConfigurator
 {
     parameters:
+       // object distribution @mutable = default([]);
         @class(ExternalGateScheduleConfigurator);
 }

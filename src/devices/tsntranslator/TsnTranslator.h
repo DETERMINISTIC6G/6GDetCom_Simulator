@@ -36,8 +36,11 @@ protected:
     virtual void handleParameterChange(const char *name) override;
 
 public:
+
+    virtual cValueArray* getDistribution(const char *delay, int numberOfSamples);
     ~TsnTranslator() override;
 };
+
 
 } /* namespace d6g */
 

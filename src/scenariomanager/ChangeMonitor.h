@@ -17,7 +17,7 @@
 #define __DYNAMIC_SCENARIO_CHANGEMONITOR_H_
 
 #include <omnetpp.h>
-//#include <zmq.h>
+//#include <zmq.hpp>
 
 #include "DynamicScenarioObserver.h"
 //#include "ObservedScenarioManager.h"
@@ -42,7 +42,7 @@ namespace d6g {
 /**
  * TODO - Generated class
  */
-class ChangeMonitor : public inet::ClockUserModuleMixin<cSimpleModule>  // public TSNschedGateScheduleConfigurator
+class ChangeMonitor : public inet::ClockUserModuleMixin<cSimpleModule>
 {
 
 protected:
@@ -54,26 +54,22 @@ protected:
         std::string application;
         std::string source;
         std::string destination;
-        /* b packetLength;
-         simtime_t packetInterval;
-         simtime_t maxLatency;
-         simtime_t maxJitter;*/
         cValue packetLength;
         cValue packetInterval;
         cValue maxLatency;
-        //   cValue maxJitter;
+        cValue maxJitter;
         //std::string pathFragments;
 
         friend std::ostream& operator<<(std::ostream &os,
                 const Mapping &mapping) {
-            os << "name: " << mapping.name << ", pcp: " << mapping.pcp
+            os << "name: " << mapping.name << ", source: " << mapping.source << ", pcp: " << mapping.pcp
                     << ", gateIndex: " << mapping.gateIndex << ", application: "
                     << mapping.application;
             return os;
         }
     };
 
-    std::vector<Mapping> configMappings;
+
 
 
   private:
@@ -81,7 +77,10 @@ protected:
     ClockEvent *timer = nullptr;
     cPar *schedulerCallDelayParameter = nullptr;
     GateScheduleConfiguratorBase *gateScheduleConfigurator;
-
+    //zmq::message_t testMsg;
+    int flowIndex = 0;
+    std::vector<Mapping> configMappings;
+    std::map<std::string, cValueArray*> *distributions = nullptr;
 
 
 
@@ -93,10 +92,16 @@ protected:
     void configureMappings();
     cValueArray* convertToCValueArray(const std::vector<Mapping>& configMappings);
     cValue convertMappingToCValue(const Mapping& mapping);
+    void createMapping(cValueMap *element, int i);
+
 
 
   public:
-    //virtual void executeTSNsched(std::string fileName) const override;
+
+    void updateMappings(cValueMap* element);
+    void updateDistributions(std::string,  cValueArray* element);
+    std::map<std::string, cValueArray*> *getDistributions();
+    cValueArray* getStreamConfigurations();
 
     virtual void externalSchedulerCall() const;
     void notify(std::string source);
