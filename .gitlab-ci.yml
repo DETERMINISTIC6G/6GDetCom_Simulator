@@ -86,7 +86,6 @@ deploy_ipvs_pages:
     - cp -r public/. $DEPLOYMENT_PATH
   tags:
     - d6g
-    - docker
     - web
 
 fingerprint:
