@@ -13,7 +13,7 @@
 namespace d6g {
 using namespace inet;
 
-class INET_API TimeTagger : public ClockUserModuleBase, cListener
+class TimeTagger : public ClockUserModuleBase, cListener
 {
   protected:
     std::map<uint16_t, clocktime_t> ingressTimeMap; // <sequenceId,ingressTime>
