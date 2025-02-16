@@ -7,11 +7,13 @@
 
 package d6g.devices.tsntranslator;
 
-import inet.node.ethernet.EthernetLink;
+import inet.linklayer.ethernet.common.PacketDirectionReverser;
 
-// A perfect channel used to connected the TTInterface of dstts and the nwtt TsnTranslator modules within a DetCom node.
-channel TTChannel extends EthernetLink {
-    length = default(0m); // length of channel
-    datarate = 0bps; // data transmission rate
-    @display("ls=,,da");
+
+// This module extends the PacketDirectionReverser of INET to keep internal DetCom time tags,
+// such as the DetComIngressTimeTag.
+module TTPacketDirectionReverser extends PacketDirectionReverser
+{
+    parameters:
+        @class(TTPacketDirectionReverser);
 }
