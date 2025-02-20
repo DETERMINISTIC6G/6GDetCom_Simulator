@@ -26,12 +26,14 @@ void DynamicPacketSource::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         enabledParameter = par("enabled");
         parameterChangeEvent = new ClockEvent("parameter-change");
+
+        pcp = par("pcp");
+        latency = &par("latency");
+        jitter = &par("jitter");
     }
 }
 
-void DynamicPacketSource::handleMessage(cMessage *msg)
-{
-    //ActivePacketSource::handleMessage(msg);
+void DynamicPacketSource::handleMessage(cMessage *msg) {
     if (msg == productionTimer) {
             if (consumer == nullptr || consumer->canPushSomePacket(outputGate->getPathEndGate())) {
                 scheduleProductionTimer(productionIntervalParameter->doubleValue());
@@ -44,17 +46,6 @@ void DynamicPacketSource::handleMessage(cMessage *msg)
         else
             throw cRuntimeError("Unknown message");
 }
-
-
-/*  if (!strcmp(name, "delayDownlink") || !strcmp(name, "delayUplink") ) {
-        cMsgPar *details = new cMsgPar("details");
-        details->setStringValue(name);
-        emit(DynamicScenarioObserver::distributionChangeSignal,
-                distributionChangeEvent, details);
-        delete details;
-    }
-
- * */
 
 
 void DynamicPacketSource::handleParameterChange(const char *name) {
@@ -118,51 +109,30 @@ void DynamicPacketSource::scheduleProductionTimerAndProducePacket() {
 }
 
 cValueMap* DynamicPacketSource::getConfiguration() {
-
     cModule *appModule = this->getParentModule();
     cModule *deviceModule = appModule->getParentModule();
-
-    UdpSocketIo *socketModule = dynamic_cast<UdpSocketIo*>(appModule->getSubmodule("io"));
+    //UdpSocketIo *socketModule = dynamic_cast<UdpSocketIo*>(appModule->getSubmodule("io"));
 
     cValueMap *map = new cValueMap();
-    cValue tmp;
-
-
-        map->set("enabled", par("enabled").boolValue());
-
-        if (flowName != "") {
-            map->set("name", cValue(flowName));
-        }
-        map->set("pcp", cValue(4));
-        map->set("gateIndex", cValue(2));
-
-        map->set("application", cValue(appModule->getFullName()));
-        map->set("source", cValue(deviceModule->getFullName()));
-
-        map->set("destination", socketModule->par("destAddress").stringValue());
-
-        tmp.set(par("packetLength").intValue(),"B");
-        map->set("packetLength", tmp);
-
-
-       cValue a =  par("productionInterval").getValue();
-
-        tmp.set(par("productionInterval").doubleValue(),"s");
-        map->set("packetInterval", tmp);
-
-        //map->set("packetInterval", par("productionInterval").getValue());
-
-        tmp.set(par("initialProductionOffset").doubleValue(),"s");
-        map->set("offset", tmp);
-
-        tmp.set(0,"s");
-        map->set("maxLatency", tmp);
-
-        tmp.set(0,"s");
-        map->set("maxJitter", tmp);
+    map->set("enabled", par("enabled").boolValue());
+    if (flowName != "") {
+        map->set("name", cValue(flowName));
+    }
+    map->set("pcp", cValue(pcp));
+    map->set("gateIndex", cValue(pcp));
+    map->set("application", cValue(appModule->getFullName()));
+    map->set("source", cValue(deviceModule->getFullName()));
+   // map->set("destination", socketModule->par("destAddress").stringValue());
+    map->set("destination", appModule->getSubmodule("io")->par("destAddress").stringValue());
+    map->set("reliability", par("reliability").doubleValue());
+    map->set("policy", par("policy").intValue());
+    map->set("packetLength", par("packetLength").getValue());
+    map->set("packetInterval", par("productionInterval").getValue());
+    map->set("offset", par("initialProductionOffset").getValue());
+    map->set("maxLatency", par("latency").getValue());
+    map->set("maxJitter", par("jitter").getValue());
 
     return map;
-
 }
 
 DynamicPacketSource::~DynamicPacketSource() {

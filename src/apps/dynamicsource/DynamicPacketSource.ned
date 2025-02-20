@@ -24,10 +24,25 @@ import inet.queueing.source.ActivePacketSource;
 simple DynamicPacketSource extends ActivePacketSource
 {
     parameters:
-      productionInterval  @mutable;
+      productionInterval  @mutable; // override
       packetLength @mutable;
+      
+      // start--stop app
       volatile bool enabled @mutable = default(true);
-      int pcp = default(0);
+      
+      // hard constraint time
+      double jitter @unit(ms)  = default(0.05ms);
+      double latency @unit(ms) = default(10ms);
+      
+      
+      // additional  Traffic Class Requirements
+      volatile int pcp @mutable = default(0);
+      int objectiveType = default(3);
+      int packetLoss = default(0);
+      int policy = default(0);
+      double reliability = default(0.9999);
+      
+      
       @class(DynamicPacketSource);
       @signal[parameter-change-event](type=cMessage);
 }

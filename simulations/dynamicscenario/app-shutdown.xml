@@ -36,14 +36,16 @@
  <!-- <create-module t="3" parent="wirelessdevice1" submodule="app" type="inet.applications.udpapp.UdpSinkApp" vector="true" param="io.localPort = 1007"/> -->
 
 
-
-<set-param t="1" module="device2.app[0].source" par="enabled" value="true"/>
+<at t="1">
+	<set-param module="device2.app[0].source" par="enabled" value="true"/>
+	<set-param module="device3.app[1].source" par="enabled" value="true"/>
+</at>
 
 <at t="10">
 	<set-param module="device2.app[0].source"
 		par="productionInterval" value="100ms" />
 	<set-param module="device2.app[0].source"
-		par="packetLength" value="1200B" />
+		par="packetLength" value="1200B" />		
 </at> 
 
 

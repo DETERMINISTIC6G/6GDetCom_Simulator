@@ -4,24 +4,23 @@
       "end_devices": [
         "wirelessdevice3"
       ],
-      "fixed_priority": "true",
-      "hard_constraint_time_jitter": 0,
-      "hard_constraint_time_latency": 0,
+      "hard_constraint_time_jitter": 50,
+      "hard_constraint_time_latency": 10000,
       "hard_constraint_time_unit": "us",
       "name": "flow0",
       "objective_type": 3,
       "packet_loss": 0,
       "packet_periodicity": 10000,
       "packet_periodicity_unit": "us",
-      "packet_size": 68480,
+      "packet_size": 8560,
       "packet_size_unit": "bit",
-      "pcp": 2,
+      "pcp": 4,
       "pdb_map": [
         {
           "histogram": "detComTwo.dstt[0]_Uplink",
           "link": {
-            "currentNodeName": "device1",
-            "nextNodeName": "detComTwo.dstt[0]"
+            "currentNodeName": "detComTwo.dstt[0]",
+            "nextNodeName": "detComTwo.nwtt"
           },
           "policy": 0,
           "reliability": 0.9999
@@ -62,36 +61,35 @@
       "end_devices": [
         "wirelessdevice1"
       ],
-      "fixed_priority": "true",
-      "hard_constraint_time_jitter": 0,
-      "hard_constraint_time_latency": 0,
+      "hard_constraint_time_jitter": 50,
+      "hard_constraint_time_latency": 10000,
       "hard_constraint_time_unit": "us",
       "name": "flow1",
       "objective_type": 3,
       "packet_loss": 0,
       "packet_periodicity": 10000,
       "packet_periodicity_unit": "us",
-      "packet_size": 68480,
+      "packet_size": 8560,
       "packet_size_unit": "bit",
-      "pcp": 2,
+      "pcp": 4,
       "pdb_map": [
         {
           "histogram": "detComTwo.dstt[1]_Uplink",
           "link": {
-            "currentNodeName": "device2",
-            "nextNodeName": "detComTwo.dstt[1]"
+            "currentNodeName": "detComTwo.dstt[1]",
+            "nextNodeName": "detComTwo.nwtt"
           },
           "policy": 0,
-          "reliability": 0.9999
+          "reliability": 0.99995
         },
         {
           "histogram": "detComOne.dstt[0]_Downlink",
           "link": {
-            "currentNodeName": "detComOne.dstt[0]",
-            "nextNodeName": "wirelessdevice1"
+            "currentNodeName": "detComOne.nwtt",
+            "nextNodeName": "detComOne.dstt[0]"
           },
           "policy": 0,
-          "reliability": 0.9999
+          "reliability": 0.99995
         }
       ],
       "phase": 0,
@@ -126,6 +124,41 @@
         }
       ],
       "source_device": "device2",
+      "type": "unicast",
+      "weight": 1
+    },
+    {
+      "end_devices": [
+        "device4"
+      ],
+      "hard_constraint_time_jitter": 50,
+      "hard_constraint_time_latency": 10000,
+      "hard_constraint_time_unit": "us",
+      "name": "flow2",
+      "objective_type": 3,
+      "packet_loss": 0,
+      "packet_periodicity": 5000,
+      "packet_periodicity_unit": "us",
+      "packet_size": 8560,
+      "packet_size_unit": "bit",
+      "pcp": 0,
+      "pdb_map": [],
+      "phase": 0,
+      "route": [
+        {
+          "currentNodeName": "device3",
+          "nextNodeName": "bridge2"
+        },
+        {
+          "currentNodeName": "bridge2",
+          "nextNodeName": "bridge1"
+        },
+        {
+          "currentNodeName": "bridge1",
+          "nextNodeName": "device4"
+        }
+      ],
+      "source_device": "device3",
       "type": "unicast",
       "weight": 1
     }

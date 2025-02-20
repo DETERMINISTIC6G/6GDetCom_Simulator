@@ -609,7 +609,8 @@
           "upper_bound": 1e+308
         }
       ],
-      "name": "detComOne.dstt[0]_Downlink"
+      "name": "detComOne.dstt[0]_Downlink",
+      "type": "rngProvider_Downlink"
     },
     {
       "data": [
@@ -1220,7 +1221,8 @@
           "upper_bound": 1e+308
         }
       ],
-      "name": "detComOne.dstt[1]_Downlink"
+      "name": "detComOne.dstt[1]_Downlink",
+      "type": "rngProvider_Downlink"
     },
     {
       "data": [
@@ -1831,7 +1833,8 @@
           "upper_bound": 1e+308
         }
       ],
-      "name": "detComTwo.dstt[0]_Uplink"
+      "name": "detComTwo.dstt[0]_Uplink",
+      "type": "rngProvider_Uplink"
     },
     {
       "data": [
@@ -2442,7 +2445,8 @@
           "upper_bound": 1e+308
         }
       ],
-      "name": "detComTwo.dstt[1]_Uplink"
+      "name": "detComTwo.dstt[1]_Uplink",
+      "type": "rngProvider_Uplink"
     }
   ]
 }

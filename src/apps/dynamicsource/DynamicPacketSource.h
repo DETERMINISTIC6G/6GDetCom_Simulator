@@ -34,15 +34,19 @@ namespace d6g {
  */
 class DynamicPacketSource: public ActivePacketSource {
 
-//public:
-//    std::string flowName = "";
+enum class StreamObjectives {
+      NO_OBJECTIVE = 0, LATENESS = 1, TARDINESS = 2, JITTER = 3, TARDINESS_AND_JITTER = 4
+};
 
 protected:
     bool enabledParameter = true;
     ClockEvent *parameterChangeEvent = nullptr;
     std::string flowName = "";
+    int pcp = 0;
+    cPar *jitter = nullptr;
+    cPar *latency = nullptr;
 
-    friend class ChangeMonitor;
+friend class ChangeMonitor;
 
 protected:
     virtual void initialize(int stage) override;

@@ -26,14 +26,16 @@
 
 using namespace omnetpp;
 using namespace inet;
-using namespace inet::common;
+//using namespace inet::common;
 
 namespace d6g {
 
-class DynamicScenarioObserver: public cListener {
+class ChangeMonitor;
+
+class DynamicScenarioObserver: public cListener, public cModule {
 
 private :
-    cModule *monitor = nullptr;
+    ChangeMonitor *monitor = nullptr;
 
 
 public:
@@ -44,10 +46,12 @@ public:
 
 public:
 
-    DynamicScenarioObserver(cModule *monitor) : monitor(monitor) {};
+    DynamicScenarioObserver(ChangeMonitor *monitor);
 
     virtual void receiveSignal(cComponent *source, simsignal_t signalID,
             cObject *obj, cObject *details) override;
+
+    cValueArray *createHistogram( cDynamicExpression &dynExpr);
 
 
 

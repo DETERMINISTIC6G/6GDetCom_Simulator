@@ -15,12 +15,12 @@
 
 #include "TsnTranslator.h"
 
-#include "../../distribution/contract/IRandomNumberProvider.h"
+//#include "../../distribution/contract/IRandomNumberProvider.h"
 
-#include "../../distribution/histogram/HistogramContainer.h"
+//#include "../../distribution/histogram/HistogramContainer.h"
 
 
-#include <regex>
+//#include <regex>
 
 
 namespace d6g {
@@ -34,12 +34,6 @@ void TsnTranslator::initialize()
     distributionChangeEvent = new cMessage("distribution-changed");
 }
 
-/*void TsnTranslator::handleMessage(cMessage *msg)
-{
-    cSimpleModule::handleMessage(msg);
-
-}*/
-
 
 void TsnTranslator::handleParameterChange(const char *name) {
     if (!strcmp(name, "delayDownlink") || !strcmp(name, "delayUplink") ) {
@@ -52,7 +46,7 @@ void TsnTranslator::handleParameterChange(const char *name) {
 }
 
 
-cValueArray* TsnTranslator::getDistribution(const char *delayStr, int numberOfSamples) {
+/*cValueArray* TsnTranslator::getDistribution(const char *delayStr, int numberOfSamples) {
 
     auto delay = par(delayStr).str();
     cDynamicExpression *dynExpr = new cDynamicExpression();
@@ -92,7 +86,7 @@ cValueArray* TsnTranslator::getDistribution(const char *delayStr, int numberOfSa
             h = sourceModule->getHistogram(key);
             h->convertHistogramToJSONBins(jsonBins);
         } else {
-            double num_bins = round(log2(numberOfSamples) + 1); // Sturges-Formel
+            double num_bins = round(log2(numberOfSamples) + 1); // Sturges-formula
             std::vector<double> samples(numberOfSamples);
             for (int i = 0; i < numberOfSamples; ++i) {
                 samples[i] = dynExpr->evaluate(this).doubleValueInUnit("ms");
@@ -127,6 +121,15 @@ cValueArray* TsnTranslator::getDistribution(const char *delayStr, int numberOfSa
     }
     delete dynExpr;
     return jsonBins;
+}*/
+
+cDynamicExpression* TsnTranslator::getDistribution(const char *delayStr) {
+    auto delay = par(delayStr).str();
+    cDynamicExpression *dynExpr = new cDynamicExpression();
+    dynExpr->parse(delay.c_str());
+    return dynExpr;
+
+
 }
 
 

@@ -37,7 +37,8 @@ protected:
 
 public:
 
-    virtual cValueArray* getDistribution(const char *delay, int numberOfSamples);
+    //virtual cValueArray* getDistribution(const char *delay, int numberOfSamples);
+    virtual cDynamicExpression* getDistribution(const char *delay);
     ~TsnTranslator() override;
 };
 

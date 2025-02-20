@@ -25,6 +25,14 @@ import inet.linklayer.configurator.gatescheduling.contract.IGateScheduleConfigur
 simple ExternalGateScheduleConfigurator extends GateScheduleConfiguratorBase like IGateScheduleConfigurator
 {
     parameters:
-       // object distribution @mutable = default([]);
-        @class(ExternalGateScheduleConfigurator);
+    
+    gateCycleDuration @mutable = default(0s);
+        
+    string outputFileName = default("tsn_configuration.json");
+   
+    string fileNameStreams = default("streams.json");
+    string fileNameNetwork = default("network.json");
+    string fileNameDistribution = default("histograms.json");
+       
+    @class(ExternalGateScheduleConfigurator);
 }

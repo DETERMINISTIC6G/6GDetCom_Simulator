@@ -1,9 +1,4 @@
 INET ?= ../../inet
-#ZMQ_INCLUDE ?= ../../zeromq-4.3.5/include       # Pfad zu den ZeroMQ Header-Dateien
-#ZMQ_LIB ?= ../../zeromq-4.3.5/build/bin/Release             # Pfad zu den ZeroMQ Bibliotheken
-
-#CXXFLAGS += -I$(ZMQ_INCLUDE)  # Pfad zu den ZeroMQ-Header-Dateien
-#LDFLAGS += -L$(ZMQ_LIB) -lzmq
 
 .PHONY: doc
 
@@ -19,12 +14,10 @@ cleanall: checkmakefiles
 	rm -f src/Makefile
 
 makefiles:
-	cd src && opp_makemake -f --deep -KINET_PROJ=$(INET) -DINET_IMPORT -I'$$(INET_PROJ)/src' -L'$$(INET_PROJ)/src' -l'INET$$(D)' #\
-	#-I$(ZMQ_INCLUDE) -L$(ZMQ_LIB) -llibzmq  # pfade
+	cd src && opp_makemake -f --deep -KINET_PROJ=$(INET) -DINET_IMPORT -I'$$(INET_PROJ)/src' -L'$$(INET_PROJ)/src' -l'INET$$(D)' LDFLAGS += -Wl,--allow-multiple-definition CXXFLAGS += -std=c++17
 	
 makefiles-so:
-	cd src && opp_makemake --make-so -f --deep -KINET_PROJ=$(INET) -DINET_IMPORT -I'$$(INET_PROJ)/src' -L'$$(INET_PROJ)/src' -l'INET$$(D)' #\
-	#-I$(ZMQ_INCLUDE) -L$(ZMQ_LIB) -llibzmq    # <-- ZeroMQ Pfade und Lib hinzufügen
+	cd src && opp_makemake --make-so -f --deep -KINET_PROJ=$(INET) -DINET_IMPORT -I'$$(INET_PROJ)/src' -L'$$(INET_PROJ)/src' -l'INET$$(D)' LDFLAGS += -Wl,--allow-multiple-definition CXXFLAGS += -std=c++17
 
 checkmakefiles:
 	@if [ ! -f src/Makefile ]; then \

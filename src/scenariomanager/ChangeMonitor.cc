@@ -16,7 +16,11 @@
 
 
 #include "ChangeMonitor.h"
+#include "DynamicScenarioObserver.h"
 
+#include <numeric> // lcm
+#include <bits/stdc++.h>
+#include <algorithm>
 
 
 namespace d6g {
@@ -27,9 +31,6 @@ Define_Module(ChangeMonitor);
 
 void ChangeMonitor::initialize(int stage)
 {
-    cSimpleModule::initialize(stage);
-
-    // TODO - Generated method body
     if (stage == INITSTAGE_LOCAL) {
         schedulerCallDelayParameter = &par("schedulerCallDelay");
         observer = new DynamicScenarioObserver(this);
@@ -38,7 +39,7 @@ void ChangeMonitor::initialize(int stage)
 
         timer = new ClockEvent("changeEventCollectionTimer");
 
-        subscribe();
+        subscribeForDynamicChanges();
 
         auto path = par("gateScheduleConfigurator").stringValue();
         gateScheduleConfigurator = check_and_cast<GateScheduleConfiguratorBase *>(getModuleByPath(path));
@@ -50,17 +51,14 @@ void ChangeMonitor::initialize(int stage)
 
 void ChangeMonitor::handleMessage(cMessage *msg)
 {
-    // TODO - Generated method body
     if (msg == timer) {
         prepaireChangesForProcessing();
-        externalSchedulerCall();
-
     }else
         throw cRuntimeError("Unknown message");
 
 }
 
-void ChangeMonitor::subscribe() {
+void ChangeMonitor::subscribeForDynamicChanges() {
     cSimulation *sim = getSimulation();
     for (int i = 0; i < sim->getLastComponentId(); ++i) {
         cModule *mod = sim->getModule(i);
@@ -100,22 +98,17 @@ void ChangeMonitor::notify(std::string source) {
 }
 
 
-
-void ChangeMonitor::externalSchedulerCall() const {
-
-   // int result = std::system("python3 scripts/dummy_scheduler.py");
-    ;
-
-}
-
 void ChangeMonitor::prepaireChangesForProcessing() {
 
-    // distribution changed
-    //gateScheduleConfigurator->par("distribution").setObjectValue(distributions);
+   /* std::vector<int> v;
+    for (const auto &mapping : configMappings) {
+            v.push_back(mapping.packetInterval.intValueInUnit("ns"));
+    }
+    auto res = std::reduce(v.begin(), v.end(), 1, std::min<int, int>);*/
 
-     gateScheduleConfigurator->par("configuration").setObjectValue(convertToCValueArray(configMappings));
+    //gateScheduleConfigurator->par("gateCycleDuration").setValue(cValue(res, "ns"));
+    gateScheduleConfigurator->par("configuration").setObjectValue(convertToCValueArray(configMappings));
 
-     //distributions.clear();
 
 }
 
@@ -167,31 +160,9 @@ void ChangeMonitor::configureMappings() {
                             "d6g.devices.tsntranslator.TsnTranslator")
                     && mod->par("isDstt"))
             { //translator
-                TsnTranslator *sourceModule = dynamic_cast<TsnTranslator*>(mod);
+               TsnTranslator *sourceModule = dynamic_cast<TsnTranslator*>(mod);
 
-                cValueArray *element = sourceModule->getDistribution("delayDownlink",
-                        1000000);
-                if (element->size())
-                {
-                    auto bridge = std::string(sourceModule->getParentModule()->getName()) + "."
-                            + std::string(sourceModule->getFullName()) + "_"
-                            + "Downlink";
-                    updateDistributions(bridge, element);
-                }else {
-                    delete element;
-                }
-
-                element = sourceModule->getDistribution("delayUplink", 1000000);
-                if (element->size())
-                {
-                    auto bridge = std::string(sourceModule->getParentModule()->getName()) + "."
-                            + std::string(sourceModule->getFullName()) + "_"
-                            + "Uplink";
-                    updateDistributions(bridge, element);
-                }else {
-                    delete element;
-                }
-
+               fillDistributionsMapFor(sourceModule);
             } //translator
         }
 
@@ -202,6 +173,22 @@ void ChangeMonitor::configureMappings() {
     }
 
 }
+
+void ChangeMonitor::fillDistributionsMapFor(TsnTranslator *translator) {
+    auto delayParam = {"Uplink", "Downlink"};
+    for (auto param : delayParam) {
+        auto expr = translator->getDistribution(("delay" + std::string(param)).c_str());
+        auto element = observer->createHistogram(*expr);
+        delete expr;
+        if (!element->size()) {
+            delete element;
+            continue;
+        }
+        auto bridge = std::string(translator->getParentModule()->getName()) + "." + std::string(translator->getFullName()) + "_" + std::string(param);
+        (*distributions)[bridge] = element;
+    }
+}
+
 
 void ChangeMonitor::createMapping(cValueMap *element, int i) {
     Mapping &mapping = configMappings[i];
@@ -218,7 +205,9 @@ void ChangeMonitor::createMapping(cValueMap *element, int i) {
     mapping.packetInterval = element->get("packetInterval");
     mapping.maxLatency = element->get("maxLatency");
 
-    // mapping.maxJitter = element->get("maxJitter");
+    mapping.maxJitter = element->get("maxJitter");
+    mapping.reliability = element->get("reliability").doubleValue();
+    mapping.policy = element->get("policy").intValue();
 }
 
 
@@ -255,25 +244,16 @@ void ChangeMonitor::updateMappings(cValueMap* element) {
         auto path = (source + "." + application + ".source");
         DynamicPacketSource *sourceModule = check_and_cast<DynamicPacketSource*>(getModuleByPath(path.c_str()));
         sourceModule->flowName = configMappings[configMappings.size() - 1].name;
-
     }
-
 }
 
 
-cValueArray* ChangeMonitor::convertToCValueArray(
-        const std::vector<Mapping> &configMappings) {
-
+cValueArray* ChangeMonitor::convertToCValueArray(const std::vector<Mapping> &configMappings) {
     cValueArray *mappingParameter = new cValueArray();
-
     for (const auto &mapping : configMappings) {
-
         cValue temp = convertMappingToCValue(mapping);
         mappingParameter->add(temp);
-
-
     }
-
     return mappingParameter;
 }
 
@@ -281,7 +261,6 @@ cValueArray* ChangeMonitor::convertToCValueArray(
 cValueArray* ChangeMonitor::getStreamConfigurations() {
     return convertToCValueArray(configMappings);
 }
-
 
 
 cValue ChangeMonitor::convertMappingToCValue(const Mapping &mapping) {
@@ -298,6 +277,9 @@ cValue ChangeMonitor::convertMappingToCValue(const Mapping &mapping) {
     map->set("packetLength", mapping.packetLength);
     map->set("packetInterval", mapping.packetInterval);
     map->set("maxLatency", mapping.maxLatency);
+    map->set("maxJitter", mapping.maxJitter);
+    map->set("reliability", mapping.reliability);
+    map->set("policy", mapping.policy);
 
     return cValue(map);
 }
@@ -306,19 +288,19 @@ void ChangeMonitor::updateDistributions(std::string bridge,  cValueArray* elemen
     std::cout << "updateDistributions " << bridge << endl;
 
     auto it = distributions->find(bridge);
-    if (it != distributions->end() && element->size()) {
+    if (it != distributions->end()) {
             delete it->second;
-          /*  if (!element->size()) {
+            //this->drop(x);
+            if (!element->size()) {
                 distributions->erase(it);
-            }else {*/
-                it->second = element;
-            //}
-        } else if (element->size()){
+                delete element;
+                return;
+            }
+            it->second = element;
+        } else {
+            if (element->size())
              (*distributions)[bridge] = element;
-        }else {
-            delete element;
         }
-
 }
 
 std::map<std::string, cValueArray*> *ChangeMonitor::getDistributions() {
@@ -327,17 +309,14 @@ std::map<std::string, cValueArray*> *ChangeMonitor::getDistributions() {
 
 
 ChangeMonitor::~ChangeMonitor() {
-    delete observer;
-
-    //if (distributions != nullptr) {
-        for (auto it = distributions->begin(); it != distributions->end(); ++it) {
-              delete it->second;
-        }
-   // }
-
+    for (auto it = distributions->begin(); it != distributions->end(); ++it) {
+         delete it->second;
+    }
     delete distributions;
     cancelAndDeleteClockEvent(timer);
+    delete observer;
 }
+
 
 } //namespace
 

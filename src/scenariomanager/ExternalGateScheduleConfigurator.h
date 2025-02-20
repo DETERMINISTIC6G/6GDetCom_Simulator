@@ -31,10 +31,27 @@ namespace d6g {
  */
 class ExternalGateScheduleConfigurator : public TSNschedGateScheduleConfigurator
 {
+    enum class DeviceType {
+        END_DEVICE = 0, TSN_BRIDGE = 1, DS_TT = 2, NW_TT = 3, UNSPECIFIED = 4
+    };
+
+    enum class DetComLinkType {
+        DSTT_NWTT, NWTT_DSTT, DSTT_DSTT, NO_DETCOM_LINK
+    };
+
+
+
 
 
 private:
     std::map<std::string, cValueArray*> *distribution;
+    std::map<std::string, uint16_t> *hashMap;
+
+    std::string fileNameStreams;
+    std::string fileNameNetwork;
+    std::string fileNameDistribution;
+
+    std::string outputFileName;
 
   protected:
     virtual void initialize(int stage) override;
@@ -46,24 +63,31 @@ private:
 
     /*ExternalGateScheduleConfigurator*/
     virtual void printJson(std::ostream& stream, const cValue& value, int level = 0) const;
-    virtual bool isDetComLink(cModule *source, cModule *target) const;
-    virtual bool hasDistribution(std::string key, std::string &hist) const;
-    /*
-     * Create separate JSON files for Streams and Network and Distributions
-     * */
-    virtual void writeInputToFile(const Input& input, std::string fileNameStreams, std::string fileNameNetwork) const;
+    virtual bool isDetComLink(cModule *source, cModule *target, DetComLinkType &detComLinkType) const;
+
+    /*Create separate JSON files for Streams and Network and Distributions */
     virtual cValueMap *convertInputToJsonStreams(const Input& input) const;
     virtual cValueMap *convertInputToJsonNetwork(const Input& input) const;
-    virtual void writeDistributionsToFile(std::string fileName) const;
+    virtual void writeDistributionsToFile() const;
+    virtual void writeStreamsToFile(const Input& input) const;
+    virtual void writeNetworkToFile(const Input& input) const;
+
+    std::string getDescription(DetComLinkType type) const;
+    std::string expandNodeName(cModule *module) const;
 
 
     /* TSNschedGateScheduleConfigurator*/
     virtual void executeTSNsched(std::string fileName)  const override;
-
     virtual Output *computeGateScheduling(const Input& input) const override;
+    virtual short getSwitchType(cModule* mod) const;
+
 
   private:
-    virtual void write(std::string fileName, cValueMap *json) const;
+    void write(std::string fileName, cValueMap *json) const;
+    void generateNetworkNodesHashMap(const std::vector<std::string>& strings) const;
+    void setReliabilityAndPolicyToPDBMapEntry(cValueArray *pdb_map, std::string name) const;
+    void addEntryToPDBMap(cValueArray *pdb_map, DetComLinkType linkType, std::string nameNetworkNode, std::string nameNextNetworkNode) const;
+    double computeGuardBand(const Input &input) const;
 
   public:
     ~ExternalGateScheduleConfigurator() override;

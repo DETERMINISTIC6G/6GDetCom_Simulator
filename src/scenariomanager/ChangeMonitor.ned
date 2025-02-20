@@ -25,8 +25,11 @@ simple ChangeMonitor
 {
     parameters:
         string clockModule = default("");
-        volatile double schedulerCallDelay @unit(s) = default(3s);
+        
+        volatile double schedulerCallDelay @unit(s) = default(2s);
+        
         string gateScheduleConfigurator = default("gateScheduleConfigurator");
+        int numberOfSamples = default(1000000);  //for the creation of a histogram
         @class(ChangeMonitor);
 
 

@@ -19,7 +19,7 @@
 #include <omnetpp.h>
 //#include <zmq.hpp>
 
-#include "DynamicScenarioObserver.h"
+//#include "DynamicScenarioObserver.h"
 //#include "ObservedScenarioManager.h"
 #include "../apps/dynamicsource/DynamicPacketSource.h"
 
@@ -39,10 +39,12 @@ namespace d6g {
 
 
 
+class DynamicScenarioObserver;
+
 /**
  * TODO - Generated class
  */
-class ChangeMonitor : public inet::ClockUserModuleMixin<cSimpleModule>
+class  ChangeMonitor : public  inet::ClockUserModuleMixin<cSimpleModule>
 {
 
 protected:
@@ -59,6 +61,8 @@ protected:
         cValue maxLatency;
         cValue maxJitter;
         //std::string pathFragments;
+        double reliability = 0.9999;
+        int policy = 0;
 
         friend std::ostream& operator<<(std::ostream &os,
                 const Mapping &mapping) {
@@ -87,13 +91,13 @@ protected:
   protected:
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *msg) override;
-    void subscribe();
+    void subscribeForDynamicChanges();
     void prepaireChangesForProcessing();
     void configureMappings();
     cValueArray* convertToCValueArray(const std::vector<Mapping>& configMappings);
     cValue convertMappingToCValue(const Mapping& mapping);
     void createMapping(cValueMap *element, int i);
-
+    void fillDistributionsMapFor(TsnTranslator *translator);
 
 
   public:
@@ -103,10 +107,10 @@ protected:
     std::map<std::string, cValueArray*> *getDistributions();
     cValueArray* getStreamConfigurations();
 
-    virtual void externalSchedulerCall() const;
     void notify(std::string source);
     ~ChangeMonitor() override;
 };
+
 
 } //namespace
 
