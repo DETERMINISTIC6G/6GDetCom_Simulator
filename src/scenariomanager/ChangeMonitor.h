@@ -103,7 +103,7 @@ protected:
     cValueArray* convertToCValueArray(const std::vector<Mapping>& configMappings);
     cValue convertMappingToCValue(const Mapping& mapping);
     void createMapping(cValueMap *element, int i);
-    void fillDistributionsMapFor(TsnTranslator *translator);
+    void addEntriesToDistributionMapFor(TsnTranslator *translator);
 
 
   public:

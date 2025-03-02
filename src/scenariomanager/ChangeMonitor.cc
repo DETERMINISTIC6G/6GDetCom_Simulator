@@ -66,31 +66,28 @@ void ChangeMonitor::subscribeForDynamicChanges() {
     for (int i = 0; i < sim->getLastComponentId(); ++i) {
         cModule *mod = sim->getModule(i);
         if (mod) {
-            if (!strcmp(mod->getNedTypeName(),
-                    "d6g.scenariomanager.ObservedScenarioManager")) { //"d6g.distribution.histogram.HistogramContainer")) {
+            if (!strcmp(mod->getModuleType()->getName(), "ObservedScenarioManager")) {
+            //(!strcmp(mod->getNedTypeName(), "d6g.scenariomanager.ObservedScenarioManager")) {
                 EV << "Subscribing module: " << mod->getFullPath() << " to the observer." << endl;
-                mod->subscribe(DynamicScenarioObserver::scenarioEventSignal,
-                        observer);
+                mod->subscribe(DynamicScenarioObserver::scenarioEventSignal, observer);
             }
 
-            if (!strcmp(mod->getNedTypeName(),
-                    "d6g.apps.dynamicsource.DynamicPacketSource")) {
+            if (!strcmp(mod->getModuleType()->getName(), "DynamicPacketSource")) {
+            //(!strcmp(mod->getNedTypeName(), "d6g.apps.dynamicsource.DynamicPacketSource")) {
                 EV << "Subscribing module: " << mod->getFullPath() << " to the observer." << endl;
-                mod->subscribe(DynamicScenarioObserver::parameterChangeSignal,
-                        observer);
+                mod->subscribe(DynamicScenarioObserver::parameterChangeSignal, observer);
             }
-            if (!strcmp(mod->getNedTypeName(), "d6g.devices.tsntranslator.TsnTranslator")
-                    && mod->par("isDstt")){
+            if (!strcmp(mod->getModuleType()->getName(), "TsnTranslator") && mod->par("isDstt")) {
+            //(!strcmp(mod->getNedTypeName(), "d6g.devices.tsntranslator.TsnTranslator") && mod->par("isDstt")){
                 EV << "Subscribing module: " << mod->getFullPath() << " to the observer." << endl;
-                mod->subscribe(
-                        DynamicScenarioObserver::distributionChangeSignal,
-                        observer);
+                mod->subscribe(DynamicScenarioObserver::distributionChangeSignal, observer);
             }
 
         }
 
-    }
+    }//endfor
 }
+
 
 void ChangeMonitor::notify(std::string source) {
     bubble(("Changes in " + source).c_str());
@@ -104,8 +101,7 @@ void ChangeMonitor::notify(std::string source) {
 void ChangeMonitor::prepaireChangesForProcessing() {
 
     //gateScheduleConfigurator->par("gateCycleDuration").setValue(cValue(res, "ns"));
-    gateScheduleConfigurator->par("configuration").setObjectValue(convertToCValueArray(configMappings));
-
+    gateScheduleConfigurator->par("configuration").setObjectValue(getStreamConfigurations());
 
 }
 
@@ -159,7 +155,7 @@ void ChangeMonitor::configureMappings() {
             { //translator
                TsnTranslator *sourceModule = dynamic_cast<TsnTranslator*>(mod);
 
-               fillDistributionsMapFor(sourceModule);
+               addEntriesToDistributionMapFor(sourceModule);
             } //translator
         }
 
@@ -171,18 +167,19 @@ void ChangeMonitor::configureMappings() {
 
 }
 
-void ChangeMonitor::fillDistributionsMapFor(TsnTranslator *translator) {
+void ChangeMonitor::addEntriesToDistributionMapFor(TsnTranslator *translator) {
     auto delayParam = {"Uplink", "Downlink"};
     for (auto param : delayParam) {
         auto expr = translator->getDistribution(("delay" + std::string(param)).c_str());
         auto element = observer->createHistogram(*expr);
         delete expr;
-        if (!element->size()) {
+        /*if (!element->size()) {
             delete element;
             continue;
-        }
+        }*/
         auto bridge = std::string(translator->getParentModule()->getName()) + "." + std::string(translator->getFullName()) + "_" + std::string(param);
-        (*distributions)[bridge] = element;
+        //(*distributions)[bridge] = element;
+        updateDistributions(bridge, element);
     }//endfor
 }
 
@@ -256,11 +253,6 @@ cValueArray* ChangeMonitor::convertToCValueArray(const std::vector<Mapping> &con
 }
 
 
-cValueArray* ChangeMonitor::getStreamConfigurations() {
-    return convertToCValueArray(configMappings);
-}
-
-
 cValue ChangeMonitor::convertMappingToCValue(const Mapping &mapping) {
 
     cValueMap *map = new cValueMap();
@@ -298,8 +290,12 @@ void ChangeMonitor::updateDistributions(std::string bridge,  cValueArray* elemen
             }
             it->second = element;
         } else {
-            if (element->size())
-             (*distributions)[bridge] = element;
+            if (!element->size()) {
+                delete element;
+                return;
+            }
+            //if (element->size())
+            (*distributions)[bridge] = element;
         }
 }
 
@@ -307,6 +303,9 @@ std::map<std::string, cValueArray*> *ChangeMonitor::getDistributions() {
     return distributions;
 }
 
+cValueArray* ChangeMonitor::getStreamConfigurations() {
+    return convertToCValueArray(configMappings);
+}
 
 ChangeMonitor::~ChangeMonitor() {
     for (auto it = distributions->begin(); it != distributions->end(); ++it) {

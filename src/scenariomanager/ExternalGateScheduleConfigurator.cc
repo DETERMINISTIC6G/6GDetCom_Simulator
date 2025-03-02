@@ -69,9 +69,10 @@ void ExternalGateScheduleConfigurator::handleParameterChange(const char *name) {
         configuration = check_and_cast<cValueArray*>(par("configuration").objectValue());
         clearConfiguration();
 
-        simtime_t startTime = simTime();//clock();
         simtime_t remainingTime = 0;
         double elapsedTime = 0;
+        simtime_t startTime = simTime();//clock();
+
         if (configurationComputedEvent->isScheduled()) {
             remainingTime = configurationComputedEvent->getArrivalTime() - startTime;
             cancelEvent(configurationComputedEvent);
@@ -189,7 +190,6 @@ ExternalGateScheduleConfigurator::Output *ExternalGateScheduleConfigurator::comp
 
     invokeScheduler();
     std::string outputLocation = getenv("LIBTSNGDM_ROOT") + (*args)[2].stdstringValue();
-
 
     return readOutputFromFile(input, outputLocation); //new Output();
 }
@@ -314,7 +314,16 @@ cValueMap *ExternalGateScheduleConfigurator::convertInputToJsonStreams(const Inp
                 }
             } // 3. for
         }//2. for
-        setReliabilityAndPolicyToPDBMapEntry(pdb_map, flow->name);
+        //setReliabilityAndPolicyToPDBMapEntry(pdb_map, flow->name);
+
+        int pdbSize = pdb_map->size();
+        double reliability = std::pow(dynApplication->reliability, 1.0/pdbSize); // #DetCom-link-th root of the reliability parameter ;
+        int policy = dynApplication->policy;
+        for (int i = 0; i < pdbSize; i++) {
+            auto vMap = check_and_cast<cValueMap*>(pdb_map->get(i).objectValue());
+            vMap->set("reliability", reliability);
+            vMap->set("policy", policy);
+        }
 
     } //1.for
     return json;
@@ -345,7 +354,6 @@ void ExternalGateScheduleConfigurator::setReliabilityAndPolicyToPDBMapEntry(cVal
     }
     for (int i = 0; i < pdbSize; i++) {
          auto vMap = check_and_cast<cValueMap *>(pdb_map->get(i).objectValue());
-         //double reliability = std::pow(getReliability(flow->name), 1.0/pdbSize); // #DetCom-link-th root of the reliability parameter
          vMap->set("reliability", reliability);
          vMap->set("policy", policy);
     }
@@ -558,10 +566,12 @@ void ExternalGateScheduleConfigurator::addFlows(Input& input) const {
        /* startApplication->packetLoss =
 
         startApplication->objectiveType =
-        startApplication->policy =
-        startApplication->reliability =
+
         startApplication->weight = */
-        startApplication->phase = entry->get("phase").doubleValueInUnit("s");
+        simtime_t phase = entry->get("phase").doubleValueInUnit("s");
+        startApplication->phase = phase < 0 ? 0 : phase;
+        startApplication->policy = entry->get("policy").intValue();
+        startApplication->reliability = entry->get("reliability").doubleValue();
 
         input.applications.push_back(startApplication);
 

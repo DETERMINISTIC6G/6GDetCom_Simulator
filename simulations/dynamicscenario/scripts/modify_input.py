@@ -3,13 +3,14 @@ import sys
 
 if __name__ == "__main__":
     # Reading JSON files
-    with open('network.json', 'r') as network_file:
+     #'../data/omnet/network.json'
+    with open('/home/elmos/Forschungsprojekt/dynamic-scenario/simulations/dynamicscenario/data/network.json', 'r') as network_file:
         network = json.load(network_file)
-    
-    with open('streams.json', 'r') as streams_file:
+    #'../data/omnet/streams.json'
+    with open('/home/elmos/Forschungsprojekt/dynamic-scenario/simulations/dynamicscenario/data/streams.json', 'r') as streams_file:
         streams = json.load(streams_file)
-    
-    with open('histograms.json') as histograms_file:
+    #'../data/omnet/histograms.json'
+    with open('/home/elmos/Forschungsprojekt/dynamic-scenario/simulations/dynamicscenario/data/histograms.json', 'r') as histograms_file:
         histograms = json.load(histograms_file)
     
     # creating a new structure based on the scheduler input
@@ -66,7 +67,7 @@ if __name__ == "__main__":
             network_data['links'].append(link)
     
     # write network
-    with open('../../../libtsndgm2.0/data/network_test.json', 'w') as outfile:
+    with open('../data/network.json', 'w') as outfile:
         json.dump(network_data, outfile, indent=4)
     
     # add flows
@@ -117,14 +118,14 @@ if __name__ == "__main__":
         streams_data.append(flow)
     
     # write flows
-    with open('../../../libtsndgm2.0/data/streams_test.json', 'w') as outfile:
+    with open('../data/streams.json', 'w') as outfile:
         json.dump(streams_data, outfile, indent=4)
         
     
         
     # write each histogram to separate file
     for hist in histograms['distributions'] :
-        with open(f"../../../libtsndgm2.0/data/histograms/{hist['name']}.json", 'w') as outfile:
+        with open(f"../data/histograms/{hist['name']}.json", 'w') as outfile:
             json.dump(hist, outfile, indent=4)
         
     
