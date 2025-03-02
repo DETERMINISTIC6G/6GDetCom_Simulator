@@ -79,9 +79,9 @@ void DynamicScenarioObserver::receiveSignal(cComponent *source, simsignal_t sign
             delete expr;
             link.erase(0, 5);
 
-            for (int i = 0; i < element->size(); ++i) {
+           /* for (int i = 0; i < element->size(); ++i) {
                 std::cout << "Element " << i << ": " << element->get(i).str() << endl;
-                }
+                }*/
             auto bridge = std::string(source->getParentModule()->getName()) + "." + source->getFullName() + "_" + link;
 
             std::cout << "Observer " << bridge << endl;
@@ -100,12 +100,15 @@ cValueArray *DynamicScenarioObserver::createHistogram(cDynamicExpression &dynExp
         Histogram *h = nullptr;
         if (dynExpr.isAConstant()) {
             double constDelay = dynExpr.evaluate(this).doubleValueInUnit("ms");
+
             if (constDelay == 0) {
                 return jsonBins;
             }
             h = new Histogram();
             cXMLElement *histogramEntity = h->createHistogramEntity( { constDelay, constDelay }, { 1, 0 }, 1);
+
             h->parseHistogramConfig(histogramEntity);
+
             h->convertHistogramToJSONBins(jsonBins);
             jsonBins->setName("constant");
             delete histogramEntity;

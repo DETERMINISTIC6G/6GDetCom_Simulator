@@ -41,75 +41,85 @@
       "name": "device4",
       "processing_delay": 0,
       "processing_delay_unit": "us"
+    },
+    {
+      "device_type": 0,
+      "name": "device5",
+      "processing_delay": 0,
+      "processing_delay_unit": "us"
     }
   ],
   "id_mapping": [
     {
-      "id": 54231,
+      "id": 9,
       "node": "bridge1"
     },
     {
-      "id": 38121,
+      "id": 10,
       "node": "bridge2"
     },
     {
-      "id": 27738,
+      "id": 211,
       "node": "detComOne.dstt[0]"
     },
     {
-      "id": 58136,
+      "id": 212,
       "node": "detComOne.dstt[1]"
     },
     {
-      "id": 7090,
+      "id": 213,
       "node": "detComOne.nwtt"
     },
     {
-      "id": 62333,
+      "id": 2587,
       "node": "detComThree.dstt[0]"
     },
     {
-      "id": 13168,
+      "id": 2588,
       "node": "detComThree.nwtt"
     },
     {
-      "id": 40877,
+      "id": 1885,
       "node": "detComTwo.dstt[0]"
     },
     {
-      "id": 2058,
+      "id": 1886,
       "node": "detComTwo.dstt[1]"
     },
     {
-      "id": 19374,
+      "id": 1887,
       "node": "detComTwo.nwtt"
     },
     {
-      "id": 39490,
+      "id": 11,
       "node": "device1"
     },
     {
-      "id": 18871,
+      "id": 12,
       "node": "device2"
     },
     {
-      "id": 33857,
+      "id": 20,
       "node": "device3"
     },
     {
-      "id": 54059,
+      "id": 21,
       "node": "device4"
     },
     {
-      "id": 50262,
+      "id": 22,
+      "node": "device5"
+    },
+    {
+      "id": 7,
       "node": "wirelessdevice1"
     },
     {
-      "id": 62545,
+      "id": 13,
       "node": "wirelessdevice2"
     },
     {
-      "id": 44064,
+      "id": 19,
       "node": "wirelessdevice3"
     }
   ],
@@ -206,6 +216,18 @@
           "detCom_link_descr": "_NoDetComLink",
           "link_type": 0,
           "port_name": "bridge2-eth[3]",
+          "propagation_delay": 0.05,
+          "propagation_delay_unit": "us",
+          "schedule_type": "Hypercycle"
+        },
+        {
+          "connects_to": "device5",
+          "data_rate": 1000,
+          "data_rate_size_unit": "bit",
+          "data_rate_time_unit": "us",
+          "detCom_link_descr": "_NoDetComLink",
+          "link_type": 0,
+          "port_name": "bridge2-eth[4]",
           "propagation_delay": 0.05,
           "propagation_delay_unit": "us",
           "schedule_type": "Hypercycle"

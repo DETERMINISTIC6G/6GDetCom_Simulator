@@ -32,15 +32,17 @@ simple DynamicPacketSource extends ActivePacketSource
       
       // hard constraint time
       double jitter @unit(ms)  = default(0.05ms);
-      double latency @unit(ms) = default(10ms);
+      double latency @unit(ms) = default(20ms);
       
       
       // additional  Traffic Class Requirements
-      volatile int pcp @mutable = default(0);
-      int objectiveType = default(3);
+      int pcp = default(0);
+      int gateIndex = default(0);
+      int objectiveType = default(4);
       int packetLoss = default(0);
       int policy = default(0);
       double reliability = default(0.9999);
+      double weight = default(1.0);
       
       
       @class(DynamicPacketSource);

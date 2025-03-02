@@ -5,25 +5,36 @@
         "wirelessdevice3"
       ],
       "hard_constraint_time_jitter": 50,
-      "hard_constraint_time_latency": 10000,
+      "hard_constraint_time_latency": 20000,
       "hard_constraint_time_unit": "us",
       "name": "flow0",
-      "objective_type": 3,
+      "objective_type": 4,
       "packet_loss": 0,
-      "packet_periodicity": 10000,
+      "packet_periodicity": 20000,
       "packet_periodicity_unit": "us",
-      "packet_size": 8560,
+      "packet_size": 8000,
       "packet_size_unit": "bit",
       "pcp": 4,
       "pdb_map": [
         {
-          "histogram": "detComTwo.dstt[0]_Uplink",
+          "histogram": "../data/histograms/detComTwo.dstt[0]_Uplink.json",
+          "key": "detComTwo.dstt[0]_Uplink",
           "link": {
             "currentNodeName": "detComTwo.dstt[0]",
             "nextNodeName": "detComTwo.nwtt"
           },
           "policy": 0,
-          "reliability": 0.9999
+          "reliability": 0.99995
+        },
+        {
+          "histogram": "../data/histograms/detComThree.dstt[0]_Downlink.json",
+          "key": "detComThree.dstt[0]_Downlink",
+          "link": {
+            "currentNodeName": "detComThree.nwtt",
+            "nextNodeName": "detComThree.dstt[0]"
+          },
+          "policy": 0,
+          "reliability": 0.99995
         }
       ],
       "phase": 0,
@@ -62,19 +73,20 @@
         "wirelessdevice1"
       ],
       "hard_constraint_time_jitter": 50,
-      "hard_constraint_time_latency": 10000,
+      "hard_constraint_time_latency": 20000,
       "hard_constraint_time_unit": "us",
       "name": "flow1",
-      "objective_type": 3,
+      "objective_type": 4,
       "packet_loss": 0,
-      "packet_periodicity": 10000,
+      "packet_periodicity": 20000,
       "packet_periodicity_unit": "us",
-      "packet_size": 8560,
+      "packet_size": 8000,
       "packet_size_unit": "bit",
       "pcp": 4,
       "pdb_map": [
         {
-          "histogram": "detComTwo.dstt[1]_Uplink",
+          "histogram": "../data/histograms/detComTwo.dstt[1]_Uplink.json",
+          "key": "detComTwo.dstt[1]_Uplink",
           "link": {
             "currentNodeName": "detComTwo.dstt[1]",
             "nextNodeName": "detComTwo.nwtt"
@@ -83,7 +95,8 @@
           "reliability": 0.99995
         },
         {
-          "histogram": "detComOne.dstt[0]_Downlink",
+          "histogram": "../data/histograms/detComOne.dstt[0]_Downlink.json",
+          "key": "detComOne.dstt[0]_Downlink",
           "link": {
             "currentNodeName": "detComOne.nwtt",
             "nextNodeName": "detComOne.dstt[0]"
@@ -92,7 +105,7 @@
           "reliability": 0.99995
         }
       ],
-      "phase": 0,
+      "phase": -1,
       "route": [
         {
           "currentNodeName": "device2",
@@ -129,20 +142,31 @@
     },
     {
       "end_devices": [
-        "device4"
+        "wirelessdevice2"
       ],
       "hard_constraint_time_jitter": 50,
-      "hard_constraint_time_latency": 10000,
+      "hard_constraint_time_latency": 20000,
       "hard_constraint_time_unit": "us",
       "name": "flow2",
-      "objective_type": 3,
+      "objective_type": 4,
       "packet_loss": 0,
-      "packet_periodicity": 5000,
+      "packet_periodicity": 10000,
       "packet_periodicity_unit": "us",
-      "packet_size": 8560,
+      "packet_size": 8000,
       "packet_size_unit": "bit",
-      "pcp": 0,
-      "pdb_map": [],
+      "pcp": 3,
+      "pdb_map": [
+        {
+          "histogram": "../data/histograms/detComOne.dstt[1]_Downlink.json",
+          "key": "detComOne.dstt[1]_Downlink",
+          "link": {
+            "currentNodeName": "detComOne.nwtt",
+            "nextNodeName": "detComOne.dstt[1]"
+          },
+          "policy": 0,
+          "reliability": 0.9999
+        }
+      ],
       "phase": 0,
       "route": [
         {
@@ -155,10 +179,72 @@
         },
         {
           "currentNodeName": "bridge1",
-          "nextNodeName": "device4"
+          "nextNodeName": "detComOne.nwtt"
+        },
+        {
+          "currentNodeName": "detComOne.nwtt",
+          "nextNodeName": "detComOne.dstt[1]"
+        },
+        {
+          "currentNodeName": "detComOne.dstt[1]",
+          "nextNodeName": "wirelessdevice2"
         }
       ],
       "source_device": "device3",
+      "type": "unicast",
+      "weight": 1
+    },
+    {
+      "end_devices": [
+        "wirelessdevice1"
+      ],
+      "hard_constraint_time_jitter": 50,
+      "hard_constraint_time_latency": 20000,
+      "hard_constraint_time_unit": "us",
+      "name": "flow3",
+      "objective_type": 4,
+      "packet_loss": 0,
+      "packet_periodicity": 10000,
+      "packet_periodicity_unit": "us",
+      "packet_size": 8000,
+      "packet_size_unit": "bit",
+      "pcp": 0,
+      "pdb_map": [
+        {
+          "histogram": "../data/histograms/detComOne.dstt[0]_Downlink.json",
+          "key": "detComOne.dstt[0]_Downlink",
+          "link": {
+            "currentNodeName": "detComOne.nwtt",
+            "nextNodeName": "detComOne.dstt[0]"
+          },
+          "policy": 0,
+          "reliability": 0.9999
+        }
+      ],
+      "phase": 0,
+      "route": [
+        {
+          "currentNodeName": "device5",
+          "nextNodeName": "bridge2"
+        },
+        {
+          "currentNodeName": "bridge2",
+          "nextNodeName": "bridge1"
+        },
+        {
+          "currentNodeName": "bridge1",
+          "nextNodeName": "detComOne.nwtt"
+        },
+        {
+          "currentNodeName": "detComOne.nwtt",
+          "nextNodeName": "detComOne.dstt[0]"
+        },
+        {
+          "currentNodeName": "detComOne.dstt[0]",
+          "nextNodeName": "wirelessdevice1"
+        }
+      ],
+      "source_device": "device5",
       "type": "unicast",
       "weight": 1
     }

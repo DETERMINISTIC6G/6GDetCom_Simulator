@@ -44,6 +44,9 @@ void ChangeMonitor::initialize(int stage)
         auto path = par("gateScheduleConfigurator").stringValue();
         gateScheduleConfigurator = check_and_cast<GateScheduleConfiguratorBase *>(getModuleByPath(path));
 
+
+    } else if (stage == INITSTAGE_NETWORK_INTERFACE_CONFIGURATION) {
+
         configureMappings();
 
     }
@@ -99,12 +102,6 @@ void ChangeMonitor::notify(std::string source) {
 
 
 void ChangeMonitor::prepaireChangesForProcessing() {
-
-   /* std::vector<int> v;
-    for (const auto &mapping : configMappings) {
-            v.push_back(mapping.packetInterval.intValueInUnit("ns"));
-    }
-    auto res = std::reduce(v.begin(), v.end(), 1, std::min<int, int>);*/
 
     //gateScheduleConfigurator->par("gateCycleDuration").setValue(cValue(res, "ns"));
     gateScheduleConfigurator->par("configuration").setObjectValue(convertToCValueArray(configMappings));
@@ -186,7 +183,7 @@ void ChangeMonitor::fillDistributionsMapFor(TsnTranslator *translator) {
         }
         auto bridge = std::string(translator->getParentModule()->getName()) + "." + std::string(translator->getFullName()) + "_" + std::string(param);
         (*distributions)[bridge] = element;
-    }
+    }//endfor
 }
 
 
@@ -208,6 +205,7 @@ void ChangeMonitor::createMapping(cValueMap *element, int i) {
     mapping.maxJitter = element->get("maxJitter");
     mapping.reliability = element->get("reliability").doubleValue();
     mapping.policy = element->get("policy").intValue();
+    mapping.phase = element->get("phase");
 }
 
 
@@ -280,6 +278,8 @@ cValue ChangeMonitor::convertMappingToCValue(const Mapping &mapping) {
     map->set("maxJitter", mapping.maxJitter);
     map->set("reliability", mapping.reliability);
     map->set("policy", mapping.policy);
+
+    map->set("phase", mapping.phase);
 
     return cValue(map);
 }

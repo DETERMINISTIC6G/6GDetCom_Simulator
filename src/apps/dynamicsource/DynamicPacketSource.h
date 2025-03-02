@@ -42,9 +42,11 @@ protected:
     bool enabledParameter = true;
     ClockEvent *parameterChangeEvent = nullptr;
     std::string flowName = "";
-    int pcp = 0;
+    int pcp;
     cPar *jitter = nullptr;
     cPar *latency = nullptr;
+    std::vector<simtime_t> offsets;
+    size_t nextProductionIndex = 0;
 
 friend class ChangeMonitor;
 
@@ -57,8 +59,11 @@ protected:
     virtual void scheduleProductionTimerAndProducePacket() override;
 
 
+
+
 public:
     virtual cValueMap* getConfiguration();
+    virtual void setNewConfiguration(const std::vector<simtime_t>& simtimeVector);
 
     ~DynamicPacketSource() override;
 

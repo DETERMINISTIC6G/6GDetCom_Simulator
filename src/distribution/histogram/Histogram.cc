@@ -145,13 +145,13 @@ void Histogram::convertHistogramToJSONBins(cValueArray *jsonBins) {
     for (const auto *bin : getBins()) {
         cValueMap *jsonBin = new cValueMap();
 
-        double left = bin->leftBoundary.doubleValueInUnit("ms");
-        jsonBin->set("lower_bound", left);
+        //double left = bin->leftBoundary.doubleValueInUnit("ms");
+        jsonBin->set("lower_bound", bin->leftBoundary);
 
-        double right = bin->rightBoundary.doubleValueInUnit("ms");
-        jsonBin->set("upper_bound", right);
+        //double right = bin->rightBoundary.doubleValueInUnit("ms");
+        jsonBin->set("upper_bound", bin->rightBoundary);
 
-        jsonBin->set("unit", cValue("ms"));
+        //jsonBin->set("unit", cValue("ms"));
         jsonBin->set("count", cValue(bin->count));
         //jsonBin->set("accumulatedCount",  cValue(bin->accumulatedCount));
 

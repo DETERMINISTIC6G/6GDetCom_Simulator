@@ -28,11 +28,8 @@ simple ExternalGateScheduleConfigurator extends GateScheduleConfiguratorBase lik
     
     gateCycleDuration @mutable = default(0s);
         
-    string outputFileName = default("tsn_configuration.json");
-   
-    string fileNameStreams = default("streams.json");
-    string fileNameNetwork = default("network.json");
-    string fileNameDistribution = default("histograms.json");
+    string command = default("");
+    object args = default([]);
        
     @class(ExternalGateScheduleConfigurator);
 }

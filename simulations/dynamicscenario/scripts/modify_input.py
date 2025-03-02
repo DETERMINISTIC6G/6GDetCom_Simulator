@@ -19,6 +19,8 @@ if __name__ == "__main__":
     }
     streams_data = []
     
+    histogram_data = {}
+    
     x_pos, y_pos = 100, 100  # dummy
     
     # creating a mapping from device name to ID
@@ -53,14 +55,14 @@ if __name__ == "__main__":
         for port in switch['ports']:
             link = {
                 "type": port.get("link_type"),
-                "data_rate": port.get("data_rate") * 10**6 if port.get("data_rate") < 1e+308 else 1e+308, # b/s,  +inf if DetCom link
+                "data_rate": port.get("data_rate") * 10**6 if port.get("data_rate") < 1e+308 else 1000000000, #1e+308, # b/s,  +inf if DetCom link
                 "propagation_delay": int(port.get("propagation_delay") * 1000), #ns
-                "multiple_subcarriers": port.get("multiple_subcarriers"),
+                #"multiple_subcarriers": port.get("multiple_subcarriers"),
                 "source": id_mapping_dict.get(switch['name']),
                 "target": id_mapping_dict.get(port['connects_to'])
             }
-            #if "multiple_subcarriers" in port:
-                #link["multiple_subcarriers"] = port["multiple_subcarriers"]
+            if "multiple_subcarriers" in port:
+                link["multiple_subcarriers"] = port["multiple_subcarriers"]
             network_data['links'].append(link)
     
     # write network
@@ -85,7 +87,21 @@ if __name__ == "__main__":
                  id_mapping_dict.get(item["nextNodeName"])] 
                 for item in stream["route"]
                 ],
-            "pdb_map": [{
+            #"pdb_map": None,
+            #"pdb_map": [{
+                #"link": [
+                        #id_mapping_dict.get(item['link']["currentNodeName"]),
+                        #id_mapping_dict.get(item['link']["nextNodeName"])
+                    #],
+                #"reliability": item['reliability'],
+                #"policy": item['policy'],
+                #"histogram": item['histogram']}
+                #for item in stream["pdb_map"]]
+        }
+        if not stream["pdb_map"]:
+            flow["pdb_map"] = None
+        else :
+            flow["pdb_map"] = [{
                 "link": [
                         id_mapping_dict.get(item['link']["currentNodeName"]),
                         id_mapping_dict.get(item['link']["nextNodeName"])
@@ -94,17 +110,21 @@ if __name__ == "__main__":
                 "policy": item['policy'],
                 "histogram": item['histogram']}
                 for item in stream["pdb_map"]]
-        }
+        
+        
+        
+        
         streams_data.append(flow)
     
     # write flows
     with open('../../../libtsndgm2.0/data/streams_test.json', 'w') as outfile:
         json.dump(streams_data, outfile, indent=4)
+        
     
         
     # write each histogram to separate file
     for hist in histograms['distributions'] :
-        with open(f"../../../libtsndgm2.0/data/histograms/{hist['name']}_test.json", 'w') as outfile:
+        with open(f"../../../libtsndgm2.0/data/histograms/{hist['name']}.json", 'w') as outfile:
             json.dump(hist, outfile, indent=4)
         
     

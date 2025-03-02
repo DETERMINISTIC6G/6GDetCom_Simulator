@@ -51,8 +51,8 @@ protected:
     class Mapping {
     public:
         std::string name;
-        int pcp = 0;
-        int gateIndex = 0;
+        int pcp;
+        int gateIndex;
         std::string application;
         std::string source;
         std::string destination;
@@ -63,12 +63,13 @@ protected:
         //std::string pathFragments;
         double reliability = 0.9999;
         int policy = 0;
+        cValue phase;
 
         friend std::ostream& operator<<(std::ostream &os,
                 const Mapping &mapping) {
             os << "name: " << mapping.name << ", source: " << mapping.source << ", pcp: " << mapping.pcp
                     << ", gateIndex: " << mapping.gateIndex << ", application: "
-                    << mapping.application;
+                    << mapping.application << ", destination: " << mapping.destination;
             return os;
         }
     };
@@ -89,6 +90,11 @@ protected:
 
 
   protected:
+
+    virtual int numInitStages() const override {
+            return 2;
+        }
+
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *msg) override;
     void subscribeForDynamicChanges();
