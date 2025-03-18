@@ -2,15 +2,19 @@ import json
 import sys
 
 if __name__ == "__main__":
+    arguments = sys.argv[1:]
     # Reading JSON files
      #'../data/omnet/network.json'
-    with open('/home/elmos/Forschungsprojekt/dynamic-scenario/simulations/dynamicscenario/data/network.json', 'r') as network_file:
+   # with open('/home/elmos/Forschungsprojekt/dynamic-scenario/simulations/dynamicscenario/data/network.json', 'r') as network_file:
+    with open(arguments[0], 'r') as network_file:
         network = json.load(network_file)
     #'../data/omnet/streams.json'
-    with open('/home/elmos/Forschungsprojekt/dynamic-scenario/simulations/dynamicscenario/data/streams.json', 'r') as streams_file:
+    #with open('/home/elmos/Forschungsprojekt/dynamic-scenario/simulations/dynamicscenario/data/streams.json', 'r') as streams_file:
+    with open(arguments[1], 'r') as streams_file:
         streams = json.load(streams_file)
     #'../data/omnet/histograms.json'
-    with open('/home/elmos/Forschungsprojekt/dynamic-scenario/simulations/dynamicscenario/data/histograms.json', 'r') as histograms_file:
+    #with open('/home/elmos/Forschungsprojekt/dynamic-scenario/simulations/dynamicscenario/data/histograms.json', 'r') as histograms_file:
+    with open(arguments[2], 'r') as histograms_file:
         histograms = json.load(histograms_file)
     
     # creating a new structure based on the scheduler input
@@ -67,7 +71,8 @@ if __name__ == "__main__":
             network_data['links'].append(link)
     
     # write network
-    with open('../data/network.json', 'w') as outfile:
+    #with open('../data/network.json', 'w') as outfile:
+    with open('/home/elmos/Forschungsprojekt/libtsndgm2.0/data/network.json', 'w') as outfile:
         json.dump(network_data, outfile, indent=4)
     
     # add flows
@@ -118,14 +123,16 @@ if __name__ == "__main__":
         streams_data.append(flow)
     
     # write flows
-    with open('../data/streams.json', 'w') as outfile:
+    #with open('../data/streams.json', 'w') as outfile:
+    with open('/home/elmos/Forschungsprojekt/libtsndgm2.0/data/streams.json', 'w') as outfile:
         json.dump(streams_data, outfile, indent=4)
         
     
         
     # write each histogram to separate file
     for hist in histograms['distributions'] :
-        with open(f"../data/histograms/{hist['name']}.json", 'w') as outfile:
+        #with open(f"../data/histograms/{hist['name']}.json", 'w') as outfile:
+        with open(f"/home/elmos/Forschungsprojekt/libtsndgm2.0/data/histograms/{hist['name']}.json", 'w') as outfile:
             json.dump(hist, outfile, indent=4)
         
     

@@ -61,7 +61,7 @@ protected:
         cValue maxLatency;
         cValue maxJitter;
         //std::string pathFragments;
-        double reliability = 0.9999;
+        double reliability = 1.0;
         int policy = 0;
         cValue phase;
 
@@ -98,7 +98,7 @@ protected:
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *msg) override;
     void subscribeForDynamicChanges();
-    void prepaireChangesForProcessing();
+    void prepaireChangesForProcessing(int initialized);
     void configureMappings();
     cValueArray* convertToCValueArray(const std::vector<Mapping>& configMappings);
     cValue convertMappingToCValue(const Mapping& mapping);
@@ -112,6 +112,7 @@ protected:
     void updateDistributions(std::string,  cValueArray* element);
     std::map<std::string, cValueArray*> *getDistributions();
     cValueArray* getStreamConfigurations();
+    void convolveDistributions(cModule *networkNode, cModule *nextNetworkNode);
 
     void notify(std::string source);
     ~ChangeMonitor() override;

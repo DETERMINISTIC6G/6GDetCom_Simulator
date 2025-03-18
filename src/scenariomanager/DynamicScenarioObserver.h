@@ -22,6 +22,8 @@
 #include "inet/common/scenario/ScenarioTimer_m.h"
 #include "inet/common/clock/ClockUserModuleMixin.h"
 
+#include "../distribution/histogram/Histogram.h"
+
 
 
 using namespace omnetpp;
@@ -51,7 +53,8 @@ public:
     virtual void receiveSignal(cComponent *source, simsignal_t signalID,
             cObject *obj, cObject *details) override;
 
-    cValueArray *createHistogram( cDynamicExpression &dynExpr);
+    cValueArray *createHistogram( cDynamicExpression &dynExpr, cDynamicExpression *dynExprOpt=nullptr);
+
 
 
 

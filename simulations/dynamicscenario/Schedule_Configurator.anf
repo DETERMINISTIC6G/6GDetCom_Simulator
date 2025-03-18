@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <analysis version="2">
     <inputs>
-        <input pattern="/dynamic-scenario/simulations/dynamicscenario/results/Schedule_Configurator-*.vec"/>
-        <input pattern="/dynamic-scenario/simulations/dynamicscenario/results/Schedule_Configurator-*.sca"/>
+        <input pattern="results/Schedule_Configurator-*.vec"/>
+        <input pattern="results/Schedule_Configurator-*.sca"/>
     </inputs>
     <charts/>
 </analysis>

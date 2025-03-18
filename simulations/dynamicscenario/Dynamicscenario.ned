@@ -93,6 +93,10 @@ network Dynamicscenario extends DetComNetworkBase
         device5: TsnDevice {
             @display("p=1421,199");
         }
+        wirelessdevice5: TsnDevice {
+            @display("p=1450,568");
+        }
+
     connections:
         wirelessdevice1.ethg++ <--> EthernetLink { @icon("radio");@display("ls=red,,da"); } <--> detComOne.dsttg++;
         wirelessdevice2.ethg++ <--> EthernetLink { @icon("radio");@display("ls=red,,da"); } <--> detComOne.dsttg++;
@@ -104,8 +108,11 @@ network Dynamicscenario extends DetComNetworkBase
         bridge2.ethg++ <--> EthernetLink <--> detComTwo.nwttg;
         detComThree.nwttg <--> EthernetLink <--> bridge2.ethg++;
         detComThree.dsttg++ <--> EthernetLink { @icon("radio");@display("ls=red,,da"); } <--> wirelessdevice3.ethg++;
+        detComThree.dsttg++ <--> EthernetLink { @icon("radio");@display("ls=red,,da"); } <--> wirelessdevice5.ethg++;
 
         device3.ethg++ <--> EthernetLink <--> bridge2.ethg++;
         bridge1.ethg++ <--> EthernetLink <--> device4.ethg++;
         device5.ethg++ <--> EthernetLink <--> bridge2.ethg++;
+        
+        
 }

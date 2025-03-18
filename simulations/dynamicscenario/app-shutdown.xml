@@ -43,18 +43,18 @@
 	<set-param module="device3.app[0].source" par="enabled" value="false"/>
 </at>
 
-  <at t="10">
+  <at t="5">
 	<set-param module="device2.app[0].source"
-		par="productionInterval" value="20ms" />
-	<set-param module="device2.app[0].source"
-		par="packetLength" value="1200B" />		
+		par="dynamicProductionInterval" value="20ms" />
+ 	<set-param module="device2.app[0].source"
+		par="dynamicPacketLength" value="1200B" />
 </at>
 
- <set-param t="20" module="device2.app[0].source" par="enabled" value="false"/>
+<set-param t="20" module="device2.app[0].source" par="enabled" value="false"/>
 <set-param t="20" module="device1.app[0].source" par="enabled" value="true"/>
 
 
-
+<set-param t="30" module="device2.app[0].source" par="enabled" value="true"/>
 
 <set-param t="50" module="device5.app[0].source" par="enabled" value="true"/>
 <set-param t="50" module="device3.app[0].source" par="enabled" value="true"/>

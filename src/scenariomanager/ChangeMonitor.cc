@@ -48,6 +48,7 @@ void ChangeMonitor::initialize(int stage)
     } else if (stage == INITSTAGE_NETWORK_INTERFACE_CONFIGURATION) {
 
         configureMappings();
+        prepaireChangesForProcessing(0);
 
     }
 }
@@ -55,7 +56,7 @@ void ChangeMonitor::initialize(int stage)
 void ChangeMonitor::handleMessage(cMessage *msg)
 {
     if (msg == timer) {
-        prepaireChangesForProcessing();
+        prepaireChangesForProcessing(1);
     }else
         throw cRuntimeError("Unknown message");
 
@@ -98,10 +99,22 @@ void ChangeMonitor::notify(std::string source) {
 }
 
 
-void ChangeMonitor::prepaireChangesForProcessing() {
+void ChangeMonitor::prepaireChangesForProcessing(int initialized) {
 
-    //gateScheduleConfigurator->par("gateCycleDuration").setValue(cValue(res, "ns"));
-    gateScheduleConfigurator->par("configuration").setObjectValue(getStreamConfigurations());
+    long hyperperiod = 1;
+    std::vector<long> intervals;
+    for (const auto &mapping : configMappings) {
+        intervals.push_back(std::round(mapping.packetInterval.doubleValueInUnit("ns")));
+
+    }
+    for (long interval : intervals) {
+        hyperperiod = std::lcm(hyperperiod, interval);//(hyperperiod * interval) / std::gcd(hyperperiod, interval) ;
+        std::cout << "interval: " << interval << endl;
+    }
+
+    std::cout << "hyperperiode: " <<  hyperperiod << endl;
+    gateScheduleConfigurator->par("gateCycleDuration").setValue(cValue(hyperperiod, "ns"));
+    if (initialized) gateScheduleConfigurator->par("configuration").setObjectValue(getStreamConfigurations());
 
 }
 
@@ -179,6 +192,7 @@ void ChangeMonitor::addEntriesToDistributionMapFor(TsnTranslator *translator) {
         }*/
         auto bridge = std::string(translator->getParentModule()->getName()) + "." + std::string(translator->getFullName()) + "_" + std::string(param);
         //(*distributions)[bridge] = element;
+        std::cout << "INITIAL " << bridge << endl;
         updateDistributions(bridge, element);
     }//endfor
 }
@@ -281,7 +295,7 @@ void ChangeMonitor::updateDistributions(std::string bridge,  cValueArray* elemen
 
     auto it = distributions->find(bridge);
     if (it != distributions->end()) {
-            delete it->second;
+            //delete it->second;
             //this->drop(x);
             if (!element->size()) {
                 distributions->erase(it);
@@ -299,6 +313,21 @@ void ChangeMonitor::updateDistributions(std::string bridge,  cValueArray* elemen
         }
 }
 
+void ChangeMonitor::convolveDistributions(cModule *networkNode, cModule *nextNetworkNode) {
+    auto expr1 = ((TsnTranslator*)networkNode)->getDistribution("delayUplink");
+    auto expr2 = ((TsnTranslator*)nextNetworkNode)->getDistribution("delayDownlink");
+
+    auto bridge = std::string(networkNode->getParentModule()->getName()) +
+            "." + networkNode->getFullName() + "_Uplink_Downlink";
+    auto element = observer->createHistogram(*expr2, expr1);
+
+    this->updateDistributions(bridge,  element);
+    delete expr1;
+    delete expr2;
+    //delete element;
+}
+
+
 std::map<std::string, cValueArray*> *ChangeMonitor::getDistributions() {
     return distributions;
 }
@@ -309,7 +338,7 @@ cValueArray* ChangeMonitor::getStreamConfigurations() {
 
 ChangeMonitor::~ChangeMonitor() {
     for (auto it = distributions->begin(); it != distributions->end(); ++it) {
-         delete it->second;
+         //delete it->second;
     }
     delete distributions;
     cancelAndDeleteClockEvent(timer);

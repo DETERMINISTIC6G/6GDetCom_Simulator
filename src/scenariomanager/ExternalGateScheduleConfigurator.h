@@ -61,9 +61,12 @@ class Schedule: public Output::Schedule {
     };
 
     class Output: public GateScheduleConfiguratorBase::Output {
-    public:
-        std::map<Input::Application*, std::vector<simtime_t>> applicationStartTimesArray;
-
+        public:
+            std::map<Input::Application*, std::vector<simtime_t>> applicationStartTimesArray;
+        public:
+            bool hasSchedule() {
+                return gateSchedules.size();
+            }
     };
 
     template<typename ... Args>
@@ -82,7 +85,14 @@ private:
     std::string command;
     cValueArray *args = nullptr;
 
+    std::string networkFilePar;
+    std::string streamsFilePar;
+    std::string histogramsFilePar;
+
+    std::string configurationFilePar;
+
     ClockEvent *configurationComputedEvent = nullptr;
+    simtime_t scheduleComputingTime = 0;
 
   protected:
     virtual void initialize(int stage) override;
@@ -108,7 +118,7 @@ private:
     virtual void writeStreamsToFile(const Input& input) const;
     virtual void writeNetworkToFile(const Input& input) const;
 
-    std::string getDescription(DetComLinkType type) const;
+    std::string getDetComLinkDescription(DetComLinkType type) const;
     std::string expandNodeName(cModule *module) const;
     virtual short getSwitchType(cModule* mod) const;
 
@@ -126,7 +136,7 @@ private:
     void setReliabilityAndPolicyToPDBMapEntry(cValueArray *pdb_map, std::string name) const;
     void addEntryToPDBMap(cValueArray *pdb_map, DetComLinkType linkType, std::string nameNetworkNode, std::string nameNextNetworkNode) const;
     double computeGuardBand(const Input &input) const;
-    void invokeScheduler() const;
+    bool invokeScheduler() const;
     std::variant<const char*, intval_t, double>  getArgValue(const int i) const;
 
 

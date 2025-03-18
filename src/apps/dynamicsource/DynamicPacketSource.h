@@ -20,6 +20,7 @@
 #include "inet/queueing/source/ActivePacketSource.h"
 #include "../../scenariomanager/DynamicScenarioObserver.h"
 #include "../../devices/tsntranslator/TsnTranslator.h"
+#include "../../scenariomanager/ExternalGateScheduleConfigurator.h"
 
 #include "inet/common/clock/ClockUserModuleMixin.h"
 
@@ -39,16 +40,16 @@ enum class StreamObjectives {
 };
 
 protected:
-    bool enabledParameter = true;
+    char enabledParameter;
+    bool hasSchedulerPermission;
+    bool isFirstTimeRun;
     ClockEvent *parameterChangeEvent = nullptr;
     std::string flowName = "";
-    int pcp;
-    cPar *jitter = nullptr;
-    cPar *latency = nullptr;
+
     std::vector<simtime_t> offsets;
     size_t nextProductionIndex = 0;
 
-friend class ChangeMonitor;
+friend class ChangeMonitor; friend class ExternalGateScheduler;
 
 protected:
     virtual void initialize(int stage) override;
@@ -64,6 +65,7 @@ protected:
 public:
     virtual cValueMap* getConfiguration();
     virtual void setNewConfiguration(const std::vector<simtime_t>& simtimeVector);
+    virtual bool stopIfNotScheduled();
 
     ~DynamicPacketSource() override;
 

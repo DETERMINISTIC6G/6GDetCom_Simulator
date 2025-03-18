@@ -85,10 +85,12 @@ void DynamicScenarioObserver::receiveSignal(cComponent *source, simsignal_t sign
 }
 
 
-cValueArray *DynamicScenarioObserver::createHistogram(cDynamicExpression &dynExpr) {
+cValueArray *DynamicScenarioObserver::createHistogram(cDynamicExpression &dynExpr, cDynamicExpression *dynExprOpt) {
         cValueArray *jsonBins = new cValueArray();
         Histogram *h = nullptr;
-        if (dynExpr.isAConstant()) {
+
+
+          if (dynExpr.isAConstant()) {
             double constDelay = dynExpr.evaluate(this).doubleValueInUnit("ms");
 
             if (constDelay == 0) {
@@ -108,7 +110,8 @@ cValueArray *DynamicScenarioObserver::createHistogram(cDynamicExpression &dynExp
             cStringTokenizer tokenizer(delay.c_str(), " \t\n\r\f(),*\"");
             const char *token = tokenizer.nextToken();
 
-            if (!strcmp(token, "rngProvider")) {
+            if (dynExprOpt == nullptr && !strcmp(token, "rngProvider")) {
+
                 auto container = tokenizer.nextToken();
                 auto key = tokenizer.nextToken();
                 //cModule *module = monitor->getModuleByPath(container);
@@ -120,8 +123,21 @@ cValueArray *DynamicScenarioObserver::createHistogram(cDynamicExpression &dynExp
                 auto numberOfSamples = monitor->par("numberOfSamples").getValue().intValue();
                 double num_bins = round(log2(numberOfSamples) + 1); // Sturges-formula
                 std::vector<double> samples(numberOfSamples);
+
+                cDynamicExpression *expression;
+                if (dynExprOpt != nullptr) {
+                           auto e = dynExpr.str() + "+" + dynExprOpt->str();
+                           expression = new cDynamicExpression();
+                           expression->parse(e.c_str());
+                           jsonBins->setName("convolution");
+                }else {
+                    expression =  &dynExpr;
+                    jsonBins->setName("expression");
+                }
+
+
                 for (int i = 0; i < numberOfSamples; ++i) {
-                    samples[i] = dynExpr.evaluate(this).doubleValueInUnit("ms");
+                    samples[i] = expression->evaluate(monitor).doubleValueInUnit("ms"); //dynExpr.evaluate(this).doubleValueInUnit("ms");
                 }
                 double min_val = *std::min_element(samples.begin(), samples.end());
                 double max_val = *std::max_element(samples.begin(), samples.end());
@@ -142,12 +158,18 @@ cValueArray *DynamicScenarioObserver::createHistogram(cDynamicExpression &dynExp
                 cXMLElement *histogramEntity = h->createHistogramEntity(bin_edges, frequencies, num_bins);
                 h->parseHistogramConfig(histogramEntity);
                 h->convertHistogramToJSONBins(jsonBins);
-                jsonBins->setName("expression");
+                //jsonBins->setName("expression");
                 delete histogramEntity;
                 delete h;
+                if (dynExprOpt != nullptr) delete expression;
+
             }
         }
+
         return jsonBins;
 }
+
+
+
 
 } /* namespace d6g */

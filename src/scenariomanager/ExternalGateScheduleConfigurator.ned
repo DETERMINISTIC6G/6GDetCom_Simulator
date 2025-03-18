@@ -28,8 +28,15 @@ simple ExternalGateScheduleConfigurator extends GateScheduleConfiguratorBase lik
     
     gateCycleDuration @mutable = default(0s);
         
-    string command = default("");
+    string command;
     object args = default([]);
+    
+    string networkFile;
+    string streamsFile;
+    string histogramsFile;
+     
+    
+    string configurationFile;
        
     @class(ExternalGateScheduleConfigurator);
 }

@@ -21,7 +21,11 @@
 #include <fstream>
 #include <functional> // hash
 #include <variant>
-
+#include <chrono>
+#include <ctime>
+#include <numeric>
+#include <limits>
+#include <cmath>
 
 
 namespace d6g {
@@ -35,10 +39,18 @@ void ExternalGateScheduleConfigurator::initialize(int stage) {
         command = par("command").stdstringValue();
         args = check_and_cast<cValueArray*>(par("args").objectValue());
 
+        networkFilePar = par("networkFile").stdstringValue();
+        streamsFilePar = par("streamsFile").stdstringValue();
+        histogramsFilePar = par("histogramsFile").stdstringValue();
+
+        configurationFilePar = par("configurationFile").stdstringValue();
+
         configuration = check_and_cast<cValueArray*>(par("configuration").objectValue()); // specified in .ini
         gateCycleDuration = par("gateCycleDuration");
 
         configurationComputedEvent = new ClockEvent("configuration_computed");
+        configurationComputedEvent->setSchedulingPriority(0);
+
 
         hashMap = new std::map<std::string, uint16_t>();
     } else if (stage == INITSTAGE_GATE_SCHEDULE_CONFIGURATION) {
@@ -52,14 +64,17 @@ void ExternalGateScheduleConfigurator::initialize(int stage) {
         computeConfiguration();
         configureGateScheduling();
         configureApplicationOffsets();
-    }
+    }//end INITSTAGE_GATE_SCHEDULE_CONFIGURATION
 }
 
 void ExternalGateScheduleConfigurator::handleMessage(cMessage *msg){
-    if (msg == configurationComputedEvent) {
-            std::cout << "Self-Message received: " << simTime() << endl;
+    if (msg == configurationComputedEvent ) {
+           std::cout << "Configurator (time from handleMessage): " << simTime() << " prio: " << msg->getSchedulingPriority() << endl;
+         if (((Output*)gateSchedulingOutput)->hasSchedule())  {
             configureGateScheduling();
             configureApplicationOffsets();
+         }
+
     } else
             throw cRuntimeError("Unknown message");
 }
@@ -69,17 +84,21 @@ void ExternalGateScheduleConfigurator::handleParameterChange(const char *name) {
         configuration = check_and_cast<cValueArray*>(par("configuration").objectValue());
         clearConfiguration();
 
-        simtime_t remainingTime = 0;
-        double elapsedTime = 0;
-        simtime_t startTime = simTime();//clock();
-
         if (configurationComputedEvent->isScheduled()) {
-            remainingTime = configurationComputedEvent->getArrivalTime() - startTime;
             cancelEvent(configurationComputedEvent);
         }
+
+        auto start_time = std::chrono::high_resolution_clock::now();
         computeConfiguration();
-        if (startTime > 0) elapsedTime = (simTime() - startTime + remainingTime).dbl();
-        scheduleAfter(elapsedTime, configurationComputedEvent);
+        auto end_time = std::chrono::high_resolution_clock::now();
+
+        scheduleComputingTime = SimTime((std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time)).count(), SIMTIME_NS);
+        simtime_t elapsedTimeSinceStartCurrentCycle = simTime() + scheduleComputingTime;
+        while (elapsedTimeSinceStartCurrentCycle - gateCycleDuration > 0) elapsedTimeSinceStartCurrentCycle-=gateCycleDuration;
+
+        configurationComputedEvent->setSchedulingPriority(0);
+        scheduleAt(simTime() + scheduleComputingTime + gateCycleDuration - elapsedTimeSinceStartCurrentCycle, configurationComputedEvent);
+        std::cout << "cycle: " << gateCycleDuration << "  Configurator (time from ParameterChange): " << simTime() + scheduleComputingTime << endl;
         //configureGateScheduling();
         //configureApplicationOffsets();
     }
@@ -168,32 +187,62 @@ ExternalGateScheduleConfigurator::Output* ExternalGateScheduleConfigurator::read
 }
 
 
-void ExternalGateScheduleConfigurator::invokeScheduler() const {
-
+bool ExternalGateScheduleConfigurator::invokeScheduler() const{
+    bool configured;
     char currentDir[PATH_MAX];
     getcwd(currentDir, sizeof(currentDir));
     auto dir = getenv("LIBTSNGDM_ROOT");
     chdir(dir);
     //std::string command = "./benchmarks/heuristic";
-    std::string commandFromINI = format(command, (*args)[0].stringValue(), (*args)[1].stringValue(), (*args)[2].stringValue());
-    if (std::system(commandFromINI.c_str()) != 0)
-        throw cRuntimeError(
-                "Command execution failed, make sure LIBTSNGDM_ROOT is set and a scheduler tool is installed");
+    //std::string commandFromINI = format(command, (*args)[0].stringValue(), (*args)[1].stringValue(), (*args)[2].stringValue());
+    std::string commandFromINI = format(command, networkFilePar.c_str(), streamsFilePar.c_str(),
+                                                 histogramsFilePar.c_str(), configurationFilePar.c_str());
+    if (std::system(commandFromINI.c_str()) != 0) {
+       // throw cRuntimeError(
+              //  "Command execution failed, make sure LIBTSNGDM_ROOT is set and a scheduler tool is installed");
+        configured = false;
+    } else configured = true;
     chdir(currentDir);
+    return configured;
 }
 
 
-ExternalGateScheduleConfigurator::Output *ExternalGateScheduleConfigurator::computeGateScheduling(const Input& input) const {
+ExternalGateScheduleConfigurator::Output *ExternalGateScheduleConfigurator::computeGateScheduling(const Input& input) const{
     writeStreamsToFile(input);
     writeNetworkToFile(input);
     writeDistributionsToFile();
 
-    invokeScheduler();
-    std::string outputLocation = getenv("LIBTSNGDM_ROOT") + (*args)[2].stdstringValue();
+    std::string outputLocation = getenv("LIBTSNGDM_ROOT") + configurationFilePar;//(*args)[2].stdstringValue();
 
-    return readOutputFromFile(input, outputLocation); //new Output();
+
+
+    if (invokeScheduler()) {
+        return readOutputFromFile(input, outputLocation); //
+        //return readOutputFromFile(input, configurationFilePar);
+    }else {
+        auto monitor = check_and_cast<ChangeMonitor*>(getModuleByPath("monitor"));
+        for (auto &application : input.applications ) {
+            auto appModule = (DynamicPacketSource*) (application->module->getSubmodule("source"));
+
+            if (appModule->stopIfNotScheduled()) {
+                std::cout << application->module->getFullName() << "   " << appModule->getFullPath() << endl;
+                auto element = appModule->getConfiguration();
+                monitor->updateMappings(element);
+                delete element;
+            }
+        }//endfor
+        bubble(format("No schedule for the event at %.2f has been calculated.",
+                simTime().dbl() - monitor->par("schedulerCallDelay").doubleValueInUnit("s")).c_str());
+
+        return new Output();
+    }
+
+
+
 }
 
+//########################################  WRITE  ################################################
+//#################################################################################################
 
 void ExternalGateScheduleConfigurator::writeDistributionsToFile() const {
     cValueMap *json = new cValueMap();
@@ -212,14 +261,21 @@ void ExternalGateScheduleConfigurator::writeDistributionsToFile() const {
         }
     }
     //this->write(getenv("LIBTSNGDM_ROOT") + fileNameDistribution, json);
-    write("data/histograms.json", json);
+    //write("data/histograms.json", json);
+    write(histogramsFilePar, json);
     delete json;
 }
 
 void ExternalGateScheduleConfigurator::writeStreamsToFile(const Input& input) const {
     auto jsonStreams = convertInputToJsonStreams(input);
+    cValueMap *metaData = new cValueMap();
+    jsonStreams->set("META", metaData);
+    metaData->set("simulation_time", simTime().inUnit(SIMTIME_US));
+    metaData->set("simulation_time_unit", "us");
+    metaData->set("schedule_type", "Hypercycle");
     //this->write(getenv("LIBTSNGDM_ROOT") + fileNameStreams, jsonStreams);
-    write("data/streams.json", jsonStreams);
+    //write("data/streams.json", jsonStreams);
+    write(streamsFilePar, jsonStreams);
     delete jsonStreams;
 }
 
@@ -235,7 +291,8 @@ void ExternalGateScheduleConfigurator::writeNetworkToFile(const Input& input) co
         jsonIDs->add(json);
     }
     //this->write(getenv("LIBTSNGDM_ROOT") + fileNameNetwork, jsonNetwork);
-    write("data/network.json", jsonNetwork);
+    //write("data/network.json", jsonNetwork);
+    write(networkFilePar, jsonNetwork);
     delete jsonNetwork;
 }
 
@@ -250,6 +307,8 @@ void ExternalGateScheduleConfigurator::write(std::string fileName, cValueMap *js
     this->printJson(stream, cValue(json));
 }
 
+//###############################################################################################
+//##################################### CONVERT #################################################
 
 cValueMap *ExternalGateScheduleConfigurator::convertInputToJsonStreams(const Input& input) const {
     cValueMap *json = new cValueMap();
@@ -283,6 +342,7 @@ cValueMap *ExternalGateScheduleConfigurator::convertInputToJsonStreams(const Inp
         //temporary hard coded
         jsonFlow->set("weight", dynApplication->weight);
         jsonFlow->set("phase", dynApplication->phase.dbl());
+        jsonFlow->set("phase_unit", "us");
         jsonFlow->set("objective_type", dynApplication->objectiveType);
         jsonFlow->set("packet_loss", dynApplication->packetLoss);
         //################################
@@ -296,6 +356,7 @@ cValueMap *ExternalGateScheduleConfigurator::convertInputToJsonStreams(const Inp
 
         cValueArray *hops = new cValueArray();
         jsonFlow->set("route", hops);
+        int wirelessCnt = 0;
         for (int j = 0; j < flow->pathFragments.size(); j++) {
             auto pathFragment = flow->pathFragments[j];
             for (int k = 0; k < pathFragment->networkNodes.size() - 1; k++) {
@@ -310,12 +371,20 @@ cValueMap *ExternalGateScheduleConfigurator::convertInputToJsonStreams(const Inp
                 //pdb map: find a distribution
                 DetComLinkType linkType = DetComLinkType::NO_DETCOM_LINK;
                 if (isDetComLink(networkNode->module, nextNetworkNode->module, linkType)) {
+                    wirelessCnt++;
                     addEntryToPDBMap(pdb_map, linkType, nameNetworkNode, nameNextNetworkNode);
+                    if (linkType == DetComLinkType::DSTT_DSTT) {
+                        auto monitor = check_and_cast<ChangeMonitor*>(getModuleByPath("monitor"));
+
+                        monitor->convolveDistributions(networkNode->module,
+                                nextNetworkNode->module);
+                    }
                 }
             } // 3. for
         }//2. for
         //setReliabilityAndPolicyToPDBMapEntry(pdb_map, flow->name);
-
+        jsonFlow->set("wirelessPath", cValue((bool)wirelessCnt));
+        if (wirelessCnt) jsonFlow->set("wirelessPathLinkCnt", wirelessCnt);
         int pdbSize = pdb_map->size();
         double reliability = std::pow(dynApplication->reliability, 1.0/pdbSize); // #DetCom-link-th root of the reliability parameter ;
         int policy = dynApplication->policy;
@@ -376,20 +445,30 @@ void ExternalGateScheduleConfigurator::addEntryToPDBMap(cValueArray *pdb_map, De
     if (linkType == DetComLinkType::DSTT_DSTT) {
         ;
         //todo
+        //##############
+        cValueMap *pdb = new cValueMap();
+        pdb_map->add(pdb);
+        pdb->set("key", nameNetworkNode  + getDetComLinkDescription(linkType));
+        cValueMap *link = new cValueMap();
+        pdb->set("link", link);
+        link->set("currentNodeName", nameNetworkNode);
+        link->set("nextNodeName", nameNextNetworkNode);
+
+        //##############
     }else {
-        auto delayParam = {nameNetworkNode + getDescription(linkType), nameNextNetworkNode + getDescription(linkType)};
+        auto delayParam = {nameNetworkNode + getDetComLinkDescription(linkType), nameNextNetworkNode + getDetComLinkDescription(linkType)};
         for (auto key : delayParam) {
-            if (distribution->find(key) != distribution->end()) {
-            cValueMap *pdb = new cValueMap();
-            pdb_map->add(pdb);
-            pdb->set("histogram", cValue("../data/histograms/" + key + ".json")); // ! hard code
-            pdb->set("key", key);
-            cValueMap *link = new cValueMap();
-            pdb->set("link", link);
-            link->set("currentNodeName", nameNetworkNode);
-            link->set("nextNodeName", nameNextNetworkNode);
-            break;
-        }//endif
+                if (distribution->find(key) != distribution->end()) {
+                cValueMap *pdb = new cValueMap();
+                pdb_map->add(pdb);
+                //pdb->set("histogram", cValue("../data/histograms/" + key + ".json")); // ! hard code
+                pdb->set("key", key);
+                cValueMap *link = new cValueMap();
+                pdb->set("link", link);
+                link->set("currentNodeName", nameNetworkNode);
+                link->set("nextNodeName", nameNextNetworkNode);
+                break;
+            }//endif
         }//endfor
 
 /*        std::string key = nameNetworkNode + getDescription(linkType);
@@ -424,7 +503,7 @@ short ExternalGateScheduleConfigurator::getSwitchType(cModule* module) const {
     return (short)type;
 }
 
-std::string ExternalGateScheduleConfigurator::getDescription(DetComLinkType type) const { // for DetCom links
+std::string ExternalGateScheduleConfigurator::getDetComLinkDescription(DetComLinkType type) const { // for DetCom links
     switch (type) {
     case DetComLinkType::DSTT_NWTT:
         return "_Uplink";
@@ -488,11 +567,11 @@ cValueMap *ExternalGateScheduleConfigurator::convertInputToJsonNetwork(const Inp
 
             DetComLinkType detComLinkType;
             short link_type = isDetComLink(port->startNode->module, port->endNode->module, detComLinkType);
-            jsonPort->set("detCom_link_descr", getDescription(detComLinkType));
+            jsonPort->set("detCom_link_descr", getDetComLinkDescription(detComLinkType));
             jsonPort->set("link_type", link_type);
             if (link_type)  jsonPort->set("multiple_subcarriers", true);
 
-            jsonSwitch->set("processing_delay", 0);
+            jsonSwitch->set("processing_delay", 0); //temporary hard coded
             jsonSwitch->set("processing_delay_unit", "us");
             jsonSwitch->set("device_type", getSwitchType(port->startNode->module));
 
@@ -503,11 +582,10 @@ cValueMap *ExternalGateScheduleConfigurator::convertInputToJsonNetwork(const Inp
             jsonPort->set("data_rate", bps(port->datarate).get() / 1000000); // portSpeed
             jsonPort->set("data_rate_size_unit", "bit"); // portSpeedSizeUnit
             jsonPort->set("data_rate_time_unit", "us"); // portSpeedTimeUnit
-            jsonPort->set("schedule_type", "Hypercycle");
-            //jsonPort->set("cycle_start", 0);
-            //jsonPort->set("cycle_start_unit", "us");
-           // jsonPort->set("max_slot_duration", gateCycleDuration.dbl() * 1000000); //hypercycle
-           // jsonPort->set("max_slot_duration_unit", "us");
+
+
+            jsonPort->set("max_slot_duration", gateCycleDuration.inUnit(SIMTIME_US)); //.dbl() * 1000000); //hypercycle
+            jsonPort->set("max_slot_duration_unit", "us");
         }
     }
     //generateNetworkNodesHashMap(deviceList);
@@ -540,7 +618,7 @@ void ExternalGateScheduleConfigurator::addFlows(Input& input) const {
         int pcp = entry->get("pcp").intValue();
         int gateIndex = entry->get("gateIndex").intValue();
 
-        b packetLength = b(entry->get("packetLength").doubleValueInUnit("b") + 464); // add Header
+        b packetLength = b(entry->get("packetLength").doubleValueInUnit("b") + 464); // add Header +58B
         b cutthroughSwitchingHeaderSize = entry->containsKey("cutthroughSwitchingHeaderSize") ? b(entry->get("cutthroughSwitchingHeaderSize").doubleValueInUnit("b")) : b(0);
         simtime_t packetInterval = entry->get("packetInterval").doubleValueInUnit("s");
         simtime_t maxLatency = entry->containsKey("maxLatency") ? entry->get("maxLatency").doubleValueInUnit("s") : -1;
@@ -568,7 +646,7 @@ void ExternalGateScheduleConfigurator::addFlows(Input& input) const {
         startApplication->objectiveType =
 
         startApplication->weight = */
-        simtime_t phase = entry->get("phase").doubleValueInUnit("s");
+        simtime_t phase = entry->get("phase").doubleValueInUnit("us");
         startApplication->phase = phase < 0 ? 0 : phase;
         startApplication->policy = entry->get("policy").intValue();
         startApplication->reliability = entry->get("reliability").doubleValue();
@@ -638,7 +716,7 @@ void ExternalGateScheduleConfigurator::generateNetworkNodesHashMap(const std::ve
     }
 }
 
-ExternalGateScheduleConfigurator::Input::Port *ExternalGateScheduleConfigurator::getPort( //LINK : "[source,target]"
+ExternalGateScheduleConfigurator::Input::Port *ExternalGateScheduleConfigurator::getPort( //LINK : "[source,target]" as string
         const Input& input, std::string &linkName) const {
     linkName = linkName.substr(1, linkName.size() - 2);
     std::stringstream ss(linkName);
@@ -678,6 +756,7 @@ ExternalGateScheduleConfigurator::Input::Port *ExternalGateScheduleConfigurator:
 ExternalGateScheduleConfigurator::Output *ExternalGateScheduleConfigurator::convertJsonToOutput(const Input& input, const cValueMap *json) const {
     auto output = new Output();
     auto jsonGCL = check_and_cast<cValueMap *>(json->get("GCL").objectValue()); // Gate control lists
+
     for (auto& gcl : jsonGCL->getFields()) {//1.for
         auto linkName = gcl.first;
         auto port = getPort(input, linkName);
@@ -689,19 +768,21 @@ ExternalGateScheduleConfigurator::Output *ExternalGateScheduleConfigurator::conv
               auto schedule = new Schedule(); //new Output::Schedule();
               schedule->port = port;
               schedule->gateIndex = queueIndex;
-              schedule->cycleDuration = 0.01;// ! HYPERPERIOD
+              schedule->cycleDuration = gateCycleDuration;// ! HYPERPERIOD
               schedule->open = queueMap->get("initial").intValue();
 
               auto dur = check_and_cast<cValueArray *>(queueMap->get("durations").objectValue());
               cValueArray * durInNs = new cValueArray();
               for (int i = 0; i < dur->size(); i++) {
                   const cValue& value = (*dur)[i];
-                  cValue newValue = cValue(value.doubleValue(), "ns");
+                  cValue newValue = cValue(value.intValue(), "ns");
                   durInNs->add(newValue);
               }
               schedule->durations = durInNs;
               //std::cout << "durations " <<  schedule->durations->str()<< endl;
-              schedule->offset = queueMap->get("offset").doubleValue() / 1000000000;
+              schedule->offset = SimTime(queueMap->get("offset").intValue(), SIMTIME_NS);
+
+
               schedules.push_back( schedule);
         }//endfor
     } // 1.for
@@ -725,14 +806,13 @@ ExternalGateScheduleConfigurator::Output *ExternalGateScheduleConfigurator::conv
 
         auto application = flow->startApplication;
 
-        double firstSendingTime = field.second.doubleValue() / 1000000000;
+        double firstSendingTime = field.second.intValue(); //ns
 
         // bps datarate = application->device->ports[0]->datarate;
-        auto startTime = firstSendingTime; // - s(application->packetLength / datarate).get();
+        auto startTime = SimTime(firstSendingTime, SIMTIME_NS);  // - s(application->packetLength / datarate).get();
         while (startTime < 0)
             startTime += application->packetInterval.dbl();
-        if (output->applicationStartTimes.find(application)
-                == output->applicationStartTimes.end()) {
+        if (output->applicationStartTimes.find(application) == output->applicationStartTimes.end()) {
             output->applicationStartTimes[application] = startTime;
         } //endif
         output->applicationStartTimesArray[application].push_back(startTime);
@@ -754,29 +834,40 @@ void ExternalGateScheduleConfigurator::configureGateScheduling() {
             int gateIndex = newSchedule->gateIndex;
             auto gate = dynamic_cast<PeriodicGate*>(queue->getSubmodule("transmissionGate", gateIndex));
             gate->par("initiallyOpen") = newSchedule->open;
-            gate->par("offset") = newSchedule->offset.dbl();
+            cPar &offsetPar =  gate->par("offset");
+
+           // std::cout << "Index:  " << newSchedule->gateIndex << " offset: "
+                                         //   << newSchedule->offset << endl;
+            offsetPar.setValue(cValue(newSchedule->offset.inUnit(SIMTIME_NS), "ns"));
+
+           // gate->par("offset") = 0.019975662; //newSchedule->offset.dbl();
+
             cPar &durationsPar = gate->par("durations");
             durationsPar.copyIfShared();
             durationsPar.setObjectValue(newSchedule->durations);
 
-            std::cout << "QUEUE:  " << gateIndex << " port: "
-                    << port->module->getFullName() << endl;
+            //std::cout << "QUEUE:  " << gateIndex << " port: "
+                  //  << port->module->getFullName() << endl;
         }//endfor
     }//endfor
 }
 
 void ExternalGateScheduleConfigurator::configureApplicationOffsets() {
     auto output = (Output*)gateSchedulingOutput;
+
     for (auto& it : output->applicationStartTimes) {
         auto startOffset = it.second;
         auto applicationModule = it.first->module;
 
         EV_DEBUG << "Setting initial packet production offset for application source" << EV_FIELD(applicationModule) << EV_FIELD(startOffset) << EV_ENDL;
         auto sourceModule = applicationModule->getSubmodule("source");
-        sourceModule->par("initialProductionOffset") = startOffset.dbl(); //logical: You may only change it once at the beginning
+
 
         const auto& offsets = output->applicationStartTimesArray[it.first];
         ((DynamicPacketSource*)sourceModule)->setNewConfiguration(offsets);
+
+        sourceModule->par("initialProductionOffset") = startOffset.dbl(); //logical: You may only change it once at the beginning
+
     }
 }
 
@@ -786,7 +877,8 @@ ExternalGateScheduleConfigurator::~ExternalGateScheduleConfigurator(){
     distribution = nullptr;
     delete hashMap;
     //delete args;
-    delete configurationComputedEvent;
+    if(configurationComputedEvent)
+        delete configurationComputedEvent;
 }
 
 } //namespace

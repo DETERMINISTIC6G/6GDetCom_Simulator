@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<analysis version="2">
-    <inputs>
-        <input pattern="/dynamic-scenario/simulations/dynamicscenario/results/Baseline_downlink-*.vec"/>
-        <input pattern="/dynamic-scenario/simulations/dynamicscenario/results/Baseline_downlink-*.sca"/>
-    </inputs>
-    <charts/>
-</analysis>
