@@ -23,7 +23,6 @@
 
 namespace d6g {
 using namespace omnetpp;
-//using namespace inet;
 
 class TsnTranslator : public cModule {
 
@@ -32,13 +31,10 @@ private :
 
 protected:
     virtual void initialize() override;
-   // virtual void handleMessage(cMessage *msg) override;
     virtual void handleParameterChange(const char *name) override;
 
 public:
-
-    //virtual cValueArray* getDistribution(const char *delay, int numberOfSamples);
-    virtual cDynamicExpression* getDistribution(const char *delay);
+    virtual cDynamicExpression* getDistributionExpression(const char *delay);
     ~TsnTranslator() override;
 };
 

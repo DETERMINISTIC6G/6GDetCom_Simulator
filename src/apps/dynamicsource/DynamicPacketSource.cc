@@ -158,8 +158,6 @@ cValueMap* DynamicPacketSource::getConfiguration() {
     map->set("objectiveType", par("objectiveType").intValue());
     map->set("packetLoss", par("packetLoss").intValue());
 
-    //std::cout << "app pcp: " <<  pcp << endl;
-
     return map;
 }
 
@@ -172,20 +170,18 @@ void DynamicPacketSource::setNewConfiguration(const std::vector<simtime_t>& simt
     par("packetLength").setValue(par("dynamicPacketLength").getValue());
 
     // length is always at least 1. otherwise, use the already existing InitialProductionOffset.
+
     if (simtimeVector.size() > 1) {
+        std::vector<simtime_t> tempVector(simtimeVector.size());
         nextProductionIndex++;
         // relative to the hyperperiod (= vec.size()*period)
-        for (size_t i = 0; i < simtimeVector.size(); i++) {
+        for (int i = 0; i < simtimeVector.size(); i++) {
             auto x = simtimeVector[i] - i*productionIntervalParameter->doubleValue();
-          //  auto x_prev = simtimeVector[(i-1) % simtimeVector.size()].dbl();
-            offsets.push_back(x);
-          //  offsets.push_back(x - x_prev);
-
+            tempVector[i] = x;
         }//endfor
-        for (size_t i = 0; i < simtimeVector.size(); i++) {
-            auto x_prev = offsets[(i-1) % simtimeVector.size()].dbl();
-            offsets[i] = offsets[i] - x_prev;
-            std::cout << flowName << " offset: " <<  offsets[i] << " simtimevector: " << simtimeVector[i] << endl;
+        for (int i = 0; i < simtimeVector.size(); i++) {
+            auto x_prev = tempVector[(i-1 + simtimeVector.size()) % simtimeVector.size()].dbl();
+            offsets.push_back(tempVector[i] - x_prev);
         }
     }//endif
 }

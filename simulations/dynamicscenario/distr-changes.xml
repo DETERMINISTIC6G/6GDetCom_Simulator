@@ -5,7 +5,7 @@
   <set-param t="5" module="detComTwo.dstt[1]" par="delayDownlink" expr="rngProvider(&quot;histogramContainer&quot;,&quot;Downlink&quot;)"/>
   <set-histogram t="25" module="histogramContainer" key="DownlinkOld" histogram="../../../deterministic6g_data/PD-Wireless-5G-1/s10-DL_wall.xml"/>
   <set-param t="25" module="detComOne.dstt[1]" par="delayDownlink" expr="rngProvider(&quot;histogramContainer&quot;,&quot;DownlinkOld&quot;)"/>
-  <set-param t="30" module="detComThree.dstt[0]" par="delayDownlink" expr="0.5ms+0.9ms"/>
+<!-- <set-param t="31.9" module="detComThree.dstt[0]" par="delayDownlink" expr="0.05ms+0.1ms"/> -->  
   <set-param t="60" module="detComThree.dstt[0]" par="delayDownlink" expr="truncnormal(0.4,0.01)*1ms"/>
   
 </script>

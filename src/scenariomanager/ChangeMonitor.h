@@ -19,33 +19,22 @@
 #include <omnetpp.h>
 //#include <zmq.hpp>
 
-//#include "DynamicScenarioObserver.h"
-//#include "ObservedScenarioManager.h"
 #include "../apps/dynamicsource/DynamicPacketSource.h"
-
 #include "inet/linklayer/configurator/gatescheduling/base/GateScheduleConfiguratorBase.h"
-#include "inet/linklayer/configurator/gatescheduling/common/TSNschedGateScheduleConfigurator.h"
+
+//#include "inet/linklayer/configurator/gatescheduling/common/TSNschedGateScheduleConfigurator.h"
 #include "inet/common/clock/ClockUserModuleMixin.h"
 #include "inet/common/scenario/ScenarioTimer_m.h"
 
 using namespace omnetpp;
 using namespace inet;
-using namespace inet::common;
-
-
-
+//using namespace inet::common;
 
 namespace d6g {
 
-
-
 class DynamicScenarioObserver;
 
-/**
- * TODO - Generated class
- */
-class  ChangeMonitor : public  inet::ClockUserModuleMixin<cSimpleModule>
-{
+class  ChangeMonitor : public  inet::ClockUserModuleMixin<cSimpleModule>{
 
 protected:
     class Mapping {
@@ -61,60 +50,60 @@ protected:
         cValue maxLatency;
         cValue maxJitter;
         //std::string pathFragments;
-        double reliability = 1.0;
-        int policy = 0;
+        double reliability;
+        int policy;
         cValue phase;
+        int packetLoss;
+        int objectiveType;
+        double weight;
 
-        friend std::ostream& operator<<(std::ostream &os,
-                const Mapping &mapping) {
-            os << "name: " << mapping.name << ", source: " << mapping.source << ", pcp: " << mapping.pcp
-                    << ", gateIndex: " << mapping.gateIndex << ", application: "
-                    << mapping.application << ", destination: " << mapping.destination;
+        friend std::ostream& operator<<(std::ostream &os, const Mapping &mapping) {
+            os << "name: " << mapping.name
+               << ", source: " << mapping.source
+               << ", pcp: "  << mapping.pcp
+               << ", gateIndex: " << mapping.gateIndex
+               << ", application: " << mapping.application
+               << ", destination: " << mapping.destination;
             return os;
         }
     };
 
-
-
-
   private:
     DynamicScenarioObserver *observer;
+    GateScheduleConfiguratorBase *gateScheduleConfigurator;
+
     ClockEvent *timer = nullptr;
     cPar *schedulerCallDelayParameter = nullptr;
-    GateScheduleConfiguratorBase *gateScheduleConfigurator;
-    //zmq::message_t testMsg;
     int flowIndex = 0;
-    std::vector<Mapping> configMappings;
+
+    //zmq::message_t testMsg;
+
+    std::vector<Mapping> streamConfigurations;
     std::map<std::string, cValueArray*> *distributions = nullptr;
 
-
+  private:
+    void prepaireChangesForProcessing(int initialized);
+    void configureInitStreamsAndDistributions();
+    cValueArray* convertToCValueArray(const std::vector<Mapping>& configMappings);
+    cValue convertMappingToCValue(const Mapping& mapping);
+    void addEntryToStreamConfigurations(cValueMap *element, int i);
+    void addEntriesToDistributionsFor(TsnTranslator *translator);
 
   protected:
-
-    virtual int numInitStages() const override {
-            return 2;
-        }
-
+    virtual int numInitStages() const override {return 2;}
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *msg) override;
     void subscribeForDynamicChanges();
-    void prepaireChangesForProcessing(int initialized);
-    void configureMappings();
-    cValueArray* convertToCValueArray(const std::vector<Mapping>& configMappings);
-    cValue convertMappingToCValue(const Mapping& mapping);
-    void createMapping(cValueMap *element, int i);
-    void addEntriesToDistributionMapFor(TsnTranslator *translator);
-
 
   public:
-
-    void updateMappings(cValueMap* element);
+    void updateStreamConfigurations(cValueMap* element);
     void updateDistributions(std::string,  cValueArray* element);
+
     std::map<std::string, cValueArray*> *getDistributions();
     cValueArray* getStreamConfigurations();
-    void convolveDistributions(cModule *networkNode, cModule *nextNetworkNode);
 
-    void notify(std::string source);
+    void notify(std::string source, cObject *obj=nullptr, cObject *details=nullptr);
+
     ~ChangeMonitor() override;
 };
 

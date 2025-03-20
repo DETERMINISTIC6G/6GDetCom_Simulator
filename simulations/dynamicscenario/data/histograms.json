@@ -1027,116 +1027,116 @@
         {
           "count": 0,
           "lower_bound": "-inf ms",
-          "upper_bound": "0.345601ms"
-        },
-        {
-          "count": 1,
-          "lower_bound": "0.345601ms",
-          "upper_bound": "0.350461ms"
-        },
-        {
-          "count": 4,
-          "lower_bound": "0.350461ms",
-          "upper_bound": "0.355322ms"
-        },
-        {
-          "count": 35,
-          "lower_bound": "0.355322ms",
-          "upper_bound": "0.360183ms"
-        },
-        {
-          "count": 183,
-          "lower_bound": "0.360183ms",
-          "upper_bound": "0.365043ms"
-        },
-        {
-          "count": 1085,
-          "lower_bound": "0.365043ms",
-          "upper_bound": "0.369904ms"
-        },
-        {
-          "count": 4601,
-          "lower_bound": "0.369904ms",
-          "upper_bound": "0.374764ms"
-        },
-        {
-          "count": 14980,
-          "lower_bound": "0.374764ms",
-          "upper_bound": "0.379625ms"
-        },
-        {
-          "count": 39813,
-          "lower_bound": "0.379625ms",
-          "upper_bound": "0.384485ms"
-        },
-        {
-          "count": 82771,
-          "lower_bound": "0.384485ms",
-          "upper_bound": "0.389346ms"
-        },
-        {
-          "count": 138078,
-          "lower_bound": "0.389346ms",
-          "upper_bound": "0.394207ms"
-        },
-        {
-          "count": 181107,
-          "lower_bound": "0.394207ms",
-          "upper_bound": "0.399067ms"
-        },
-        {
-          "count": 190101,
-          "lower_bound": "0.399067ms",
-          "upper_bound": "0.403928ms"
-        },
-        {
-          "count": 157192,
-          "lower_bound": "0.403928ms",
-          "upper_bound": "0.408788ms"
-        },
-        {
-          "count": 103642,
-          "lower_bound": "0.408788ms",
-          "upper_bound": "0.413649ms"
-        },
-        {
-          "count": 54228,
-          "lower_bound": "0.413649ms",
-          "upper_bound": "0.418509ms"
-        },
-        {
-          "count": 22394,
-          "lower_bound": "0.418509ms",
-          "upper_bound": "0.42337ms"
-        },
-        {
-          "count": 7307,
-          "lower_bound": "0.42337ms",
-          "upper_bound": "0.428231ms"
-        },
-        {
-          "count": 2004,
-          "lower_bound": "0.428231ms",
-          "upper_bound": "0.433091ms"
-        },
-        {
-          "count": 396,
-          "lower_bound": "0.433091ms",
-          "upper_bound": "0.437952ms"
-        },
-        {
-          "count": 71,
-          "lower_bound": "0.437952ms",
-          "upper_bound": "0.442812ms"
+          "upper_bound": "0.351631ms"
         },
         {
           "count": 7,
-          "lower_bound": "0.442812ms",
-          "upper_bound": "0.447673ms"
+          "lower_bound": "0.351631ms",
+          "upper_bound": "0.35629ms"
+        },
+        {
+          "count": 31,
+          "lower_bound": "0.35629ms",
+          "upper_bound": "0.36095ms"
+        },
+        {
+          "count": 219,
+          "lower_bound": "0.36095ms",
+          "upper_bound": "0.36561ms"
+        },
+        {
+          "count": 1143,
+          "lower_bound": "0.36561ms",
+          "upper_bound": "0.370269ms"
+        },
+        {
+          "count": 4702,
+          "lower_bound": "0.370269ms",
+          "upper_bound": "0.374929ms"
+        },
+        {
+          "count": 14413,
+          "lower_bound": "0.374929ms",
+          "upper_bound": "0.379588ms"
+        },
+        {
+          "count": 36833,
+          "lower_bound": "0.379588ms",
+          "upper_bound": "0.384248ms"
+        },
+        {
+          "count": 76603,
+          "lower_bound": "0.384248ms",
+          "upper_bound": "0.388907ms"
+        },
+        {
+          "count": 126299,
+          "lower_bound": "0.388907ms",
+          "upper_bound": "0.393567ms"
+        },
+        {
+          "count": 169335,
+          "lower_bound": "0.393567ms",
+          "upper_bound": "0.398227ms"
+        },
+        {
+          "count": 184500,
+          "lower_bound": "0.398227ms",
+          "upper_bound": "0.402886ms"
+        },
+        {
+          "count": 161232,
+          "lower_bound": "0.402886ms",
+          "upper_bound": "0.407546ms"
+        },
+        {
+          "count": 113492,
+          "lower_bound": "0.407546ms",
+          "upper_bound": "0.412205ms"
+        },
+        {
+          "count": 65472,
+          "lower_bound": "0.412205ms",
+          "upper_bound": "0.416865ms"
+        },
+        {
+          "count": 30142,
+          "lower_bound": "0.416865ms",
+          "upper_bound": "0.421525ms"
+        },
+        {
+          "count": 11194,
+          "lower_bound": "0.421525ms",
+          "upper_bound": "0.426184ms"
+        },
+        {
+          "count": 3388,
+          "lower_bound": "0.426184ms",
+          "upper_bound": "0.430844ms"
+        },
+        {
+          "count": 826,
+          "lower_bound": "0.430844ms",
+          "upper_bound": "0.435503ms"
+        },
+        {
+          "count": 148,
+          "lower_bound": "0.435503ms",
+          "upper_bound": "0.440163ms"
+        },
+        {
+          "count": 15,
+          "lower_bound": "0.440163ms",
+          "upper_bound": "0.444822ms"
+        },
+        {
+          "count": 6,
+          "lower_bound": "0.444822ms",
+          "upper_bound": "0.449482ms"
         },
         {
           "count": 0,
-          "lower_bound": "0.447673ms",
+          "lower_bound": "0.449482ms",
           "upper_bound": "inf ms"
         }
       ],
@@ -1653,6 +1653,127 @@
       ],
       "name": "detComThree.dstt[0]_Uplink",
       "type": "rngProvider"
+    },
+    {
+      "data": [
+        {
+          "count": 0,
+          "lower_bound": "-inf ms",
+          "upper_bound": "0.891556ms"
+        },
+        {
+          "count": 112798,
+          "lower_bound": "0.891556ms",
+          "upper_bound": "0.963914ms"
+        },
+        {
+          "count": 220200,
+          "lower_bound": "0.963914ms",
+          "upper_bound": "1.03627ms"
+        },
+        {
+          "count": 250367,
+          "lower_bound": "1.03627ms",
+          "upper_bound": "1.10863ms"
+        },
+        {
+          "count": 265073,
+          "lower_bound": "1.10863ms",
+          "upper_bound": "1.18099ms"
+        },
+        {
+          "count": 79443,
+          "lower_bound": "1.18099ms",
+          "upper_bound": "1.25335ms"
+        },
+        {
+          "count": 66905,
+          "lower_bound": "1.25335ms",
+          "upper_bound": "1.3257ms"
+        },
+        {
+          "count": 4911,
+          "lower_bound": "1.3257ms",
+          "upper_bound": "1.39806ms"
+        },
+        {
+          "count": 170,
+          "lower_bound": "1.39806ms",
+          "upper_bound": "1.47042ms"
+        },
+        {
+          "count": 83,
+          "lower_bound": "1.47042ms",
+          "upper_bound": "1.54278ms"
+        },
+        {
+          "count": 24,
+          "lower_bound": "1.54278ms",
+          "upper_bound": "1.61514ms"
+        },
+        {
+          "count": 0,
+          "lower_bound": "1.61514ms",
+          "upper_bound": "1.6875ms"
+        },
+        {
+          "count": 0,
+          "lower_bound": "1.6875ms",
+          "upper_bound": "1.75985ms"
+        },
+        {
+          "count": 0,
+          "lower_bound": "1.75985ms",
+          "upper_bound": "1.83221ms"
+        },
+        {
+          "count": 0,
+          "lower_bound": "1.83221ms",
+          "upper_bound": "1.90457ms"
+        },
+        {
+          "count": 0,
+          "lower_bound": "1.90457ms",
+          "upper_bound": "1.97693ms"
+        },
+        {
+          "count": 0,
+          "lower_bound": "1.97693ms",
+          "upper_bound": "2.04929ms"
+        },
+        {
+          "count": 0,
+          "lower_bound": "2.04929ms",
+          "upper_bound": "2.12165ms"
+        },
+        {
+          "count": 0,
+          "lower_bound": "2.12165ms",
+          "upper_bound": "2.194ms"
+        },
+        {
+          "count": 7,
+          "lower_bound": "2.194ms",
+          "upper_bound": "2.26636ms"
+        },
+        {
+          "count": 0,
+          "lower_bound": "2.26636ms",
+          "upper_bound": "2.33872ms"
+        },
+        {
+          "count": 19,
+          "lower_bound": "2.33872ms",
+          "upper_bound": "2.41108ms"
+        },
+        {
+          "count": 0,
+          "lower_bound": "2.41108ms",
+          "upper_bound": "inf ms"
+        }
+      ],
+      "name": "detComThree.dstt[1]-dstt[0]",
+      "type": "convolution"
     },
     {
       "data": [
@@ -2291,121 +2412,511 @@
         {
           "count": 0,
           "lower_bound": "-inf ms",
-          "upper_bound": "0.888ms"
+          "upper_bound": "0.5877ms"
         },
         {
-          "count": 102322,
-          "lower_bound": "0.888ms",
-          "upper_bound": "0.960586ms"
+          "count": 50580,
+          "lower_bound": "0.5877ms",
+          "upper_bound": "0.6154ms"
         },
         {
-          "count": 221249,
-          "lower_bound": "0.960586ms",
-          "upper_bound": "1.03317ms"
+          "count": 74214,
+          "lower_bound": "0.6154ms",
+          "upper_bound": "0.6431ms"
         },
         {
-          "count": 248976,
-          "lower_bound": "1.03317ms",
-          "upper_bound": "1.10576ms"
+          "count": 74024,
+          "lower_bound": "0.6431ms",
+          "upper_bound": "0.6708ms"
         },
         {
-          "count": 271037,
-          "lower_bound": "1.10576ms",
-          "upper_bound": "1.17834ms"
+          "count": 85886,
+          "lower_bound": "0.6708ms",
+          "upper_bound": "0.6985ms"
         },
         {
-          "count": 82208,
-          "lower_bound": "1.17834ms",
-          "upper_bound": "1.25093ms"
+          "count": 92918,
+          "lower_bound": "0.6985ms",
+          "upper_bound": "0.7262ms"
         },
         {
-          "count": 67898,
-          "lower_bound": "1.25093ms",
-          "upper_bound": "1.32352ms"
+          "count": 92918,
+          "lower_bound": "0.7262ms",
+          "upper_bound": "0.7539ms"
         },
         {
-          "count": 5995,
-          "lower_bound": "1.32352ms",
-          "upper_bound": "1.3961ms"
+          "count": 92548,
+          "lower_bound": "0.7539ms",
+          "upper_bound": "0.7816ms"
         },
         {
-          "count": 162,
-          "lower_bound": "1.3961ms",
-          "upper_bound": "1.46869ms"
+          "count": 94798,
+          "lower_bound": "0.7816ms",
+          "upper_bound": "0.8093ms"
         },
         {
-          "count": 111,
-          "lower_bound": "1.46869ms",
-          "upper_bound": "1.54127ms"
+          "count": 97789,
+          "lower_bound": "0.8093ms",
+          "upper_bound": "0.837ms"
         },
         {
-          "count": 18,
-          "lower_bound": "1.54127ms",
-          "upper_bound": "1.61386ms"
+          "count": 55100,
+          "lower_bound": "0.837ms",
+          "upper_bound": "0.8647ms"
+        },
+        {
+          "count": 36377,
+          "lower_bound": "0.8647ms",
+          "upper_bound": "0.8924ms"
+        },
+        {
+          "count": 34036,
+          "lower_bound": "0.8924ms",
+          "upper_bound": "0.9201ms"
+        },
+        {
+          "count": 26265,
+          "lower_bound": "0.9201ms",
+          "upper_bound": "0.9478ms"
+        },
+        {
+          "count": 19244,
+          "lower_bound": "0.9478ms",
+          "upper_bound": "0.9755ms"
+        },
+        {
+          "count": 17353,
+          "lower_bound": "0.9755ms",
+          "upper_bound": "1.0032ms"
+        },
+        {
+          "count": 16163,
+          "lower_bound": "1.0032ms",
+          "upper_bound": "1.0309ms"
+        },
+        {
+          "count": 16803,
+          "lower_bound": "1.0309ms",
+          "upper_bound": "1.0586ms"
+        },
+        {
+          "count": 16202,
+          "lower_bound": "1.0586ms",
+          "upper_bound": "1.0863ms"
+        },
+        {
+          "count": 4371,
+          "lower_bound": "1.0863ms",
+          "upper_bound": "1.114ms"
+        },
+        {
+          "count": 60,
+          "lower_bound": "1.114ms",
+          "upper_bound": "1.1417ms"
+        },
+        {
+          "count": 40,
+          "lower_bound": "1.1417ms",
+          "upper_bound": "1.1694ms"
+        },
+        {
+          "count": 40,
+          "lower_bound": "1.1694ms",
+          "upper_bound": "1.1971ms"
+        },
+        {
+          "count": 80,
+          "lower_bound": "1.1971ms",
+          "upper_bound": "1.2248ms"
+        },
+        {
+          "count": 30,
+          "lower_bound": "1.2248ms",
+          "upper_bound": "1.2525ms"
+        },
+        {
+          "count": 10,
+          "lower_bound": "1.2525ms",
+          "upper_bound": "1.2802ms"
+        },
+        {
+          "count": 70,
+          "lower_bound": "1.2802ms",
+          "upper_bound": "1.3079ms"
+        },
+        {
+          "count": 20,
+          "lower_bound": "1.3079ms",
+          "upper_bound": "1.3356ms"
+        },
+        {
+          "count": 40,
+          "lower_bound": "1.3356ms",
+          "upper_bound": "1.3633ms"
+        },
+        {
+          "count": 20,
+          "lower_bound": "1.3633ms",
+          "upper_bound": "1.391ms"
+        },
+        {
+          "count": 20,
+          "lower_bound": "1.391ms",
+          "upper_bound": "1.4187ms"
         },
         {
           "count": 0,
-          "lower_bound": "1.61386ms",
-          "upper_bound": "1.68645ms"
+          "lower_bound": "1.4187ms",
+          "upper_bound": "1.4464ms"
+        },
+        {
+          "count": 60,
+          "lower_bound": "1.4464ms",
+          "upper_bound": "1.4741ms"
+        },
+        {
+          "count": 30,
+          "lower_bound": "1.4741ms",
+          "upper_bound": "1.5018ms"
+        },
+        {
+          "count": 30,
+          "lower_bound": "1.5018ms",
+          "upper_bound": "1.5295ms"
+        },
+        {
+          "count": 40,
+          "lower_bound": "1.5295ms",
+          "upper_bound": "1.5572ms"
+        },
+        {
+          "count": 30,
+          "lower_bound": "1.5572ms",
+          "upper_bound": "1.5849ms"
+        },
+        {
+          "count": 10,
+          "lower_bound": "1.5849ms",
+          "upper_bound": "1.6126ms"
+        },
+        {
+          "count": 10,
+          "lower_bound": "1.6126ms",
+          "upper_bound": "1.6403ms"
         },
         {
           "count": 0,
-          "lower_bound": "1.68645ms",
-          "upper_bound": "1.75903ms"
+          "lower_bound": "1.6403ms",
+          "upper_bound": "1.668ms"
+        },
+        {
+          "count": 30,
+          "lower_bound": "1.668ms",
+          "upper_bound": "1.6957ms"
+        },
+        {
+          "count": 90,
+          "lower_bound": "1.6957ms",
+          "upper_bound": "1.7234ms"
+        },
+        {
+          "count": 60,
+          "lower_bound": "1.7234ms",
+          "upper_bound": "1.7511ms"
+        },
+        {
+          "count": 20,
+          "lower_bound": "1.7511ms",
+          "upper_bound": "1.7788ms"
+        },
+        {
+          "count": 40,
+          "lower_bound": "1.7788ms",
+          "upper_bound": "1.8065ms"
+        },
+        {
+          "count": 40,
+          "lower_bound": "1.8065ms",
+          "upper_bound": "1.8342ms"
+        },
+        {
+          "count": 80,
+          "lower_bound": "1.8342ms",
+          "upper_bound": "1.8619ms"
+        },
+        {
+          "count": 50,
+          "lower_bound": "1.8619ms",
+          "upper_bound": "1.8896ms"
+        },
+        {
+          "count": 40,
+          "lower_bound": "1.8896ms",
+          "upper_bound": "1.9173ms"
+        },
+        {
+          "count": 80,
+          "lower_bound": "1.9173ms",
+          "upper_bound": "1.945ms"
+        },
+        {
+          "count": 60,
+          "lower_bound": "1.945ms",
+          "upper_bound": "1.9727ms"
+        },
+        {
+          "count": 100,
+          "lower_bound": "1.9727ms",
+          "upper_bound": "2.0004ms"
+        },
+        {
+          "count": 30,
+          "lower_bound": "2.0004ms",
+          "upper_bound": "2.0281ms"
+        },
+        {
+          "count": 30,
+          "lower_bound": "2.0281ms",
+          "upper_bound": "2.0558ms"
+        },
+        {
+          "count": 40,
+          "lower_bound": "2.0558ms",
+          "upper_bound": "2.0835ms"
+        },
+        {
+          "count": 20,
+          "lower_bound": "2.0835ms",
+          "upper_bound": "2.1112ms"
+        },
+        {
+          "count": 20,
+          "lower_bound": "2.1112ms",
+          "upper_bound": "2.1389ms"
+        },
+        {
+          "count": 20,
+          "lower_bound": "2.1389ms",
+          "upper_bound": "2.1666ms"
+        },
+        {
+          "count": 10,
+          "lower_bound": "2.1666ms",
+          "upper_bound": "2.1943ms"
         },
         {
           "count": 0,
-          "lower_bound": "1.75903ms",
-          "upper_bound": "1.83162ms"
+          "lower_bound": "2.1943ms",
+          "upper_bound": "2.222ms"
+        },
+        {
+          "count": 10,
+          "lower_bound": "2.222ms",
+          "upper_bound": "2.2497ms"
+        },
+        {
+          "count": 20,
+          "lower_bound": "2.2497ms",
+          "upper_bound": "2.2774ms"
+        },
+        {
+          "count": 20,
+          "lower_bound": "2.2774ms",
+          "upper_bound": "2.3051ms"
+        },
+        {
+          "count": 20,
+          "lower_bound": "2.3051ms",
+          "upper_bound": "2.3328ms"
         },
         {
           "count": 0,
-          "lower_bound": "1.83162ms",
-          "upper_bound": "1.90421ms"
+          "lower_bound": "2.3328ms",
+          "upper_bound": "2.3605ms"
         },
         {
           "count": 0,
-          "lower_bound": "1.90421ms",
-          "upper_bound": "1.97679ms"
+          "lower_bound": "2.3605ms",
+          "upper_bound": "2.3882ms"
+        },
+        {
+          "count": 10,
+          "lower_bound": "2.3882ms",
+          "upper_bound": "2.4159ms"
+        },
+        {
+          "count": 10,
+          "lower_bound": "2.4159ms",
+          "upper_bound": "2.4436ms"
+        },
+        {
+          "count": 10,
+          "lower_bound": "2.4436ms",
+          "upper_bound": "2.4713ms"
         },
         {
           "count": 0,
-          "lower_bound": "1.97679ms",
-          "upper_bound": "2.04938ms"
+          "lower_bound": "2.4713ms",
+          "upper_bound": "2.499ms"
+        },
+        {
+          "count": 10,
+          "lower_bound": "2.499ms",
+          "upper_bound": "2.5267ms"
         },
         {
           "count": 0,
-          "lower_bound": "2.04938ms",
-          "upper_bound": "2.12196ms"
+          "lower_bound": "2.5267ms",
+          "upper_bound": "2.5544ms"
+        },
+        {
+          "count": 10,
+          "lower_bound": "2.5544ms",
+          "upper_bound": "2.5821ms"
+        },
+        {
+          "count": 10,
+          "lower_bound": "2.5821ms",
+          "upper_bound": "2.6098ms"
+        },
+        {
+          "count": 20,
+          "lower_bound": "2.6098ms",
+          "upper_bound": "2.6375ms"
         },
         {
           "count": 0,
-          "lower_bound": "2.12196ms",
-          "upper_bound": "2.19455ms"
+          "lower_bound": "2.6375ms",
+          "upper_bound": "2.6652ms"
         },
         {
-          "count": 8,
-          "lower_bound": "2.19455ms",
-          "upper_bound": "2.26714ms"
-        },
-        {
-          "count": 0,
-          "lower_bound": "2.26714ms",
-          "upper_bound": "2.33972ms"
-        },
-        {
-          "count": 16,
-          "lower_bound": "2.33972ms",
-          "upper_bound": "2.41231ms"
+          "count": 10,
+          "lower_bound": "2.6652ms",
+          "upper_bound": "2.6929ms"
         },
         {
           "count": 0,
-          "lower_bound": "2.41231ms",
+          "lower_bound": "2.6929ms",
+          "upper_bound": "2.7206ms"
+        },
+        {
+          "count": 10,
+          "lower_bound": "2.7206ms",
+          "upper_bound": "2.7483ms"
+        },
+        {
+          "count": 0,
+          "lower_bound": "2.7483ms",
+          "upper_bound": "2.776ms"
+        },
+        {
+          "count": 0,
+          "lower_bound": "2.776ms",
+          "upper_bound": "2.8037ms"
+        },
+        {
+          "count": 0,
+          "lower_bound": "2.8037ms",
+          "upper_bound": "2.8314ms"
+        },
+        {
+          "count": 0,
+          "lower_bound": "2.8314ms",
+          "upper_bound": "2.8591ms"
+        },
+        {
+          "count": 0,
+          "lower_bound": "2.8591ms",
+          "upper_bound": "2.8868ms"
+        },
+        {
+          "count": 10,
+          "lower_bound": "2.8868ms",
+          "upper_bound": "2.9145ms"
+        },
+        {
+          "count": 0,
+          "lower_bound": "2.9145ms",
+          "upper_bound": "2.9422ms"
+        },
+        {
+          "count": 0,
+          "lower_bound": "2.9422ms",
+          "upper_bound": "2.9699ms"
+        },
+        {
+          "count": 0,
+          "lower_bound": "2.9699ms",
+          "upper_bound": "2.9976ms"
+        },
+        {
+          "count": 0,
+          "lower_bound": "2.9976ms",
+          "upper_bound": "3.0253ms"
+        },
+        {
+          "count": 0,
+          "lower_bound": "3.0253ms",
+          "upper_bound": "3.053ms"
+        },
+        {
+          "count": 0,
+          "lower_bound": "3.053ms",
+          "upper_bound": "3.0807ms"
+        },
+        {
+          "count": 0,
+          "lower_bound": "3.0807ms",
+          "upper_bound": "3.1084ms"
+        },
+        {
+          "count": 0,
+          "lower_bound": "3.1084ms",
+          "upper_bound": "3.1361ms"
+        },
+        {
+          "count": 0,
+          "lower_bound": "3.1361ms",
+          "upper_bound": "3.1638ms"
+        },
+        {
+          "count": 0,
+          "lower_bound": "3.1638ms",
+          "upper_bound": "3.1915ms"
+        },
+        {
+          "count": 0,
+          "lower_bound": "3.1915ms",
+          "upper_bound": "3.2192ms"
+        },
+        {
+          "count": 0,
+          "lower_bound": "3.2192ms",
+          "upper_bound": "3.2469ms"
+        },
+        {
+          "count": 0,
+          "lower_bound": "3.2469ms",
+          "upper_bound": "3.2746ms"
+        },
+        {
+          "count": 0,
+          "lower_bound": "3.2746ms",
+          "upper_bound": "3.3023ms"
+        },
+        {
+          "count": 10,
+          "lower_bound": "3.3023ms",
+          "upper_bound": "3.33ms"
+        },
+        {
+          "count": 0,
+          "lower_bound": "3.33ms",
           "upper_bound": "inf ms"
         }
       ],
-      "name": "detComThree.dstt[1]_Uplink_Downlink",
-      "type": "convolution"
+      "name": "detComTwo.dstt[1]_Downlink",
+      "type": "rngProvider"
     }
   ]
 }

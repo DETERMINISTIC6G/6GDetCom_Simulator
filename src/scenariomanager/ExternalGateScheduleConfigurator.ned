@@ -20,16 +20,28 @@ import inet.linklayer.configurator.gatescheduling.contract.IGateScheduleConfigur
 
 
 //
-// TODO auto-generated module
+// This module extends the GateScheduleConfiguratorBase module to dynamically configure the network
+// after multiple changes by ScenarioManagers. It calls an external scheduler tool for the calculation of the GCLs.
+// It prepares input files for the scheduler, which include network configurations, stream configurations,
+// and distributions over wireless links.
 //
+// <pre>
+// Command usage:
+// e.g.: "./path/scheduler -n %s -s %s -d %s -o %s"
+// Parameters:
+// -n %s: Specifies the network configuration (input-)file (networkFile). 
+// -s %s: Specifies the scheduler's configuration (input-)file (streamsFile).
+// -d %s: Specifies changes of wireless link distributions (histogramsFile).
+// -o %s: Defines the output file (configurationFile).
+// (%s will be replaced with the filename)
+// </pre>
 simple ExternalGateScheduleConfigurator extends GateScheduleConfiguratorBase like IGateScheduleConfigurator
 {
     parameters:
     
-    gateCycleDuration @mutable = default(0s);
+    gateCycleDuration @mutable = default(0s); //hyperperiod is also automatically calculated in the monitor module
         
     string command;
-    object args = default([]);
     
     string networkFile;
     string streamsFile;

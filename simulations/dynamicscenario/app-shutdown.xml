@@ -51,7 +51,7 @@
 </at>
 
 <set-param t="20" module="device2.app[0].source" par="enabled" value="false"/>
-<set-param t="20" module="device1.app[0].source" par="enabled" value="true"/>
+<!--  <set-param t="20" module="device1.app[0].source" par="enabled" value="true"/>-->
 
 
 <set-param t="30" module="device2.app[0].source" par="enabled" value="true"/>

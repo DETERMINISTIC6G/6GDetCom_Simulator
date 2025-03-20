@@ -18,7 +18,6 @@
 #include "ChangeMonitor.h"
 #include "inet/common/scenario/ScenarioTimer_m.h"
 
-
 #include "../distribution/histogram/HistogramContainer.h"
 #include "../distribution/histogram/Histogram.h"
 
@@ -27,7 +26,6 @@
 
 
 namespace d6g {
-
 
 const simsignal_t DynamicScenarioObserver::scenarioEventSignal =
         cComponent::registerSignal("scenario-event");
@@ -41,135 +39,127 @@ DynamicScenarioObserver::DynamicScenarioObserver(ChangeMonitor *monitor) : monit
    };
 
 
-
 void DynamicScenarioObserver::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) {
-
     cMessage *msg = check_and_cast<cMessage*>(obj);
 
     if (signalID == scenarioEventSignal) {
-       // auto node = check_and_cast<ScenarioTimer*>(msg)->getXmlNode();
         EV << "Received message (scenariomanager): " << msg->getName() << " from source: " << source->getFullName() << endl;
     }
     if (signalID == parameterChangeSignal) {
         EV << "Received message (app): " << msg->getName() << " from source: " << source->getFullPath() << endl;
-        DynamicPacketSource *sourceModule = dynamic_cast<DynamicPacketSource *>(source);
+        DynamicPacketSource *sourceModule = dynamic_cast<DynamicPacketSource*>(source);
         if (sourceModule) {
-           cValueMap* element = sourceModule->getConfiguration();
-           monitor->updateMappings(element);
-           delete element;
+            cValueMap *element = sourceModule->getConfiguration();
+            monitor->updateStreamConfigurations(element);
+            delete element;
         }
         monitor->notify(source->getFullPath());
     }
     if (signalID == distributionChangeSignal) {
         std::cout << "Received message (distribution): " << msg->getName() << " from source: " << source->getFullPath() << endl;
-
-        TsnTranslator *sourceModule = dynamic_cast<TsnTranslator *>(source);
+        TsnTranslator *sourceModule = dynamic_cast<TsnTranslator*>(source);
         if (sourceModule) {
-            std::string link = details->str();
-            link.erase(0, 1);
-            link.erase(link.size() - 1);
-
-            auto expr = sourceModule->getDistribution(link.c_str());
+            std::string paramName = details->str();
+            paramName.erase(0, 1);
+            paramName.erase(paramName.size() - 1);
+            auto expr = sourceModule->getDistributionExpression(paramName.c_str());
             auto element = createHistogram(*expr);
             delete expr;
-            link.erase(0, 5);
 
-           /* for (int i = 0; i < element->size(); ++i) {
-                std::cout << "Element " << i << ": " << element->get(i).str() << endl;
-                }*/
-            auto bridge = std::string(source->getParentModule()->getName()) + "." + source->getFullName() + "_" + link;
-            monitor->updateDistributions(bridge,  element);
+            paramName.erase(0, 5);
+            auto bridgePort = std::string(source->getParentModule()->getName()) + "." + source->getFullName() + "_" + paramName;
+            monitor->updateDistributions(bridgePort, element);
         }
         monitor->notify(source->getFullPath());
     }
 }
 
+cValueArray* DynamicScenarioObserver::createHistogram(cDynamicExpression &dynExpr, cObject *details) {
+    cValueArray *jsonBins = new cValueArray();
+    Histogram *h = nullptr;
 
-cValueArray *DynamicScenarioObserver::createHistogram(cDynamicExpression &dynExpr, cDynamicExpression *dynExprOpt) {
-        cValueArray *jsonBins = new cValueArray();
-        Histogram *h = nullptr;
+    if (dynExpr.isAConstant()) {
+        double constDelay = dynExpr.evaluate(this).doubleValueInUnit("ms");
 
+        if (constDelay == 0) {
+            return jsonBins;
+        }
+        h = new Histogram();
+        cXMLElement *histogramEntity = h->createHistogramEntity( { constDelay,
+                constDelay }, { 1, 0 }, 1);
 
-          if (dynExpr.isAConstant()) {
-            double constDelay = dynExpr.evaluate(this).doubleValueInUnit("ms");
+        h->parseHistogramConfig(histogramEntity);
 
-            if (constDelay == 0) {
-                return jsonBins;
+        h->convertHistogramToJSONBins(jsonBins);
+        jsonBins->setName("constant");
+        delete histogramEntity;
+        delete h;
+    } else {
+        auto delay = dynExpr.str();
+        cStringTokenizer tokenizer(delay.c_str(), " \t\n\r\f(),*\"");
+        const char *token = tokenizer.nextToken();
+
+        if (details == nullptr && !strcmp(token, "rngProvider")) {
+
+            auto container = tokenizer.nextToken();
+            auto key = tokenizer.nextToken();
+            //cModule *module = monitor->getModuleByPath(container);
+            HistogramContainer *sourceModule =
+                    dynamic_cast<HistogramContainer*>(monitor->getModuleByPath(
+                            container));
+            h = sourceModule->getHistogram(key);
+            h->convertHistogramToJSONBins(jsonBins);
+            jsonBins->setName("rngProvider");
+        } else {
+            auto numberOfSamples =
+                    monitor->par("numberOfSamples").getValue().intValue();
+            double num_bins = round(log2(numberOfSamples) + 1); // Sturges-formula
+            std::vector<double> samples(numberOfSamples);
+
+           /* cDynamicExpression *expression;
+            if (dynExprOpt != nullptr) {
+                auto e = dynExpr.str() + "+" + dynExprOpt->str();
+                expression = new cDynamicExpression();
+                expression->parse(e.c_str());
+                jsonBins->setName("convolution");
+            } else {
+                expression = &dynExpr;
+                jsonBins->setName("expression");
+            }*/
+
+            for (int i = 0; i < numberOfSamples; ++i) {
+                samples[i] = dynExpr.evaluate(monitor).doubleValueInUnit("ms"); //expression->evaluate(monitor).doubleValueInUnit( "ms"); //
+            }
+            double min_val = *std::min_element(samples.begin(), samples.end());
+            double max_val = *std::max_element(samples.begin(), samples.end());
+            double bin_width = (max_val - min_val) / num_bins;
+            std::vector<double> bin_edges;
+            for (int i = 0; i <= num_bins; ++i) {
+                bin_edges.push_back(min_val + i * bin_width);
+            }
+            std::vector<int> frequencies;
+            frequencies.resize(num_bins + 1, 0);
+            for (double value : samples) {
+                int bin_index = std::min(
+                        static_cast<int>((value - min_val) / bin_width),
+                        static_cast<int>(num_bins - 1));
+                frequencies[bin_index]++;
             }
             h = new Histogram();
-            cXMLElement *histogramEntity = h->createHistogramEntity( { constDelay, constDelay }, { 1, 0 }, 1);
-
+            cXMLElement *histogramEntity = h->createHistogramEntity(bin_edges,
+                    frequencies, num_bins);
             h->parseHistogramConfig(histogramEntity);
-
             h->convertHistogramToJSONBins(jsonBins);
-            jsonBins->setName("constant");
+            jsonBins->setName("expression");
             delete histogramEntity;
             delete h;
-        } else {
-            auto delay = dynExpr.str();
-            cStringTokenizer tokenizer(delay.c_str(), " \t\n\r\f(),*\"");
-            const char *token = tokenizer.nextToken();
+            if (details != nullptr) jsonBins->setName("convolution");
+                //delete expression;
 
-            if (dynExprOpt == nullptr && !strcmp(token, "rngProvider")) {
-
-                auto container = tokenizer.nextToken();
-                auto key = tokenizer.nextToken();
-                //cModule *module = monitor->getModuleByPath(container);
-                HistogramContainer *sourceModule = dynamic_cast<HistogramContainer*>(monitor->getModuleByPath(container));
-                h = sourceModule->getHistogram(key);
-                h->convertHistogramToJSONBins(jsonBins);
-                jsonBins->setName("rngProvider");
-            } else {
-                auto numberOfSamples = monitor->par("numberOfSamples").getValue().intValue();
-                double num_bins = round(log2(numberOfSamples) + 1); // Sturges-formula
-                std::vector<double> samples(numberOfSamples);
-
-                cDynamicExpression *expression;
-                if (dynExprOpt != nullptr) {
-                           auto e = dynExpr.str() + "+" + dynExprOpt->str();
-                           expression = new cDynamicExpression();
-                           expression->parse(e.c_str());
-                           jsonBins->setName("convolution");
-                }else {
-                    expression =  &dynExpr;
-                    jsonBins->setName("expression");
-                }
-
-
-                for (int i = 0; i < numberOfSamples; ++i) {
-                    samples[i] = expression->evaluate(monitor).doubleValueInUnit("ms"); //dynExpr.evaluate(this).doubleValueInUnit("ms");
-                }
-                double min_val = *std::min_element(samples.begin(), samples.end());
-                double max_val = *std::max_element(samples.begin(), samples.end());
-                double bin_width = (max_val - min_val) / num_bins;
-                std::vector<double> bin_edges;
-                for (int i = 0; i <= num_bins; ++i) {
-                    bin_edges.push_back(min_val + i * bin_width);
-                }
-                std::vector<int> frequencies;
-                frequencies.resize(num_bins + 1, 0);
-                for (double value : samples) {
-                    int bin_index = std::min(
-                            static_cast<int>((value - min_val) / bin_width),
-                            static_cast<int>(num_bins - 1));
-                    frequencies[bin_index]++;
-                }
-                h = new Histogram();
-                cXMLElement *histogramEntity = h->createHistogramEntity(bin_edges, frequencies, num_bins);
-                h->parseHistogramConfig(histogramEntity);
-                h->convertHistogramToJSONBins(jsonBins);
-                //jsonBins->setName("expression");
-                delete histogramEntity;
-                delete h;
-                if (dynExprOpt != nullptr) delete expression;
-
-            }
         }
+    }
 
-        return jsonBins;
+    return jsonBins;
 }
-
-
-
 
 } /* namespace d6g */

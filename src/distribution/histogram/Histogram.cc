@@ -144,17 +144,10 @@ std::vector<Histogram::BinEntry *> Histogram::getBins() const {
 void Histogram::convertHistogramToJSONBins(cValueArray *jsonBins) {
     for (const auto *bin : getBins()) {
         cValueMap *jsonBin = new cValueMap();
-
-        //double left = bin->leftBoundary.doubleValueInUnit("ms");
         jsonBin->set("lower_bound", bin->leftBoundary);
-
-        //double right = bin->rightBoundary.doubleValueInUnit("ms");
         jsonBin->set("upper_bound", bin->rightBoundary);
-
         //jsonBin->set("unit", cValue("ms"));
         jsonBin->set("count", cValue(bin->count));
-        //jsonBin->set("accumulatedCount",  cValue(bin->accumulatedCount));
-
         jsonBins->add(cValue(jsonBin));
     }
 }
@@ -166,7 +159,6 @@ cXMLElement* Histogram::createHistogramEntity(const std::vector<double> &bin_edg
     bin->setAttribute("low", "-inf ms");
     bin->setNodeValue(0);
     histogramEntity->appendChild(bin);
-
     for (int i = 0; i <= num_bins; ++i) {
         cXMLElement *bin = new cXMLElement("bin", histogramEntity);
         bin->setAttribute("low", (std::to_string(bin_edges[i]) + " ms").c_str());

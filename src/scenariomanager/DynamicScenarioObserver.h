@@ -17,18 +17,15 @@
 #define SCENARIOMANAGER_DYNAMICSCENARIOOBSERVER_H_
 
 #include <omnetpp.h>
-//#include "ChangeMonitor.h"
-#include <cstdlib>
-#include "inet/common/scenario/ScenarioTimer_m.h"
+//#include <cstdlib>
+//#include "inet/common/scenario/ScenarioTimer_m.h"
 #include "inet/common/clock/ClockUserModuleMixin.h"
 
-#include "../distribution/histogram/Histogram.h"
-
+//#include "../distribution/histogram/Histogram.h"
 
 
 using namespace omnetpp;
 using namespace inet;
-//using namespace inet::common;
 
 namespace d6g {
 
@@ -50,14 +47,9 @@ public:
 
     DynamicScenarioObserver(ChangeMonitor *monitor);
 
-    virtual void receiveSignal(cComponent *source, simsignal_t signalID,
-            cObject *obj, cObject *details) override;
-
-    cValueArray *createHistogram( cDynamicExpression &dynExpr, cDynamicExpression *dynExprOpt=nullptr);
-
-
-
-
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
+    cValueArray *createHistogram(cDynamicExpression &dynExpr, cObject *details=nullptr);
+    //void convolveDistributions(cModule *networkNode, cModule *nextNetworkNode);
 };
 
 } /* namespace d6g */
