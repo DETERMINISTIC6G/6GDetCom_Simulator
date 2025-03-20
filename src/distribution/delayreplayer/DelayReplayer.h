@@ -1,4 +1,4 @@
-// This file is part of Deliverable D4.1 DetCom Simulator Framework Release 1
+// This file is part of Deliverable D4.4 [D44PLACEHOLDER]
 // of the DETERMINISTIC6G project receiving funding from the
 // European Union’s Horizon Europe research and innovation programme
 // under Grant Agreement No. 101096504.
@@ -15,69 +15,69 @@
 using namespace omnetpp;
 
 namespace d6g {
-using namespace inet;
+    using namespace inet;
 
-/**
- * DelayReplayer is a module that provides a random number based on a CSV file.
- * For more information about the module, see the NED documentation.
- */
-class INET_API DelayReplayer : public cSimpleModule, public IRandomNumberProvider{
     /**
-     * DelayEntry is a class that represents a delay in the CSV file.
+     * DelayReplayer is a module that provides a random number based on a CSV file.
+     * For more information about the module, see the NED documentation.
      */
-public:
-    class INET_API DelayEntry{
+    class INET_API DelayReplayer : public cSimpleModule, public IRandomNumberProvider {
+        /**
+         * DelayEntry is a class that represents a delay in the CSV file.
+         */
     public:
-        cValue startTime; ///<start time
-        cValue delayTime; ///<delay time
+        enum OperationMode { CYCLE, TIME_BASED, NONE };
 
-        DelayEntry(const cValue& start, const cValue& delay)
-            : startTime(start), delayTime(delay) {}
+        class INET_API DelayEntry {
+        public:
+            cValue startTime; ///<start time
+            cValue delayTime; ///<delay time
 
+            DelayEntry(const cValue &start, const cValue &delay)
+                : startTime(start), delayTime(delay) {
+            }
+        };
+
+    private:
+        std::vector<DelayEntry> delays; ///< Vector to store the delays
+        std::vector<DelayEntry>::iterator delayIterator; ///< Iterator to traverse through the delays.
+
+    protected:
+        virtual void initialize(int stage) override;
+        OperationMode mode = NONE;
+
+    public:
+        /*!
+         * Read delays from the CSV file
+         *
+         * @param filename the name of the file to read the delays from.
+         */
+        void readCSV(const char *filename);
+
+        /*!
+         * Get a random number from the delayreplayer.
+         *
+         * @return random delay time from the delayreplayer
+         */
+        cValue getRand() override;
+
+        /*!
+         * Get the target's delay time from the delayreplayer.
+         *
+         * @param targetTime the target time to get the delay time for.
+         *
+         * @return the target's delay time from the delayreplayer
+         */
+        cValue getDelayFromTargetValue(double targetTime) const;
+
+    private:
+        /*!
+         * Self check to make sure that the delayreplayer is correct
+         *
+         * This was used for debugging purposes, not needed anymore hopefully but keeping it just in case.
+         */
+        void selfCheck() const;
     };
-private:
-    std::vector<DelayEntry> delays; ///< Vector to store the delays
-    std::vector<DelayEntry>::iterator delayIterator; ///< Iterator to traverse through the delays.
-
-protected:
-    virtual void initialize(int stage) override;
-
-public:
-    /*!
-     * Read delays from the CSV file
-     *
-     * @param filename the name of the file to read the delays from.
-     */
-    void readCSV(const char* filename);
-
-    /*!
-     * Get a random number from the delayreplayer.
-     *
-     * @return random delay time from the delayreplayer
-     */
-    cValue getRand() override;
-
-    /*!
-     * Get the target's delay time from the delayreplayer.
-     *
-     * @param targetTime the target time to get the delay time for.
-     *
-     * @return the target's delay time from the delayreplayer
-     */
-    cValue getDelayFromTargetValue(double targetTime) const;
-
-    DelayReplayer();
-    virtual ~DelayReplayer();
-
-private:
-    /*!
-     * Self check to make sure that the delayreplayer is correct
-     *
-     * This was used for debugging purposes, not needed anymore hopefully but keeping it just in case.
-     */
-    void selfCheck() const;
-};
-
 } /* namespace d6g */
 
 #endif /* DISTRIBUTION_DELAYREPLAYER_DELAYREPLAYER_H_ */

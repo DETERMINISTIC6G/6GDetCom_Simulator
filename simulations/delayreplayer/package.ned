@@ -5,7 +5,7 @@
 //
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-package d6g.simulations.test;
+package d6g.simulations.delayreplayer;
 
 import d6g.distribution.delayreplayer.DelayReplayerContainer;
 import d6g.distribution.histogram.HistogramContainer;

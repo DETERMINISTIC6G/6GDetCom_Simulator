@@ -1,4 +1,4 @@
-// This file is part of Deliverable D4.1 DetCom Simulator Framework Release 1
+// This file is part of Deliverable D4.4 [D44PLACEHOLDER]
 // of the DETERMINISTIC6G project receiving funding from the
 // European Union’s Horizon Europe research and innovation programme
 // under Grant Agreement No. 101096504.
@@ -8,6 +8,8 @@
 #include "DelayReplayer.h"
 #include <algorithm>
 #include <omnetpp.h>
+#include <inet/common/Units.h>
+
 #include "fstream"
 #include "inet/common/XMLUtils.h"
 
@@ -35,33 +37,47 @@ void DelayReplayer::readCSV(const char *filename) {
         throw cRuntimeError("File '%s' not found", filename);
     }
     while (getline(infile, line)) {
-        std::stringstream str(line);
-        getline(str, delayTimeStr, ',');
-        getline(str, startTimeStr, ',');
+        if (mode == NONE) {
+            if (line.find(',') != std::string::npos) {
+                mode = TIME_BASED;
+            } else {
+                mode = CYCLE;
+            }
+        }
 
-        delayExpr.parse(delayTimeStr.c_str());
-        delayValue = delayExpr.evaluate(this);
-        startExpr.parse(startTimeStr.c_str());
-        startValue = startExpr.evaluate(this);
+        if (mode == CYCLE) {
+            delayExpr.parse(line.c_str());
+            delayValue = delayExpr.evaluate(this);
+            startValue = cValue(-1, "s");
+            delays.emplace_back(startValue, delayValue);
+        } else if (mode == TIME_BASED) {
+            std::stringstream str(line);
+            getline(str, delayTimeStr, ',');
+            getline(str, startTimeStr, ',');
 
-        delays.push_back(DelayEntry(startValue, delayValue));
+            delayExpr.parse(delayTimeStr.c_str());
+            delayValue = delayExpr.evaluate(this);
+            startExpr.parse(startTimeStr.c_str());
+            startValue = startExpr.evaluate(this);
+
+            delays.emplace_back(startValue, delayValue);
+        }
     }
-    delayIterator = delays.begin();
-    for (const auto &delay : delays) {
-        EV << "Start time: " << delay.startTime.str() << ", Delay time: "
-                << delay.delayTime.str() << endl;
-    }
-    selfCheck();
 }
 
 cValue DelayReplayer::getRand() {
-    if (delayIterator == delays.end()) {
-        delayIterator = delays.begin();
+    if (mode == CYCLE) {
+        if (delayIterator == delays.end()) {
+            delayIterator = delays.begin();
+        }
+        cValue value = delayIterator->delayTime;
+        ++delayIterator;
+        return value;
+    } else if (mode == TIME_BASED) {
+        return getDelayFromTargetValue(simTime().dbl());
+    } else {
+        throw cRuntimeError("No operation mode selected");
     }
-    cValue value = delayIterator->delayTime;
-    EV << value.str() << endl;
-    ++delayIterator;
-    return value;
 }
 
 cValue DelayReplayer::getDelayFromTargetValue(double targetTime) const{
@@ -84,32 +100,6 @@ cValue DelayReplayer::getDelayFromTargetValue(double targetTime) const{
         throw cRuntimeError(
                 "No suitable delay interval found for the target time");
     }
-}
-
-void DelayReplayer::selfCheck() const {
-    EV << "DelayReplayer self check" << endl;
-
-    double startTime = delays.front().startTime.doubleValueInUnit("s");
-    double timeIncrement = 1.0; // 1 second increment
-    double endTime = 15.0; // End time for self-check
-
-    for (double time = startTime; time <= endTime; time += timeIncrement) {
-        try {
-            cValue delay = getDelayFromTargetValue(time);
-            EV << "Target: " << std::to_string(time) << "s  --  Delay: " << delay.str()
-                    << endl;
-        } catch (const cRuntimeError &e) {
-            throw cRuntimeError("Self check failed for target %s: %s",
-                    std::to_string(time).c_str(), e.what());
-        }
-    }
-    EV << "DelayReplayer self check completed successfully" << endl;
-}
-
-DelayReplayer::DelayReplayer() {
-}
-
-DelayReplayer::~DelayReplayer() {
 }
 
 } /* namespace d6g */

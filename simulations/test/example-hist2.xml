@@ -1,4 +1,0 @@
-<histogram>
-    <bin low="1ms">1</bin>
-    <bin low="2ms">0</bin>
-</histogram>

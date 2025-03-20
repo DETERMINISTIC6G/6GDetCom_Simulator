@@ -1,4 +1,4 @@
-// This file is part of Deliverable D4.1 DetCom Simulator Framework Release 1
+// This file is part of Deliverable D4.4 [D44PLACEHOLDER]
 // of the DETERMINISTIC6G project receiving funding from the
 // European Union’s Horizon Europe research and innovation programme
 // under Grant Agreement No. 101096504.
