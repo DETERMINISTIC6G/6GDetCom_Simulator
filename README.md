@@ -36,7 +36,7 @@ The following guide assumes you already have a working OMNeT++ installation (see
 Your workspace should have the following structure:
 ```
 [path_to_your_workspace]
-├── deterministic6g
+├── 6GDetCom_Simulator
 ├── deterministic6g_data (optional)
 └── inet
 ```
