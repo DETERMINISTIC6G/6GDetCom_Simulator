@@ -117,7 +117,7 @@ void DynamicPacketSource::scheduleProductionTimerAndProducePacket() {
     }
 }
 
-cValueMap* DynamicPacketSource::getConfiguration() {
+cValueMap* DynamicPacketSource::getConfiguration() const{
     cModule *appModule = this->getParentModule();
     cModule *deviceModule = appModule->getParentModule();
 

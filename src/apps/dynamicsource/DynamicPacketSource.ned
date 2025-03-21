@@ -40,13 +40,13 @@ simple DynamicPacketSource extends ActivePacketSource
       double latency @unit(ms) = default(productionInterval);
             
       // additional  Traffic Class Requirements
-      int pcp = default(0);
+      int pcp = default(0); //
       int gateIndex = default(0);
       int objectiveType = default(4);
       int packetLoss = default(0);
       int policy = default(0);
       double reliability = default(1.0);
-      double weight = default(1.0);
+      double weight = default(1.0); //
       
       
       @class(DynamicPacketSource);

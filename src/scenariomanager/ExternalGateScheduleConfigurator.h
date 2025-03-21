@@ -115,7 +115,7 @@ private:
     /*ExternalGateScheduleConfigurator*/
     virtual bool isDetComLink(cModule *source, cModule *target, DetComLinkType &detComLinkType) const;
 
-    virtual std::string getExpandedNodeName(cModule *module) const;
+    virtual inline std::string getExpandedNodeName(cModule *module) const;
     std::string getDetComLinkDescription(DetComLinkType type) const;
     short getSwitchType(cModule* mod) const;
     Input::Port *getConfigurablePort(const Input& input, std::string &linkName) const;
@@ -124,13 +124,12 @@ private:
 
 
   private:
-    void write(std::string fileName, cValueMap *json) const;
+    void inline write(std::string fileName, cValueMap *json) const;
     void writeDistributionsToFile() const;
     void writeStreamsToFile(const Input& input) const;
     void writeNetworkToFile(const Input& input) const;
 
-    void addEntryToPDBMap(cValueArray *pdb_map, DetComLinkType linkType, std::string nameNetworkNode, std::string nameNextNetworkNode) const;
-
+    bool addEntryToPDBMap(cValueArray *pdb_map, cModule *source, cModule *target) const;
     /*Create separate JSON files for Streams and Network and Distributions */
     cValueMap *convertInputToJsonStreams(const Input& input) const;
     cValueMap *convertInputToJsonNetwork(const Input& input) const;

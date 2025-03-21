@@ -59,9 +59,9 @@ void DynamicScenarioObserver::receiveSignal(cComponent *source, simsignal_t sign
         std::cout << "Received message (distribution): " << msg->getName() << " from source: " << source->getFullPath() << endl;
         TsnTranslator *sourceModule = dynamic_cast<TsnTranslator*>(source);
         if (sourceModule) {
-            std::string paramName = details->str();
-            paramName.erase(0, 1);
-            paramName.erase(paramName.size() - 1);
+            std::string paramName = check_and_cast<cMsgPar*>(details)->stringValue();//details->str();
+            //paramName.erase(0, 1);
+            //paramName.erase(paramName.size() - 1);
             auto expr = sourceModule->getDistributionExpression(paramName.c_str());
             auto element = createHistogram(*expr);
             delete expr;
@@ -105,8 +105,7 @@ cValueArray* DynamicScenarioObserver::createHistogram(cDynamicExpression &dynExp
             auto key = tokenizer.nextToken();
             //cModule *module = monitor->getModuleByPath(container);
             HistogramContainer *sourceModule =
-                    dynamic_cast<HistogramContainer*>(monitor->getModuleByPath(
-                            container));
+                    dynamic_cast<HistogramContainer*>(monitor->getModuleByPath(container));
             h = sourceModule->getHistogram(key);
             h->convertHistogramToJSONBins(jsonBins);
             jsonBins->setName("rngProvider");
@@ -115,17 +114,6 @@ cValueArray* DynamicScenarioObserver::createHistogram(cDynamicExpression &dynExp
                     monitor->par("numberOfSamples").getValue().intValue();
             double num_bins = round(log2(numberOfSamples) + 1); // Sturges-formula
             std::vector<double> samples(numberOfSamples);
-
-           /* cDynamicExpression *expression;
-            if (dynExprOpt != nullptr) {
-                auto e = dynExpr.str() + "+" + dynExprOpt->str();
-                expression = new cDynamicExpression();
-                expression->parse(e.c_str());
-                jsonBins->setName("convolution");
-            } else {
-                expression = &dynExpr;
-                jsonBins->setName("expression");
-            }*/
 
             for (int i = 0; i < numberOfSamples; ++i) {
                 samples[i] = dynExpr.evaluate(monitor).doubleValueInUnit("ms"); //expression->evaluate(monitor).doubleValueInUnit( "ms"); //
@@ -154,8 +142,6 @@ cValueArray* DynamicScenarioObserver::createHistogram(cDynamicExpression &dynExp
             delete histogramEntity;
             delete h;
             if (details != nullptr) jsonBins->setName("convolution");
-                //delete expression;
-
         }
     }
 

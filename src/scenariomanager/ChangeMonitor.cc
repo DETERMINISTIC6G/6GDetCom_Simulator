@@ -285,7 +285,7 @@ void ChangeMonitor::notify(std::string source, cObject *obj, cObject *details) {
         auto convolveExpr =  new cDynamicExpression();
         convolveExpr->parse(check_and_cast<cMsgPar*>(obj)->stringValue());
         cMsgPar *histogramDetails = new cMsgPar("convolution");
-        //histogramDetails->setStringValue();
+
         auto element = observer->createHistogram(*convolveExpr, histogramDetails);
         auto bridgePort = std::string(check_and_cast<cMsgPar*>(details)->stringValue());
         updateDistributions(bridgePort,  element);

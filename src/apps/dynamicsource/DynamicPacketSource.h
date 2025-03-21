@@ -31,7 +31,7 @@ using namespace inet::queueing;
 namespace d6g {
 
 /**
- * TODO - Generated class
+ *
  */
 class DynamicPacketSource: public ActivePacketSource {
 
@@ -39,7 +39,7 @@ enum class StreamObjectives {
       NO_OBJECTIVE = 0, LATENESS = 1, TARDINESS = 2, JITTER = 3, TARDINESS_AND_JITTER = 4
 };
 
-protected:
+private:
     char enabledParameter;
     bool hasSchedulerPermission;
     bool isFirstTimeRun;
@@ -49,7 +49,8 @@ protected:
     std::vector<simtime_t> offsets;
     size_t nextProductionIndex = 0;
 
-friend class ChangeMonitor; friend class ExternalGateScheduler;
+friend class ChangeMonitor;
+friend class ExternalGateScheduleConfigurator;
 
 protected:
     virtual void initialize(int stage) override;
@@ -58,14 +59,14 @@ protected:
 
     virtual void scheduleProductionTimer(clocktime_t delay) override;
     virtual void scheduleProductionTimerAndProducePacket() override;
-
-
+    virtual bool stopIfNotScheduled();
+    virtual void setNewConfiguration(const std::vector<simtime_t>& simtimeVector);
 
 
 public:
-    virtual cValueMap* getConfiguration();
-    virtual void setNewConfiguration(const std::vector<simtime_t>& simtimeVector);
-    virtual bool stopIfNotScheduled();
+    virtual cValueMap* getConfiguration() const;
+
+
 
     ~DynamicPacketSource() override;
 
