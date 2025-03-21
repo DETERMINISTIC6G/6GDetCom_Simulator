@@ -22,6 +22,15 @@
       "pcp": 4,
       "pdb_map": [
         {
+          "key": "detComTwo.dstt[0]_Uplink",
+          "link": {
+            "currentNodeName": "detComTwo.dstt[0]",
+            "nextNodeName": "detComTwo.nwtt"
+          },
+          "policy": 0,
+          "reliability": 1
+        },
+        {
           "key": "detComThree.dstt[0]_Downlink",
           "link": {
             "currentNodeName": "detComThree.nwtt",
@@ -81,6 +90,15 @@
       "packet_size_unit": "bit",
       "pcp": 4,
       "pdb_map": [
+        {
+          "key": "detComTwo.dstt[1]_Uplink",
+          "link": {
+            "currentNodeName": "detComTwo.dstt[1]",
+            "nextNodeName": "detComTwo.nwtt"
+          },
+          "policy": 0,
+          "reliability": 1
+        },
         {
           "key": "detComOne.dstt[0]_Downlink",
           "link": {
@@ -304,7 +322,17 @@
       "packet_size": 10064,
       "packet_size_unit": "bit",
       "pcp": 0,
-      "pdb_map": [],
+      "pdb_map": [
+        {
+          "key": "detComTwo.dstt[1]_Uplink",
+          "link": {
+            "currentNodeName": "detComTwo.dstt[1]",
+            "nextNodeName": "detComTwo.nwtt"
+          },
+          "policy": 0,
+          "reliability": 1
+        }
+      ],
       "phase": 0,
       "phase_unit": "us",
       "route": [

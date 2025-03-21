@@ -19,20 +19,13 @@ namespace d6g {
 
 Define_Module(ObservedScenarioManager);
 
-//simsignal_t scenarioEventSignal = cComponent::registerSignal("scenario-event");
-
 void ObservedScenarioManager::initialize() {
     ScenarioManager::initialize();
-
-   /* observer = new DynamicScenarioObserver();
-    this->subscribe(scenarioEventSignal, observer);*/
-
 }
 
 void ObservedScenarioManager::handleMessage(cMessage *msg)
 {
     //ScenarioManager::handleMessage(msg);
-
     auto node = check_and_cast<ScenarioTimer*>(msg)->getXmlNode();
 
     processCommand(node);
@@ -44,7 +37,7 @@ void ObservedScenarioManager::handleMessage(cMessage *msg)
 }
 
 /*ObservedScenarioManager::~ObservedScenarioManager() {
-        delete observer;
+       ;
 }*/
 
 } //namespace

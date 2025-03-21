@@ -240,8 +240,9 @@ void ChangeMonitor::updateDistributions(std::string bridge,  cValueArray* elemen
     std::cout << "updateDistributions " << bridge << endl;
     //##################################################
     auto it = distributions->find(bridge);
-    if (it != distributions->end()) { // replace if found
+    if (it != distributions->end() && it->second != nullptr) { // replace if found
             //delete it->second;
+            it->second = nullptr;
             if (!element->size()) { // delete entry if no new histogram
                 distributions->erase(it);
                 delete element;
@@ -286,9 +287,11 @@ void ChangeMonitor::notify(std::string source, cObject *obj, cObject *details) {
         cMsgPar *histogramDetails = new cMsgPar("convolution");
         //histogramDetails->setStringValue();
         auto element = observer->createHistogram(*convolveExpr, histogramDetails);
-        this->updateDistributions(check_and_cast<cMsgPar*>(details)->stringValue(),  element);
+        auto bridgePort = std::string(check_and_cast<cMsgPar*>(details)->stringValue());
+        updateDistributions(bridgePort,  element);
         delete convolveExpr;
         delete histogramDetails;
+        //delete element;
 
     }
     else if (!timer->isScheduled()) {
@@ -297,8 +300,12 @@ void ChangeMonitor::notify(std::string source, cObject *obj, cObject *details) {
 }
 
 ChangeMonitor::~ChangeMonitor() {
-    for (auto it = distributions->begin(); it != distributions->end(); ++it) {
+   /* for (auto it = distributions->begin(); it != distributions->end(); ++it) {
         // delete it->second;
+    }*/
+    for (auto& pair : *distributions) {
+        if (pair.second != nullptr)
+           ;//delete pair.second;
     }
     delete distributions;
     cancelAndDeleteClockEvent(timer);

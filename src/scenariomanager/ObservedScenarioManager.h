@@ -18,32 +18,25 @@
 
 #include <omnetpp.h>
 #include "inet/common/scenario/ScenarioManager.h"
-//#include "ChangeMonitor.h"
 #include "DynamicScenarioObserver.h"
 
 #include "inet/common/scenario/ScenarioTimer_m.h"
 
 using namespace omnetpp;
 using namespace inet;
-using namespace inet::common;
 
 namespace d6g {
 
-/**
- * TODO - Generated class
- */
+
 class ObservedScenarioManager : public ScenarioManager
 {
-/*private:
-    DynamicScenarioObserver *observer;*/
 
   protected:
     virtual void initialize() override;
     virtual void handleMessage(cMessage *msg) override;
 
-/*  public:
-    // Destructor
-        ~ObservedScenarioManager() override; */
+/*public:
+      ~ObservedScenarioManager() override; */
 };
 
 } //namespace

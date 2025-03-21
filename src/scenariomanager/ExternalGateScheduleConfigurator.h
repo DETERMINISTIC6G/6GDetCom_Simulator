@@ -19,15 +19,12 @@
 #include <omnetpp.h>
 #include "inet/linklayer/configurator/gatescheduling/common/TSNschedGateScheduleConfigurator.h"
 #include "inet/queueing/gate/PeriodicGate.h"
-//#include <variant>
-//#include "inet/common/clock/ClockUserModuleMixin.h"
-//#include "inet/common/scenario/ScenarioTimer_m.h"
+#include "ChangeMonitor.h"
 
 #include <sstream>
 
 using namespace omnetpp;
 using namespace inet;
-//using namespace inet::queueing;
 
 namespace d6g {
 
@@ -80,8 +77,9 @@ class Output: public GateScheduleConfiguratorBase::Output {
 
 
 private:
-    std::map<std::string, cValueArray*> *distributions;
+    //std::map<std::string, cValueArray*> *distributions;
     std::map<std::string, uint16_t> *hashMapNodeId;
+    ChangeMonitor *monitor = nullptr;
 
     std::string command;
 
@@ -92,23 +90,24 @@ private:
     std::string configurationFilePar;
 
     ClockEvent *configurationComputedEvent = nullptr;
-    simtime_t scheduleComputingTime = 0;
+    mutable simtime_t scheduleComputingTime = 0;
+    mutable simtime_t commitTime = 0;
+    mutable simtime_t gateCycleDuration = 0;
 
   protected:
     virtual void initialize(int stage) override;
     virtual void handleParameterChange(const char *name) override;
     virtual void handleMessage(cMessage *msg) override;
 
-    /*GateScheduleConfiguratorBase*/
+    /*extend GateScheduleConfiguratorBase*/
     virtual void addFlows(Input& input) const override;
     virtual void configureGateScheduling() override;
     virtual void configureApplicationOffsets() override;
     virtual Output *computeGateScheduling(const Input& input) const override;
 
 
-    /* TSNschedGateScheduleConfigurator*/
+    /*extend TSNschedGateScheduleConfigurator*/
     virtual void executeTSNsched(std::string fileName) = delete;
-    //virtual Output *readOutputFromFile(const Input& input, std::string fileName) const override;
     virtual Output *convertJsonToOutput(const Input& input, const cValueMap *json) const override;
     virtual void printJson(std::ostream& stream, const cValue& value, int level = 0) const;
 
@@ -119,7 +118,10 @@ private:
     virtual std::string getExpandedNodeName(cModule *module) const;
     std::string getDetComLinkDescription(DetComLinkType type) const;
     short getSwitchType(cModule* mod) const;
-    Input::Port *getPort(const Input& input, std::string &linkName) const;
+    Input::Port *getConfigurablePort(const Input& input, std::string &linkName) const;
+
+    bool invokeScheduler() const;
+
 
   private:
     void write(std::string fileName, cValueMap *json) const;
@@ -127,15 +129,11 @@ private:
     void writeStreamsToFile(const Input& input) const;
     void writeNetworkToFile(const Input& input) const;
 
+    void addEntryToPDBMap(cValueArray *pdb_map, DetComLinkType linkType, std::string nameNetworkNode, std::string nameNextNetworkNode) const;
+
     /*Create separate JSON files for Streams and Network and Distributions */
     cValueMap *convertInputToJsonStreams(const Input& input) const;
     cValueMap *convertInputToJsonNetwork(const Input& input) const;
-    //void generateNetworkNodesHashMap(const std::vector<std::string>& strings) const;
-    //void setReliabilityAndPolicyToPDBMapEntry(cValueArray *pdb_map, std::string name) const;
-    void addEntryToPDBMap(cValueArray *pdb_map, DetComLinkType linkType, std::string nameNetworkNode, std::string nameNextNetworkNode) const;
-    //double computeGuardBand(const Input &input) const;
-    bool invokeScheduler() const;
-
 
   public:
     ~ExternalGateScheduleConfigurator() override;

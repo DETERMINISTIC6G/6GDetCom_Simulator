@@ -38,7 +38,6 @@ void DynamicPacketSource::initialize(int stage)
 
 void DynamicPacketSource::handleMessage(cMessage *msg) {
     if (msg == productionTimer) {
-      //  std::cout << "Self-Message received App: " << simTime() << " flow " << flowName  << " prio: " << msg->getSchedulingPriority() << endl;
         if (consumer == nullptr || consumer->canPushSomePacket(outputGate->getPathEndGate())) {
             if (offsets.size() > 1) {
                 auto currentProductionOffset = offsets[nextProductionIndex];
@@ -50,10 +49,9 @@ void DynamicPacketSource::handleMessage(cMessage *msg) {
             producePacket();
         }
     } else if (msg == parameterChangeEvent) {
-        EV << "Self-Message received immediately!\n";
         emit(DynamicScenarioObserver::parameterChangeSignal, msg);
     } else
-        throw cRuntimeError("Unknown message");
+        throw cRuntimeError("Unknown message type.");
 }
 
 
@@ -68,12 +66,7 @@ void DynamicPacketSource::handleParameterChange(const char *name) {
                 cancelEvent(productionTimer);
             }
             hasSchedulerPermission = false;
-
-        } /*else { //enabled
-            if (hasSchedulerPermission && !productionTimer->isScheduled()) {
-                scheduleProductionTimerAndProducePacket();
-            }
-        }*/
+        }
     }
     if (!strcmp(name, "initialProductionOffset")) {
         initialProductionOffset = par("initialProductionOffset");
@@ -81,12 +74,8 @@ void DynamicPacketSource::handleParameterChange(const char *name) {
         if (productionTimer->isScheduled()) { //Stop the production of packets from the old configuration
             cancelEvent(productionTimer);
         }
-
-        //scheduleProductionTimerAndProducePacket();
         if (hasSchedulerPermission && enabledParameter)
             scheduleProductionTimer(initialProductionOffset);
-        //initialProductionOffsetScheduled = false;
-
     }//endif initialProductionOffset
 
     if (!strcmp(name, "dynamicProductionInterval") || !strcmp(name, "dynamicPacketLength")) {
@@ -94,13 +83,12 @@ void DynamicPacketSource::handleParameterChange(const char *name) {
     }
 
     if (!strcmp(name, "productionInterval") || !strcmp(name, "packetLength")) {
-        //par("dynamicPacketLength").setValue(par("packetLength").getValue());
-        //par("dynamicProductionInterval").setValue(par("productionInterval").getValue());
         return;
     }
 
-
-    /*  */
+    /* Send the signal only once if multiple parameters change simultaneously.
+     * Do not send a signal if the configurator requests the app to stop/start
+     * or it already configures the new production offsets. */
     if (strcmp(name, "initialProductionOffset") && !parameterChangeEvent->isScheduled() && !configuratorChanges)
         //scheduleAt(simTime(), parameterChangeEvent);
         scheduleClockEventAt(getClockTime(), parameterChangeEvent);
@@ -132,10 +120,9 @@ void DynamicPacketSource::scheduleProductionTimerAndProducePacket() {
 cValueMap* DynamicPacketSource::getConfiguration() {
     cModule *appModule = this->getParentModule();
     cModule *deviceModule = appModule->getParentModule();
-    //UdpSocketIo *socketModule = dynamic_cast<UdpSocketIo*>(appModule->getSubmodule("io"));
 
     cValueMap *map = new cValueMap();
-    map->set("enabled", static_cast<bool>(enabledParameter));//par("enabled").boolValue());
+    map->set("enabled", static_cast<bool>(enabledParameter));
     if (flowName != "") {
         map->set("name", cValue(flowName));
     }
@@ -143,7 +130,6 @@ cValueMap* DynamicPacketSource::getConfiguration() {
     map->set("gateIndex", par("gateIndex").intValue());
     map->set("application", cValue(appModule->getFullName()));
     map->set("source", cValue(deviceModule->getFullName()));
-   // map->set("destination", socketModule->par("destAddress").stringValue());
     map->set("destination", appModule->getSubmodule("io")->par("destAddress").stringValue());
 
     map->set("reliability", par("reliability").doubleValue());
@@ -161,7 +147,7 @@ cValueMap* DynamicPacketSource::getConfiguration() {
     return map;
 }
 
-void DynamicPacketSource::setNewConfiguration(const std::vector<simtime_t>& simtimeVector) {
+void DynamicPacketSource::setNewConfiguration(const std::vector<simtime_t>& productionTimesInHyperCycleVector) {
     hasSchedulerPermission = true;
     offsets.clear();
     nextProductionIndex = 0;
@@ -170,20 +156,21 @@ void DynamicPacketSource::setNewConfiguration(const std::vector<simtime_t>& simt
     par("packetLength").setValue(par("dynamicPacketLength").getValue());
 
     // length is always at least 1. otherwise, use the already existing InitialProductionOffset.
-
-    if (simtimeVector.size() > 1) {
-        std::vector<simtime_t> tempVector(simtimeVector.size());
+    size_t vectorSize = productionTimesInHyperCycleVector.size();
+    if (vectorSize > 1) {
+        std::vector<simtime_t> tempVector(vectorSize);
         nextProductionIndex++;
         // relative to the hyperperiod (= vec.size()*period)
-        for (int i = 0; i < simtimeVector.size(); i++) {
-            auto x = simtimeVector[i] - i*productionIntervalParameter->doubleValue();
-            tempVector[i] = x;
+        for (int i = 0; i < vectorSize; i++) {
+            auto offset_i = productionTimesInHyperCycleVector[i] - i*productionIntervalParameter->doubleValue();
+            tempVector[i] = offset_i;
         }//endfor
-        for (int i = 0; i < simtimeVector.size(); i++) {
-            auto x_prev = tempVector[(i-1 + simtimeVector.size()) % simtimeVector.size()].dbl();
-            offsets.push_back(tempVector[i] - x_prev);
+        for (int i = 0; i < vectorSize; i++) {
+            auto offset_prev = tempVector[(i-1 + vectorSize) % vectorSize].dbl();
+            offsets.push_back(tempVector[i] - offset_prev);
         }
     }//endif
+    par("initialProductionOffset") = productionTimesInHyperCycleVector[0].dbl();
 }
 
 
