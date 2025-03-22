@@ -19,7 +19,7 @@ import inet.linklayer.configurator.gatescheduling.base.GateScheduleConfiguratorB
 
 
 //
-// TODO auto-generated module
+// 
 //
 simple ChangeMonitor
 {
@@ -29,7 +29,24 @@ simple ChangeMonitor
         volatile double schedulerCallDelay @unit(s) = default(2s);
         
         string gateScheduleConfigurator = default("gateScheduleConfigurator");
+        
+        //If true, assign the gateIndex to the pcp value.
+        //If false, forward the pcp value to the Configurator.
+        bool isPortQueuesCountConsistentGlobally;
+      	int globallyNumTrafficClasses = default(8);
         int numberOfSamples = default(1000000);  //for the creation of a histogram
+        
+        // IEEE Standard for Local and Metropolitan Area Networks, Bridges and Bridged Networks
+        // Table 8-5—Recommended priority to traffic class mappings
+        object mapping = default([[0, 0, 0, 0, 0, 1, 1, 1],   // BE best effort
+                                  [0, 0, 0, 0, 0, 0, 0, 0],   // BK background
+                                  [0, 0, 0, 1, 1, 2, 2, 2],   // EE excellent effort
+                                  [0, 0, 0, 1, 1, 2, 3, 3],   // CA critical applications
+                                  [0, 1, 1, 2, 2, 3, 4, 4],   // VI video
+                                  [0, 1, 1, 2, 2, 3, 4, 5],   // VO voice
+                                  [0, 1, 2, 3, 3, 4, 5, 6],   // IC internetwork control
+                                  [0, 1, 2, 3, 4, 5, 6, 7]]); // NC network control
+        
         @class(ChangeMonitor);
 
 

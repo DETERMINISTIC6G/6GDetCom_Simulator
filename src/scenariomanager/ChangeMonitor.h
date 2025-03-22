@@ -51,11 +51,11 @@ protected:
         cValue maxJitter;
         //std::string pathFragments;
         double reliability;
-        int policy;
+        //int policy;
         cValue phase;
-        int packetLoss;
+        //int packetLoss;
         int objectiveType;
-        double weight;
+        //double weight;
 
         friend std::ostream& operator<<(std::ostream &os, const Mapping &mapping) {
             os << "name: " << mapping.name
@@ -75,11 +75,14 @@ protected:
     ClockEvent *timer = nullptr;
     cPar *schedulerCallDelayParameter = nullptr;
     int flowIndex = 0;
+    bool fixedPriority;
 
     //zmq::message_t testMsg;
 
     std::vector<Mapping> streamConfigurations;
     std::map<std::string, cValueArray*> *distributions = nullptr;
+
+    cValueArray *pcpMapping = nullptr;
 
   private:
     void prepaireChangesForProcessing(int initialized);
@@ -94,6 +97,7 @@ protected:
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *msg) override;
     void subscribeForDynamicChanges();
+    int classify(int pcp);
 
   public:
     void updateStreamConfigurations(cValueMap* element);
@@ -101,6 +105,7 @@ protected:
 
     std::map<std::string, cValueArray*> *getDistributions();
     cValueArray* getStreamConfigurations();
+    inline bool isFixedPriority() {return fixedPriority;}
 
     void notify(std::string source, cObject *obj=nullptr, cObject *details=nullptr);
 

@@ -31,7 +31,15 @@ void DynamicPacketSource::initialize(int stage)
         parameterChangeEvent = new ClockEvent("parameter-change");
         productionTimer->setSchedulingPriority(10);
 
+        cValueArray *productionOffsets = check_and_cast<cValueArray *>(par("productionOffsets").objectValue());
+        std::vector<simtime_t> tempVector(productionOffsets->size());
+        for (int i = 0; i < productionOffsets->size(); i++) {
+             const cValue& value = (*productionOffsets)[i];
+             tempVector.push_back(SimTime(value.intValueInUnit("ns"), SIMTIME_NS));
+        }
+        computeProductionOffsets(tempVector);
     }else if (stage == INITSTAGE_LAST) {
+        std::cout << "ho-ho" << endl;
         isFirstTimeRun = ! static_cast<bool>(enabledParameter);
     }
 }
@@ -78,7 +86,7 @@ void DynamicPacketSource::handleParameterChange(const char *name) {
             scheduleProductionTimer(initialProductionOffset);
     }//endif initialProductionOffset
 
-    if (!strcmp(name, "dynamicProductionInterval") || !strcmp(name, "dynamicPacketLength")) {
+    if (!strcmp(name, "pendingProductionInterval") || !strcmp(name, "pendingPacketLength")) {
         hasSchedulerPermission = false;
     }
 
@@ -127,50 +135,56 @@ cValueMap* DynamicPacketSource::getConfiguration() const{
         map->set("name", cValue(flowName));
     }
     map->set("pcp", par("pcp").intValue());
-    map->set("gateIndex", par("gateIndex").intValue());
+    //map->set("gateIndex", par("gateIndex").intValue());
     map->set("application", cValue(appModule->getFullName()));
     map->set("source", cValue(deviceModule->getFullName()));
     map->set("destination", appModule->getSubmodule("io")->par("destAddress").stringValue());
 
     map->set("reliability", par("reliability").doubleValue());
-    map->set("policy", par("policy").intValue());
-    map->set("packetLength", par("dynamicPacketLength").getValue());
-    map->set("packetInterval", par("dynamicProductionInterval").getValue());
+    //map->set("policy", par("policy").intValue());
+    map->set("packetLength", par("pendingPacketLength").getValue());
+    map->set("packetInterval", par("pendingProductionInterval").getValue());
 
     map->set("phase", isFirstTimeRun ? par("initialProductionOffset").getValue() : cValue(0, "us"));
-    map->set("maxLatency", par("latency").getValue());
-    map->set("maxJitter", par("jitter").getValue());
-    map->set("weight", par("weight").doubleValue());
-    map->set("objectiveType", par("objectiveType").intValue());
-    map->set("packetLoss", par("packetLoss").intValue());
+    map->set("maxLatency", par("maxLatency").getValue());
+    map->set("maxJitter", par("maxJitter").getValue());
+    //map->set("weight", par("weight").doubleValue());
+    map->set("objectiveType", objective(par("objectiveType")));//par("objectiveType").intValue());
+    //map->set("packetLoss", par("packetLoss").intValue());
 
     return map;
 }
 
 void DynamicPacketSource::setNewConfiguration(const std::vector<simtime_t>& productionTimesInHyperCycleVector) {
     hasSchedulerPermission = true;
+
+    par("productionInterval").setValue(par("pendingProductionInterval").getValue());
+    par("packetLength").setValue(par("pendingPacketLength").getValue());
+
     offsets.clear();
     nextProductionIndex = 0;
-
-    par("productionInterval").setValue(par("dynamicProductionInterval").getValue());
-    par("packetLength").setValue(par("dynamicPacketLength").getValue());
-
     // length is always at least 1. otherwise, use the already existing InitialProductionOffset.
     size_t vectorSize = productionTimesInHyperCycleVector.size();
     if (vectorSize > 1) {
         std::vector<simtime_t> tempVector(vectorSize);
-        nextProductionIndex++;
         // relative to the hyperperiod (= vec.size()*period)
         for (int i = 0; i < vectorSize; i++) {
             auto offset_i = productionTimesInHyperCycleVector[i] - i*productionIntervalParameter->doubleValue();
             tempVector[i] = offset_i;
         }//endfor
-        for (int i = 0; i < vectorSize; i++) {
-            auto offset_prev = tempVector[(i-1 + vectorSize) % vectorSize].dbl();
-            offsets.push_back(tempVector[i] - offset_prev);
-        }
+        computeProductionOffsets(tempVector);
     }//endif
+
     par("initialProductionOffset") = productionTimesInHyperCycleVector[0].dbl();
+}
+
+void DynamicPacketSource::computeProductionOffsets(const std::vector<simtime_t>& productionOffsets) {
+    nextProductionIndex++;
+    size_t vectorSize = productionOffsets.size();
+    for (int i = 0; i < vectorSize; i++) {
+         auto offset_prev = productionOffsets[(i-1 + vectorSize) % vectorSize].dbl();
+         offsets.push_back(productionOffsets[i] - offset_prev);
+    }
 }
 
 
@@ -182,6 +196,21 @@ bool DynamicPacketSource::stopIfNotScheduled() {
     }
     return false;
 }
+
+int DynamicPacketSource::objective(const char* type) const {
+        StreamObjectives value;
+        if (!strcmp(type, "LATENESS"))
+                value = StreamObjectives::LATENESS;
+            else if (!strcmp(type, "TARDINESS"))
+                value = StreamObjectives::TARDINESS;
+            else if (!strcmp(type, "JITTER"))
+                value = StreamObjectives::JITTER;
+            else if (!strcmp(type, "TARDINESS_AND_JITTER"))
+                value = StreamObjectives::TARDINESS_AND_JITTER;
+            else
+                value = StreamObjectives::NO_OBJECTIVE;
+        return static_cast<int>(value);
+    }
 
 DynamicPacketSource::~DynamicPacketSource() {
         cancelAndDeleteClockEvent(parameterChangeEvent);

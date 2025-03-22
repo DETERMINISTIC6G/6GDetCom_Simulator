@@ -28,25 +28,28 @@ simple DynamicPacketSource extends ActivePacketSource
       productionInterval  @mutable;
       packetLength @mutable;
       
+      object productionOffsets @unit(s) = default([0ns]);
+      
       // If you change the value, the effects in the network are only visible after the decision and permission of the scheduler
-      volatile double dynamicProductionInterval @unit(s) @mutable = default(productionInterval);
-      volatile int dynamicPacketLength @unit(b) @mutable = default(packetLength);
+      volatile double pendingProductionInterval @unit(s) @mutable = default(productionInterval);
+      volatile int pendingPacketLength @unit(b) @mutable = default(packetLength);
            
       // start and stop the app dynamically
       volatile bool enabled @mutable = default(true);
       
       // hard constraint time
-      double jitter @unit(ms)  = default(1.0ms);
-      double latency @unit(ms) = default(productionInterval);
+      double maxJitter @unit(ms)  = default(productionInterval * 0.05);
+      double maxLatency @unit(ms) = default(productionInterval);
             
       // additional  Traffic Class Requirements
       int pcp = default(0); //
-      int gateIndex = default(0);
-      int objectiveType = default(4);
-      int packetLoss = default(0);
-      int policy = default(0);
+      //int gateIndex = default(0);
+      
+      string objectiveType @enum("NO_OBJECTIVE", "LATENESS", "TARDINESS", "JITTER", "TARDINESS_AND_JITTER") = default("TARDINESS_AND_JITTER");
+      //int packetLoss = default(0);
+      //int policy = default(0); // packet delay budget
       double reliability = default(1.0);
-      double weight = default(1.0); //
+      //double weight = default(1.0); //
       
       
       @class(DynamicPacketSource);

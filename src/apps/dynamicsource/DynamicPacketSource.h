@@ -52,6 +52,9 @@ private:
 friend class ChangeMonitor;
 friend class ExternalGateScheduleConfigurator;
 
+private:
+    void computeProductionOffsets(const std::vector<simtime_t>& simtimeVector);
+
 protected:
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *msg) override;
@@ -66,7 +69,7 @@ protected:
 public:
     virtual cValueMap* getConfiguration() const;
 
-
+    int objective(const char* type) const;
 
     ~DynamicPacketSource() override;
 

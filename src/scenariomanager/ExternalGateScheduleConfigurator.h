@@ -50,12 +50,12 @@ class Schedule: public Output::Schedule {
 
 class Application: public Input::Application {
     public:
-        int objectiveType; //4
-        int packetLoss; //0
-        int policy; // 0
+        int objectiveType;
+        //int packetLoss;
+        //int policy;
         double reliability; //0.9999;
         simtime_t phase = 0; // already running
-        double weight; //= 1.0;
+        //double weight; //= 1.0;
     };
 
 class Output: public GateScheduleConfiguratorBase::Output {
@@ -116,8 +116,8 @@ private:
     virtual bool isDetComLink(cModule *source, cModule *target, DetComLinkType &detComLinkType) const;
 
     virtual inline std::string getExpandedNodeName(cModule *module) const;
-    std::string getDetComLinkDescription(DetComLinkType type) const;
-    short getSwitchType(cModule* mod) const;
+    inline std::string getDetComLinkDescription(DetComLinkType type) const;
+    inline short getSwitchType(cModule* mod) const;
     Input::Port *getConfigurablePort(const Input& input, std::string &linkName) const;
 
     bool invokeScheduler() const;

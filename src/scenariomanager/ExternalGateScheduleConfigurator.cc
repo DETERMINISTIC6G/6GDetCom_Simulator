@@ -222,7 +222,7 @@ void ExternalGateScheduleConfigurator::writeStreamsToFile(const Input& input) co
     metaData->set("simulation_time", simTime().inUnit(SIMTIME_US));
     metaData->set("simulation_time_unit", "us");
     metaData->set("schedule_type", "Hypercycle");
-    // metaData->set("fixed_priority", "true");
+    metaData->set("fixed_priority", monitor->isFixedPriority());
     write(streamsFilePar, jsonStreams);
 
     delete jsonStreams;
@@ -278,11 +278,11 @@ cValueMap *ExternalGateScheduleConfigurator::convertInputToJsonStreams(const Inp
         jsonFlow->set("hard_constraint_time_latency", dynApplication->maxLatency.dbl() * 1000000);
         jsonFlow->set("hard_constraint_time_jitter", dynApplication->maxJitter.dbl() * 1000000);
         jsonFlow->set("hard_constraint_time_unit", "us");
-        jsonFlow->set("weight", dynApplication->weight);
+        //jsonFlow->set("weight", dynApplication->weight);
         jsonFlow->set("phase", dynApplication->phase.dbl());
         jsonFlow->set("phase_unit", "us");
         jsonFlow->set("objective_type", dynApplication->objectiveType);
-        jsonFlow->set("packet_loss", dynApplication->packetLoss);
+        //jsonFlow->set("packet_loss", dynApplication->packetLoss);
 
         cValueArray *endDevices = new cValueArray();
         jsonFlow->set("end_devices", endDevices);
@@ -318,7 +318,7 @@ cValueMap *ExternalGateScheduleConfigurator::convertInputToJsonStreams(const Inp
         for (int i = 0; i < pdbSize; i++) {
             auto vMap = check_and_cast<cValueMap*>(pdb_map->get(i).objectValue());
             vMap->set("reliability", reliability);
-            vMap->set("policy", dynApplication->policy);
+            //vMap->set("policy", dynApplication->policy);
         }//endfor
     } //1.for
     return json;
@@ -334,7 +334,7 @@ cValueMap *ExternalGateScheduleConfigurator::convertInputToJsonNetwork(const Inp
         jsonDevices->add(jsonDevice);
         jsonDevice->set("name", device->module->getFullName());
         jsonDevice->set("device_type", (short)DeviceType::END_DEVICE);
-        jsonDevice->set("processing_delay", 0);
+        jsonDevice->set("processing_delay", 0);  // temporary hard coded
         jsonDevice->set("processing_delay_unit", "us");
 
         (*hashMapNodeId)[std::string(device->module->getFullName())] = device->module->getId();
@@ -391,7 +391,8 @@ cValueMap *ExternalGateScheduleConfigurator::convertInputToJsonNetwork(const Inp
 std::string ExternalGateScheduleConfigurator::getExpandedNodeName(cModule *module) const {
     auto fullNameNetworkNode = std::string(module->getFullName());
     auto type = getSwitchType(module);
-    auto nameNetworkNode = (1 < type && type < 4) ? std::string(module->getParentModule()->getName()) + "."
+    auto nameNetworkNode = (1 < type && type < 4) ?
+                                  std::string(module->getParentModule()->getName()) + "."
                                 + std::string(module->getFullName()) : std::string(module->getFullName());
     return nameNetworkNode;
 }
@@ -521,12 +522,12 @@ void ExternalGateScheduleConfigurator::addFlows(Input& input) const {
         startApplication->packetInterval = entry->get("packetInterval").doubleValueInUnit("s");//packetInterval;
         startApplication->maxLatency = entry->containsKey("maxLatency") ? entry->get("maxLatency").doubleValueInUnit("s") : -1;
         startApplication->maxJitter = entry->containsKey("maxJitter") ? entry->get("maxJitter").doubleValueInUnit("s") : 0;
-        startApplication->packetLoss = entry->get("packetLoss").intValue();
+        //startApplication->packetLoss = entry->get("packetLoss").intValue();
         startApplication->objectiveType = entry->get("objectiveType").intValue();
-        startApplication->weight = entry->get("weight").doubleValue();
+        //startApplication->weight = entry->get("weight").doubleValue();
         simtime_t phase = entry->get("phase").doubleValueInUnit("us");
         startApplication->phase = phase <= 0 ? 0 : phase;
-        startApplication->policy = entry->get("policy").intValue();
+        //startApplication->policy = entry->get("policy").intValue();
         startApplication->reliability = entry->get("reliability").doubleValue();
 
         input.applications.push_back(startApplication);
@@ -537,8 +538,8 @@ void ExternalGateScheduleConfigurator::addFlows(Input& input) const {
             throw cRuntimeError("Cannot identify the flow!");
         flow->name = entry->get("name").stringValue();
         flow->gateIndex = entry->get("gateIndex").intValue();
-        flow->cutthroughSwitchingHeaderSize = entry->containsKey("cutthroughSwitchingHeaderSize") ?
-                                b(entry->get("cutthroughSwitchingHeaderSize").doubleValueInUnit("b")) : b(0);
+        //flow->cutthroughSwitchingHeaderSize = entry->containsKey("cutthroughSwitchingHeaderSize") ?
+                                //b(entry->get("cutthroughSwitchingHeaderSize").doubleValueInUnit("b")) : b(0);
         flow->startApplication = startApplication;
         flow->endDevice = endDevice;
 
@@ -685,9 +686,9 @@ ExternalGateScheduleConfigurator::Output *ExternalGateScheduleConfigurator::conv
             throw cRuntimeError("Cannot find flow: %s", flowID.c_str());
         auto flow = *flowIt;
         auto application = flow->startApplication;
-        double firstSendingTime = field.second.intValue(); //ns
-        auto startTime = SimTime(firstSendingTime, SIMTIME_NS);
-        while (startTime < 0) startTime += application->packetInterval.dbl();
+        //double firstSendingTime = field.second.intValue(); //ns
+        auto startTime = SimTime(field.second.intValue(), SIMTIME_NS);
+        //while (startTime < 0) startTime += application->packetInterval.dbl();
         if (output->applicationStartTimes.find(application) == output->applicationStartTimes.end()) {
             output->applicationStartTimes[application] = startTime;
         } //endif

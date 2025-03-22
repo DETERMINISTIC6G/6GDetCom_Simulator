@@ -30,6 +30,8 @@ void ChangeMonitor::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         schedulerCallDelayParameter = &par("schedulerCallDelay");
         timer = new ClockEvent("changeEventCollectionTimer");
+        fixedPriority = par("isPortQueuesCountConsistentGlobally").boolValue();
+        pcpMapping = check_and_cast<cValueArray *>(par("mapping").objectValue());
 
         observer = new DynamicScenarioObserver(this);
         distributions = new std::map<std::string, cValueArray*>();
@@ -158,7 +160,10 @@ void ChangeMonitor::addEntryToStreamConfigurations(cValueMap *element, int i) {
     mapping.name = element->containsKey("name") ? element->get("name").stringValue() : (std::string("flow") + std::to_string(flowIndex++)).c_str();
 
     mapping.pcp = element->get("pcp").intValue();
-    mapping.gateIndex = element->get("gateIndex").intValue();
+
+    mapping.gateIndex = //element->get("gateIndex").intValue();
+                        element->containsKey("gateIndex") ? element->get("gateIndex").intValue() : classify(mapping.pcp);
+
     mapping.application = element->get("application").stringValue();
     mapping.source = element->get("source").stringValue();
     mapping.destination = element->get("destination").stringValue();
@@ -169,11 +174,23 @@ void ChangeMonitor::addEntryToStreamConfigurations(cValueMap *element, int i) {
 
     mapping.maxJitter = element->get("maxJitter");
     mapping.reliability = element->get("reliability").doubleValue();
-    mapping.policy = element->get("policy").intValue();
+    //mapping.policy = element->get("policy").intValue();
     mapping.phase = element->get("phase");
-    mapping.packetLoss = element->get("packetLoss").intValue();
+    //mapping.packetLoss = element->get("packetLoss").intValue();
     mapping.objectiveType = element->get("objectiveType").intValue();
-    mapping.weight = element->get("weight").doubleValue();
+    //mapping.weight = element->get("weight").doubleValue();
+}
+
+int ChangeMonitor::classify(int pcp) {
+    if (!fixedPriority)
+        return pcp;
+    int numTrafficClasses = par("globallyNumTrafficClasses").intValue();
+    if (numTrafficClasses > pcpMapping->size())
+        return 0;
+    if (pcp < 0 || pcp > pcpMapping->size()-1)
+        return 0;
+    auto pcpToGateIndex = check_and_cast<cValueArray *>(pcpMapping->get(pcp).objectValue());
+    return pcpToGateIndex->get(numTrafficClasses - 1);
 }
 
 
@@ -199,11 +216,11 @@ cValue ChangeMonitor::convertMappingToCValue(const Mapping &mapping) {
     map->set("maxLatency", mapping.maxLatency);
     map->set("maxJitter", mapping.maxJitter);
     map->set("reliability", mapping.reliability);
-    map->set("policy", mapping.policy);
+    //map->set("policy", mapping.policy);
     map->set("phase", mapping.phase);
-    map->set("packetLoss", mapping.packetLoss);
+    //map->set("packetLoss", mapping.packetLoss);
     map->set("objectiveType", mapping.objectiveType);
-    map->set("weight", mapping.weight);
+    //map->set("weight", mapping.weight);
 
     return cValue(map);
 }

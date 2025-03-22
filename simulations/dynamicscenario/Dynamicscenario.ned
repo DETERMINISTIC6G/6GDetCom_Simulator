@@ -35,7 +35,7 @@ network Dynamicscenario extends DetComNetworkBase
 {
     parameters:
         *.gateScheduleConfigurator.typename = "ExternalGateScheduleConfigurator";//> like IGateScheduleConfigurator; 
-
+		
         @display("bgb=2035,1324");
     submodules:
         histogramContainer: HistogramContainer {
