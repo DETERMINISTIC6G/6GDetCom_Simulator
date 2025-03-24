@@ -46,6 +46,11 @@ class Schedule: public Output::Schedule {
     public:
         cValueArray *durations;
         simtime_t offset;
+    public:
+        ~Schedule() {
+            delete durations;
+            durations = nullptr;
+        }
     };
 
 class Application: public Input::Application {
@@ -64,6 +69,21 @@ class Output: public GateScheduleConfiguratorBase::Output {
      public:
         bool hasSchedule() {
             return gateSchedules.size();
+        }
+     public:
+        ~Output() {
+
+            /*for (auto it = gateSchedules.begin(); it != gateSchedules.end(); ++it) {
+
+             std::vector<Output::Schedule*> &schedules = it->second;
+
+             for (Output::Schedule *schedule : schedules) {
+             Schedule *oldSchedule = (Schedule*) schedule;
+             oldSchedule->~Schedule();
+             }//endfor
+
+             }//endfor
+             */
         }
 };
 
@@ -98,6 +118,8 @@ private:
     virtual void initialize(int stage) override;
     virtual void handleParameterChange(const char *name) override;
     virtual void handleMessage(cMessage *msg) override;
+    virtual void clearConfiguration() override;
+
 
     /*extend GateScheduleConfiguratorBase*/
     virtual void addFlows(Input& input) const override;
@@ -133,6 +155,8 @@ private:
     /*Create separate JSON files for Streams and Network and Distributions */
     cValueMap *convertInputToJsonStreams(const Input& input) const;
     cValueMap *convertInputToJsonNetwork(const Input& input) const;
+
+    void deleteOldConfigurationPar();
 
   public:
     ~ExternalGateScheduleConfigurator() override;

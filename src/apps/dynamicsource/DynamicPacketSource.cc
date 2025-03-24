@@ -32,6 +32,7 @@ void DynamicPacketSource::initialize(int stage)
         productionTimer->setSchedulingPriority(10);
 
         cValueArray *productionOffsets = check_and_cast<cValueArray *>(par("productionOffsets").objectValue());
+        //std::vector<simtime_t> test = productionOffsets->asObjectVector();
         std::vector<simtime_t> tempVector(productionOffsets->size());
         for (int i = 0; i < productionOffsets->size(); i++) {
              const cValue& value = (*productionOffsets)[i];

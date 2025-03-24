@@ -88,7 +88,7 @@ protected:
     void prepaireChangesForProcessing(int initialized);
     void configureInitStreamsAndDistributions();
     cValueArray* convertToCValueArray(const std::vector<Mapping>& configMappings);
-    cValue convertMappingToCValue(const Mapping& mapping);
+    cValueMap *convertMappingToCValue(const Mapping& mapping);
     void addEntryToStreamConfigurations(cValueMap *element, int i);
     void addEntriesToDistributionsFor(TsnTranslator *translator);
 

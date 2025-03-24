@@ -42,7 +42,7 @@ void ChangeMonitor::initialize(int stage)
         subscribeForDynamicChanges();
     } else if (stage == INITSTAGE_NETWORK_INTERFACE_CONFIGURATION) {
         configureInitStreamsAndDistributions();
-        prepaireChangesForProcessing(0);
+        prepaireChangesForProcessing(0); //
     }
 }
 
@@ -97,7 +97,11 @@ void ChangeMonitor::prepaireChangesForProcessing(int initialized) {
     std::cout << "Hyperperiod: " <<  hyperperiod << endl;
     //##################################################
     gateScheduleConfigurator->par("gateCycleDuration").setValue(cValue(hyperperiod, "ns"));
-    if (initialized) gateScheduleConfigurator->par("configuration").setObjectValue(getStreamConfigurations());
+
+    if (initialized) {
+        gateScheduleConfigurator->par("configuration").setObjectValue(nullptr);
+    }
+
 }
 
 
@@ -147,6 +151,8 @@ void ChangeMonitor::addEntriesToDistributionsFor(TsnTranslator *translator) { //
     for (std::string param : delayParam) {
         auto dynExpr = translator->getDistributionExpression(("delay" + param).c_str());
         auto element = observer->createHistogram(*dynExpr);
+        take(element);
+        drop(element);
         auto bridgePort = std::string(translator->getParentModule()->getName()) + "." + std::string(translator->getFullName()) + "_" + param;
         updateDistributions(bridgePort, element);
         delete dynExpr;
@@ -197,13 +203,13 @@ int ChangeMonitor::classify(int pcp) {
 cValueArray* ChangeMonitor::convertToCValueArray(const std::vector<Mapping> &configMappings) {
     cValueArray *mappingParameter = new cValueArray();
     for (const auto &mapping : configMappings) {
-        cValue temp = convertMappingToCValue(mapping);
+        auto temp = convertMappingToCValue(mapping);
         mappingParameter->add(temp);
     }
     return mappingParameter;
 }
 
-cValue ChangeMonitor::convertMappingToCValue(const Mapping &mapping) {
+cValueMap *ChangeMonitor::convertMappingToCValue(const Mapping &mapping) {
     cValueMap *map = new cValueMap();
     map->set("name", cValue(mapping.name));
     map->set("pcp", cValue(mapping.pcp));
@@ -222,7 +228,7 @@ cValue ChangeMonitor::convertMappingToCValue(const Mapping &mapping) {
     map->set("objectiveType", mapping.objectiveType);
     //map->set("weight", mapping.weight);
 
-    return cValue(map);
+    return map;
 }
 
 void ChangeMonitor::updateStreamConfigurations(cValueMap* element) {
@@ -256,18 +262,24 @@ void ChangeMonitor::updateDistributions(std::string bridge,  cValueArray* elemen
     //###################################################
     std::cout << "updateDistributions " << bridge << endl;
     //##################################################
+    take(element);
     auto it = distributions->find(bridge);
     if (it != distributions->end() && it->second != nullptr) { // replace if found
-            //delete it->second;
+            take(it->second);
+            drop(it->second);
+            delete it->second;
             it->second = nullptr;
+
             if (!element->size()) { // delete entry if no new histogram
                 distributions->erase(it);
+
                 delete element;
                 return;
             }
             it->second = element;
         } else { // not found
             if (!element->size()) {
+
                 delete element; // delete if no new histogram
                 return;
             }
@@ -305,10 +317,10 @@ void ChangeMonitor::notify(std::string source, cObject *obj, cObject *details) {
 
         auto element = observer->createHistogram(*convolveExpr, histogramDetails);
         auto bridgePort = std::string(check_and_cast<cMsgPar*>(details)->stringValue());
+        this->take(element);
         updateDistributions(bridgePort,  element);
         delete convolveExpr;
         delete histogramDetails;
-        //delete element;
 
     }
     else if (!timer->isScheduled()) {
@@ -317,12 +329,11 @@ void ChangeMonitor::notify(std::string source, cObject *obj, cObject *details) {
 }
 
 ChangeMonitor::~ChangeMonitor() {
-   /* for (auto it = distributions->begin(); it != distributions->end(); ++it) {
-        // delete it->second;
-    }*/
     for (auto& pair : *distributions) {
-        if (pair.second != nullptr)
-           ;//delete pair.second;
+        if (pair.second != nullptr) {
+            delete pair.second;
+        }
+
     }
     delete distributions;
     cancelAndDeleteClockEvent(timer);

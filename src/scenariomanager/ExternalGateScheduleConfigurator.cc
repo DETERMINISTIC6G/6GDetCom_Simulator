@@ -32,8 +32,8 @@ void ExternalGateScheduleConfigurator::initialize(int stage) {
 
         configurationFilePar = par("configurationFile").stdstringValue();
 
-        configuration = check_and_cast<cValueArray*>(par("configuration").objectValue()); // specified in .ini
-        gateCycleDuration = par("gateCycleDuration");
+        //configuration = check_and_cast<cValueArray*>(par("configuration").objectValue()); // specified in .ini
+        //gateCycleDuration = par("gateCycleDuration");
 
         configurationComputedEvent = new ClockEvent("configuration_computed");
         configurationComputedEvent->setSchedulingPriority(0);
@@ -41,13 +41,16 @@ void ExternalGateScheduleConfigurator::initialize(int stage) {
         hashMapNodeId = new std::map<std::string, uint16_t>();
     } else if (stage == INITSTAGE_GATE_SCHEDULE_CONFIGURATION) {
         //ChangeMonitor *monitor = nullptr;
-        if (!configuration->size() && (monitor = check_and_cast<ChangeMonitor*>(getModuleByPath("monitor")))) { // query monitor if it exists
+        //!configuration->size() &&
+        if ( (monitor = check_and_cast<ChangeMonitor*>(getModuleByPath("monitor")))) { // query monitor if it exists
             //distributions = monitor->getDistributions();
             configuration = monitor->getStreamConfigurations();
         }
         computeConfiguration();
         configureGateScheduling();
         configureApplicationOffsets();
+
+        clearConfiguration();
     }//end INITSTAGE_GATE_SCHEDULE_CONFIGURATION
 }
 
@@ -61,15 +64,16 @@ void ExternalGateScheduleConfigurator::handleMessage(cMessage *msg){
             configureGateScheduling();
             configureApplicationOffsets();
          }
+
     } else
             throw cRuntimeError("Unknown message type");
 }
 
 void ExternalGateScheduleConfigurator::handleParameterChange(const char *name) {
     if (!strcmp(name, "configuration")) {
-        //delete configuration;
-        configuration = check_and_cast<cValueArray*>(par("configuration").objectValue());
         clearConfiguration();
+        configuration = monitor->getStreamConfigurations();
+
         if (configurationComputedEvent->isScheduled()) {
             cancelEvent(configurationComputedEvent);
         }
@@ -161,7 +165,7 @@ ExternalGateScheduleConfigurator::Output* ExternalGateScheduleConfigurator::comp
                 std::cout << application->module->getFullName() << "   "
                         << appModule->getFullPath() << endl;
                 //##################################################
-                auto element = appModule->getConfiguration();
+                cValueMap *element = appModule->getConfiguration();
                 monitor->updateStreamConfigurations(element);
                 delete element;
             }//endif
@@ -459,6 +463,7 @@ bool ExternalGateScheduleConfigurator::addEntryToPDBMap(cValueArray *pdb_map, cM
         }
         if (mapSize == pdb_map->size()) {
             delete pdb;
+
             }
         return true;
     }//endif
@@ -586,6 +591,7 @@ void ExternalGateScheduleConfigurator::addFlows(Input& input) const {
         if (!entry->containsKey("pathFragments"))
             delete pathFragments;
         input.flows.push_back(flow);
+
     }//endfor
     /*std::sort(input.flows.begin(), input.flows.end(), [] (const Input::Flow *r1, const Input::Flow *r2) {
         return r1->startApplication->pcp > r2->startApplication->pcp;
@@ -664,6 +670,7 @@ ExternalGateScheduleConfigurator::Output *ExternalGateScheduleConfigurator::conv
                   cValue newValue = cValue(value.intValue(), "ns");
                   schedule->durations->add(newValue);
               }
+              dur = nullptr;
               schedule->offset = SimTime(queueMap->get("offset").intValue(), SIMTIME_NS);
               schedules.push_back(schedule);
         }//endfor
@@ -698,8 +705,31 @@ ExternalGateScheduleConfigurator::Output *ExternalGateScheduleConfigurator::conv
     return output;
 }
 
+void ExternalGateScheduleConfigurator::clearConfiguration(){
+
+    deleteOldConfigurationPar();
+    if (gateSchedulingInput == nullptr || (Output*) gateSchedulingOutput == nullptr)
+        return;
+    if (topology != nullptr)
+        topology->clear();
+
+    delete gateSchedulingInput;
+    gateSchedulingInput = nullptr;
+
+    auto scheduleMap = gateSchedulingOutput->gateSchedules;
+    for (auto it = scheduleMap.begin(); it != scheduleMap.end(); ++it) {
+        std::vector<Output::Schedule*> &schedules = it->second;
+        for (Output::Schedule *schedule : schedules) {
+            Schedule *oldSchedule = (Schedule*)schedule;
+            oldSchedule->~Schedule();
+        }//endfor
+    }//endfor
+    delete (Output*) gateSchedulingOutput;
+    gateSchedulingOutput = nullptr;
+}
 
 
+//TODO fix me...
 void ExternalGateScheduleConfigurator::configureGateScheduling() {
     std::cout << "Configure Scheduling :  " << ((Output*)gateSchedulingOutput)->hasSchedule() << endl;
 
@@ -723,7 +753,7 @@ void ExternalGateScheduleConfigurator::configureGateScheduling() {
 
             cPar &durationsPar = gate->par("durations");
             durationsPar.copyIfShared();
-            durationsPar.setObjectValue(newSchedule->durations);
+            durationsPar.setObjectValue(newSchedule->durations->dup());
         }//endfor
     }//endfor
 }
@@ -741,15 +771,33 @@ void ExternalGateScheduleConfigurator::configureApplicationOffsets() {
     }
 }
 
+void ExternalGateScheduleConfigurator::deleteOldConfigurationPar() {
+    if (configuration != nullptr) {
+        for (int i = 0; i < configuration->size(); i++) {
+            auto entry = check_and_cast<cValueMap*>(
+                    configuration->get(i).objectValue());
+            configuration->remove(i);
+            take(entry);
+            drop(entry);
+            delete entry;
+        }
+        configuration->clear();
+        delete configuration;
+        configuration = nullptr;
+    }
+}
+
 
 ExternalGateScheduleConfigurator::~ExternalGateScheduleConfigurator(){
-    //clearConfiguration();
-    //delete configuration;
-    //distributions = nullptr;
+    clearConfiguration();
+
+    if (configuration != nullptr)
+        delete configuration;
 
     delete hashMapNodeId;
 
     if(configurationComputedEvent != nullptr)
+        drop(configurationComputedEvent);
         delete configurationComputedEvent;
 }
 
