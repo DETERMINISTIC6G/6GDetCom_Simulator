@@ -19,14 +19,13 @@ Define_Module(DelayReplayer);
 
 void DelayReplayer::initialize(int stage) {
     if (stage == INITSTAGE_LOCAL) {
-        delays.clear();
         const char *csvfile = par("csvFilename").stringValue();
         readCSV(csvfile);
-        delayIterator = delays.begin();
     }
 }
 
 void DelayReplayer::readCSV(const char *filename) {
+    delays.clear();
     std::string line;
     std::ifstream infile(filename);
     cDynamicExpression delayExpr, startExpr;
@@ -63,6 +62,7 @@ void DelayReplayer::readCSV(const char *filename) {
             delays.emplace_back(startValue, delayValue);
         }
     }
+    delayIterator = delays.begin();
 }
 
 cValue DelayReplayer::getRand() {
