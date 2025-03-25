@@ -7,7 +7,7 @@
 
 package d6g.devices.tsntranslator;
 
-import inet.linklayer.ethernet.LayeredEthernetInterface;
+import inet.linklayer.ethernet.modular.LayeredEthernetInterface;
 import inet.node.tsn.TsnSwitch;
 import inet.linklayer.contract.IEthernetInterface;
 
