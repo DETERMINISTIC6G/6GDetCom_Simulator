@@ -85,7 +85,7 @@ protected:
     cValueArray *pcpMapping = nullptr;
 
   private:
-    void prepaireChangesForProcessing(int initialized);
+    void prepareChangesForProcessing(int initialized);
     void configureInitStreamsAndDistributions();
     cValueArray* convertToCValueArray(const std::vector<Mapping>& configMappings);
     cValueMap *convertMappingToCValue(const Mapping& mapping);

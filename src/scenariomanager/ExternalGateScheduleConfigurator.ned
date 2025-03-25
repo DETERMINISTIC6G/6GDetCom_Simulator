@@ -43,12 +43,10 @@ simple ExternalGateScheduleConfigurator extends GateScheduleConfiguratorBase lik
         
     string command;
     
-    string networkFile;
-    string streamsFile;
-    string histogramsFile;
-     
-    
-    string configurationFile;
+    volatile string networkFile;
+    volatile string streamsFile;
+    volatile string histogramsFile;
+    volatile string configurationFile;
        
     @class(ExternalGateScheduleConfigurator);
 }
