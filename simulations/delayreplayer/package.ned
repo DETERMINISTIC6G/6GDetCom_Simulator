@@ -27,7 +27,6 @@ network TsnTestNetwork extends DetComNetworkBase
     parameters:
         *.eth[*].bitrate = default(100Mbps); // Default bitrate for all Ethernet interfaces is set to 100Mbps.
     submodules:
-        // Histogram for capturing statistical data.
 
         delayreplayerContainer: DelayReplayerContainer {
             @display("p=100,500;is=s");
