@@ -49,6 +49,8 @@ void DynamicScenarioObserver::receiveSignal(cComponent *source,
   if (signalID == parameterChangeSignal) {
     EV << "Received message (app): " << msg->getName()
        << " from source: " << source->getFullPath() << endl;
+    std::cout << "CHANGES" << "   "
+                                << source->getFullPath() << " time: " << simTime() << endl;
     DynamicPacketSource *sourceModule =
         dynamic_cast<DynamicPacketSource *>(source);
     if (sourceModule) {

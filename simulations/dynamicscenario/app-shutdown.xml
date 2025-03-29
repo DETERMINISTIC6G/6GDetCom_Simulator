@@ -1,74 +1,57 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <script>
-   <!--  <shutdown t="2" module="device2.app[0].io"/>   -->
-   <!-- <set-param t="2" module="device2.app[0].source" par="typename" value="EmptyPacketSource"/> 
-    <delete-module t="2" module="device2.app[0].source"/> -->
-    <!--  <delete-module t="2" module="device2.app[0].io"/> -->
-  <!-- sendung der pakete stoppen -->
- <!-- <delete-module t="1" module="device2.app[0].source"/>
-     <create-module t="2" parent="device2.app[0]" submodule="source" type="inet.queueing.source.EmptyPacketSource" vector="false"/> 
-  
- 
-  <create-module t="1" parent="device2.app[0]" submodule="source" type="inet.queueing.source.ActivePacketSource" vector="false"/>
-  		   		
-  
-   <connect t="1.0" src-module="device2.app[0].source" src-gate="out"
-                 dest-module="device2.app[0].io" dest-gate="trafficIn" channel-type="-->"-->
-                 />
- <!--    <connect t="3" src-module="device2.app[0].io" src-gate="socketIn"
-                 dest-module="&lt;parent&gt;" dest-gate="socketIn"
-                 />
-   <connect t="3" src-module="device2.app[0].io" src-gate="socketOut"
-                 dest-module="&lt;parent&gt;" dest-gate="socketOut"
-                 /> -->
-     
-  <!--    <create-module t="3" parent="device2.app[0]" submodule="source" type="inet.queueing.base.ActivePacketSource" vector="false"/>
-    <set-param t="3" module="device2.app[0].source" par="initialProductionOffset" value="0.010"/> 
-    <connect t="3" src-module="device2.app[0].source" src-gate="out"
-                 dest-module="device2.app[0].io" dest-gate="trafficIn"/> -->
-    
-    
- <!--     <create-module t="1" parent="device2" submodule="app" type="inet.applications.udpapp.UdpSourceApp" vector="true"/>
-    <connect t="1" src-module="device2.app[0]" src-gate="socketOut"
-                 dest-module="device2.at" dest-gate="in[2]" channel-type="omnetpp::cChannel"
-                 /> -->
-     
- <!-- <create-module t="3" parent="wirelessdevice1" submodule="app" type="inet.applications.udpapp.UdpSinkApp" vector="true" param="io.localPort = 1007"/> -->
+
+	<at t="1">
+		<set-param module="device2.app[0].source"
+			par="pendingEnabled" value="true" />
+		<set-param module="device1.app[0].source"
+			par="pendingEnabled" value="true" />
+		<set-param module="device5.app[0].source"
+			par="pendingEnabled" value="false" />
+		<set-param module="device3.app[0].source"
+			par="pendingEnabled" value="false" />
+	</at>
+
+	<at t="5">
+		<set-param module="device2.app[0].source"
+			par="pendingProductionInterval" value="20ms" />
+		<set-param module="device2.app[0].source"
+			par="pendingPacketLength" value="1200B" />
+	</at>
+
+	<set-param t="20" module="device2.app[0].source"
+		par="pendingEnabled" value="false" />
+	<!-- <set-param t="20" module="device1.app[0].source" par="enabled" value="true"/> -->
 
 
-<at t="1">
-	<set-param module="device2.app[0].source" par="enabled" value="true"/>
-	<set-param module="device1.app[0].source" par="enabled" value="true"/>
-	<set-param module="device5.app[0].source" par="enabled" value="false"/>
-	<set-param module="device3.app[0].source" par="enabled" value="false"/>
-</at>
+	<set-param t="30" module="device2.app[0].source"
+		par="pendingEnabled" value="true" />
 
-  <at t="5">
-	<set-param module="device2.app[0].source"
-		par="pendingProductionInterval" value="20ms" />
- 	<set-param module="device2.app[0].source"
-		par="pendingPacketLength" value="1200B" />
-</at>
+	<set-param t="50" module="device5.app[0].source"
+		par="pendingEnabled" value="true" />
+	<set-param t="50" module="device3.app[0].source"
+		par="pendingEnabled" value="true" />
 
-<set-param t="20" module="device2.app[0].source" par="enabled" value="false"/>
-<!--  <set-param t="20" module="device1.app[0].source" par="enabled" value="true"/>-->
+	
 
+	<at t="70">
+		<set-param module="device2.app[0].source"
+			par="pendingEnabled" value="false" />
+	
+		<set-param module="device2.app[1].source"
+			par="pendingProductionInterval" value="40ms" />
+		<set-param module="device2.app[1].source" par="maxLatency"
+			value="40ms" />
+		<set-param module="device2.app[1].source"
+			par="pendingEnabled" value="true" />
+	</at>
 
-<set-param t="30" module="device2.app[0].source" par="enabled" value="true"/>
+	<set-param t="90" module="device2.app[1].source"
+		par="pendingEnabled" value="false" />
 
-<set-param t="50" module="device5.app[0].source" par="enabled" value="true"/>
-<set-param t="50" module="device3.app[0].source" par="enabled" value="true"/>
+	<set-param t="95" module="device5.app[0].source"
+		par="pendingProductionInterval" value="50ms" />
+	<set-param t="95" module="device5.app[0].source"
+		par="maxLatency" value="50ms" />
 
-
-
-<!--  <create-module t="3" parent="device2" submodule="app" type="inet.applications.udpapp.UdpSourceApp" vector="true" operation="connect"/>
-  <initiate t="3" module="device2.app[2]"></initiate>
-<connect t="3" src-module="device2.app[2]" src-gate="socketOut"
-                 dest-module="device2.at" dest-gate="in[2]" 
-                 /> -->
-
-<!--  <initiate t="2" module="device2.app[0].source"/> -->
-
-
-  <!--  <startup t="3"  module="device2.app[0].io"/> --> 
 </script>

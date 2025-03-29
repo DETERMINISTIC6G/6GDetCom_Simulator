@@ -274,6 +274,7 @@ void ChangeMonitor::updateStreamConfigurations(cValueMap *element) {
     if (element->get("enabled").boolValue()) {
       addEntryToStreamConfigurations(element, i);
     } else {
+      streamWantsToStop.push_back(source + "." + application + ".source");
       streamConfigurations.erase(it);
       streamConfigurations.shrink_to_fit();
     }
@@ -326,6 +327,17 @@ std::map<std::string, cValueArray *> *ChangeMonitor::getDistributions() {
 
 cValueArray *ChangeMonitor::getStreamConfigurations() {
   return convertToCValueArray(streamConfigurations);
+}
+
+void ChangeMonitor::stopApplicationsWithStopReq() {
+    for (auto& appPath : streamWantsToStop) {
+        auto application = check_and_cast<DynamicPacketSource *>(getModuleByPath(appPath.c_str()));
+        std::cout << "stopApplicationsWithStopReq" << "   " << appPath
+                                               << " time: " << simTime() << endl;
+        application->stopIfNotScheduled();
+    }
+    streamWantsToStop.clear();
+
 }
 
 /**

@@ -46,9 +46,10 @@ void ExternalGateScheduleConfigurator::initialize(int stage) {
       configuration = monitor->getStreamConfigurations();
     }
     computeConfiguration();
-    configureGateScheduling();
-    configureApplicationOffsets();
-
+    if (((Output *)gateSchedulingOutput)->hasSchedule()) {
+        configureGateScheduling();
+        configureApplicationOffsets();
+    }
     clearConfiguration();
   } // end INITSTAGE_GATE_SCHEDULE_CONFIGURATION
 }
@@ -155,32 +156,36 @@ ExternalGateScheduleConfigurator::computeGateScheduling(
   writeNetworkToFile(input);
   writeDistributionsToFile();
 
+  Output *scheduleOutput = nullptr;
+
   if (invokeScheduler()) {
-    return (Output *)readOutputFromFile(input,
+    scheduleOutput = (Output *)readOutputFromFile(input,
                                         configurationFilePar->stdstringValue());
+
   } else {
-    // auto monitor =
-    // check_and_cast<ChangeMonitor*>(getModuleByPath("monitor"));
+    commitTime = simTime(); // !
+    scheduleOutput =  new Output();
+  }
+
+  if (!scheduleOutput->hasSchedule() && commitTime > SIMTIME_ZERO) {
+    std::cout << commitTime << "  " << SIMTIME_ZERO <<  endl;
+
     for (auto &application : input.applications) {
       auto appModule =
           (DynamicPacketSource *)(application->module->getSubmodule("source"));
-      if (appModule->stopIfNotScheduled()) {
-        // ##################################################
-        std::cout << application->module->getFullName() << "   "
-                  << appModule->getFullPath() << endl;
-        // ##################################################
+        appModule->cancelLastChanges();
         cValueMap *element = appModule->getConfiguration();
         monitor->updateStreamConfigurations(element);
         delete element;
-      } // endif
     } // endfor
     bubble(format("No schedule for the event at %.2f has been calculated.",
                   simTime().dbl() -
                       monitor->par("schedulerCallDelay").doubleValueInUnit("s"))
                .c_str());
-    return new Output();
   }
+  return scheduleOutput;
 }
+
 
 bool ExternalGateScheduleConfigurator::invokeScheduler() const {
   bool configured = true;
@@ -194,9 +199,9 @@ bool ExternalGateScheduleConfigurator::invokeScheduler() const {
              histogramsFilePar->stdstringValue().c_str(),
              configurationFilePar->stdstringValue().c_str());
   if (std::system(commandFromINI.c_str()) != 0) {
-    // throw cRuntimeError(
-    //  "Command execution failed, make sure LIBTSNDGM_ROOT is set and a
-    //  scheduler tool is installed");
+    if (monitor->par("stopWhenNotSchedulable").boolValue() || commitTime == SIMTIME_ZERO)
+       throw cRuntimeError("Command execution failed, make sure LIBTSNDGM_ROOT is set and a scheduler tool is installed");
+
     configured = false;
   }
   chdir(currentDir);
@@ -353,7 +358,7 @@ cValueMap *ExternalGateScheduleConfigurator::convertInputToJsonNetwork(
     const Input &input) const {
   cValueMap *json = new cValueMap();
   cValueArray *jsonDevices = new cValueArray();
-  json->set("end_devices", jsonDevices);
+  json->set("end_devices", jsonDevices);  // END DEVICES
   for (auto device : input.devices) {
     cValueMap *jsonDevice = new cValueMap();
     jsonDevices->add(jsonDevice);
@@ -362,11 +367,51 @@ cValueMap *ExternalGateScheduleConfigurator::convertInputToJsonNetwork(
     jsonDevice->set("processing_delay", 0); // temporary hard coded
     jsonDevice->set("processing_delay_unit", "us");
 
+    //################################
+
+        auto jsonDevicePorts = new cValueArray();
+        jsonDevice->set("ports", jsonDevicePorts);
+        for (int j = 0; j < device->ports.size(); j++) {
+          auto port = device->ports[j];
+          auto jsonPort = new cValueMap();
+          jsonDevicePorts->add(jsonPort);
+
+          auto nameNode = getExpandedNodeName(port->startNode->module);
+          jsonPort->set("port_name", nameNode + "-" + port->module->getFullName());
+          auto connectedToFullName = getExpandedNodeName(port->endNode->module);
+          jsonPort->set("connects_to", connectedToFullName);
+
+          DetComLinkType detComLinkType;
+          short link_type = isDetComLink(port->startNode->module,
+                                         port->endNode->module, detComLinkType);
+          jsonPort->set("wireless_link_descr",
+                        getDetComLinkDescription(detComLinkType));
+          jsonPort->set("link_type", link_type);
+          if (link_type)
+            jsonPort->set("multiple_subcarriers", true);
+
+
+          jsonPort->set("propagation_delay", port->propagationTime.dbl() * 1000000);
+          jsonPort->set("propagation_delay_unit", "us");
+          jsonPort->set("data_rate", bps(port->datarate).get() / 1000000);
+          jsonPort->set("data_rate_size_unit", "bit");
+          jsonPort->set("data_rate_time_unit", "us");
+
+          auto queue = port->module->findModuleByPath(".macLayer.queue");
+          jsonPort->set("num_queues",
+                        strcmp(queue->getModuleType()->getName(), "PacketQueue")
+                            ? queue->par("numTrafficClasses").intValue()
+                            : 0);
+        }
+
+    //###############################
+
+
     (*hashMapNodeId)[std::string(device->module->getFullName())] =
         device->module->getId();
   }
   cValueArray *jsonSwitches = new cValueArray();
-  json->set("switches", jsonSwitches);
+  json->set("switches", jsonSwitches);              // SWITCHES
   for (int i = 0; i < input.switches.size(); i++) {
     auto switch_ = input.switches[i];
     cValueMap *jsonSwitch = new cValueMap();
@@ -718,6 +763,12 @@ ExternalGateScheduleConfigurator::convertJsonToOutput(
   auto output = new Output();
   auto jsonMETA =
       check_and_cast<cValueMap *>(json->get("META").objectValue()); // META data
+  int scheduled = jsonMETA->containsKey("scheduled") ? jsonMETA->get("scheduled").intValue() : 0;
+  if (monitor->par("stopWhenNotSchedulable").boolValue()) {
+      if (input.flows.size() > scheduled)
+          throw cRuntimeError("Simulation was stopped because not all flows were scheduled.");
+  }
+  if (scheduled == 0) return output;
 
   commitTime = SimTime(jsonMETA->get("commit_time").intValue(), SIMTIME_NS);
   scheduleComputingTime =
@@ -787,6 +838,11 @@ ExternalGateScheduleConfigurator::convertJsonToOutput(
     output->applicationStartTimesArray[application].push_back(startTime);
   } // endfor
 
+  for (auto& offsetsPair : output->applicationStartTimesArray) {
+      auto& offsets = offsetsPair.second;
+      std::sort(offsets.begin(), offsets.end(), [](simtime_t a, simtime_t b) { return a < b; });
+  }
+
   return output;
 }
 
@@ -848,6 +904,9 @@ void ExternalGateScheduleConfigurator::configureGateScheduling() {
 
 void ExternalGateScheduleConfigurator::configureApplicationOffsets() {
   auto output = (Output *)gateSchedulingOutput;
+
+  monitor->stopApplicationsWithStopReq();
+
   for (auto &it : output->applicationStartTimes) {
     auto startOffset = it.second;
     auto applicationModule = it.first->module;
@@ -857,9 +916,26 @@ void ExternalGateScheduleConfigurator::configureApplicationOffsets() {
     auto sourceModule = applicationModule->getSubmodule("source");
     const auto &offsets = output->applicationStartTimesArray[it.first];
     ((DynamicPacketSource *)sourceModule)->setNewConfiguration(offsets);
+
     // sourceModule->par("initialProductionOffset") = startOffset.dbl();
     // //logical: You may only change it once at the beginning
   }
+  //#################################
+      for (auto &application : gateSchedulingInput->applications) {
+            auto appModule =
+                (DynamicPacketSource *)(application->module->getSubmodule("source"));
+            if (appModule->stopIfNotScheduled()) {
+              // ##################################################
+              std::cout << application->module->getFullName() << "   "
+                        << appModule->getFullPath() << endl;
+              // ##################################################
+              cValueMap *element = appModule->getConfiguration();
+              monitor->updateStreamConfigurations(element);
+              delete element;
+            } // endif
+          } // endfor
+
+      //#################################
 }
 
 void ExternalGateScheduleConfigurator::deleteOldConfigurationPar() {

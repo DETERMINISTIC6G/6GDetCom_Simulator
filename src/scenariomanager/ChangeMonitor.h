@@ -81,6 +81,7 @@ protected:
 
     std::vector<Mapping> streamConfigurations;
     std::map<std::string, cValueArray*> *distributions = nullptr;
+    std::vector<std::string> streamWantsToStop;
 
     cValueArray *pcpMapping = nullptr;
 
@@ -103,6 +104,7 @@ protected:
     void updateStreamConfigurations(cValueMap* element);
     void updateDistributions(std::string,  cValueArray* element);
 
+    void stopApplicationsWithStopReq();
     std::map<std::string, cValueArray*> *getDistributions();
     cValueArray* getStreamConfigurations();
     inline bool isFixedPriority() {return fixedPriority;}

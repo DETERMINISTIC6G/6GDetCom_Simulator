@@ -43,6 +43,9 @@ private:
     char enabledParameter;
     bool hasSchedulerPermission;
     bool isFirstTimeRun;
+
+    cPar *runningState = nullptr;
+
     ClockEvent *parameterChangeEvent = nullptr;
     std::string flowName = "";
 
@@ -64,6 +67,7 @@ protected:
     virtual void scheduleProductionTimerAndProducePacket() override;
     virtual bool stopIfNotScheduled();
     virtual void setNewConfiguration(const std::vector<simtime_t>& simtimeVector);
+    virtual void cancelLastChanges();
 
 
 public:
