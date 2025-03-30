@@ -56,9 +56,11 @@ void DynamicScenarioObserver::receiveSignal(cComponent *source,
     if (sourceModule) {
       cValueMap *element = sourceModule->getConfiguration();
       monitor->updateStreamConfigurations(element);
+      take(element);
+      drop(element);
       delete element;
     }
-    monitor->notify(source->getFullPath());
+    monitor->scheduleTimer(source->getFullPath());
   }
   if (signalID == distributionChangeSignal) {
     std::cout << "Received message (distribution): " << msg->getName()
@@ -66,19 +68,18 @@ void DynamicScenarioObserver::receiveSignal(cComponent *source,
     TsnTranslator *sourceModule = dynamic_cast<TsnTranslator *>(source);
     if (sourceModule) {
       std::string paramName =
-          check_and_cast<cMsgPar *>(details)->stringValue(); // details->str();
-      // paramName.erase(0, 1);
-      // paramName.erase(paramName.size() - 1);
+          check_and_cast<cMsgPar *>(details)->stringValue();
+
       auto expr = sourceModule->getDistributionExpression(paramName.c_str());
       auto element = createHistogram(*expr);
       delete expr;
 
       paramName.erase(0, 5);
-      auto bridgePort = std::string(source->getParentModule()->getName()) +
+      auto key = std::string(source->getParentModule()->getName()) +
                         "." + source->getFullName() + "_" + paramName;
-      monitor->updateDistributions(bridgePort, element);
+      monitor->updateDistributions(key, element);
     }
-    monitor->notify(source->getFullPath());
+    monitor->scheduleTimer(source->getFullPath());
   }
 }
 

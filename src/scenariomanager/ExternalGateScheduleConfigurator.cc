@@ -29,66 +29,46 @@ void ExternalGateScheduleConfigurator::initialize(int stage) {
     histogramsFilePar = &par("histogramsFile");
     configurationFilePar = &par("configurationFile");
 
-    // configuration =
-    // check_and_cast<cValueArray*>(par("configuration").objectValue()); //
-    // specified in .ini gateCycleDuration = par("gateCycleDuration");
-
     configurationComputedEvent = new ClockEvent("configuration_computed");
     configurationComputedEvent->setSchedulingPriority(0);
 
     hashMapNodeId = new std::map<std::string, uint16_t>();
   } else if (stage == INITSTAGE_GATE_SCHEDULE_CONFIGURATION) {
-    // ChangeMonitor *monitor = nullptr;
-    //! configuration->size() &&
-    if ((monitor = check_and_cast<ChangeMonitor *>(
-             getModuleByPath("monitor")))) { // query monitor if it exists
-      // distributions = monitor->getDistributions();
-      configuration = monitor->getStreamConfigurations();
-    }
-    computeConfiguration();
-    if (((Output *)gateSchedulingOutput)->hasSchedule()) {
-        configureGateScheduling();
-        configureApplicationOffsets();
-    }
-    clearConfiguration();
-  } // end INITSTAGE_GATE_SCHEDULE_CONFIGURATION
+        // query monitor if it exists
+        if ((monitor = check_and_cast<ChangeMonitor *>(
+             getModuleByPath("monitor")))) {
+
+            configuration = monitor->getStreamConfigurations();
+            computeConfiguration();
+            configureGateScheduling();
+            configureApplicationOffsets();
+            clearConfiguration();
+        }//endif
+  }
 }
 
 void ExternalGateScheduleConfigurator::handleMessage(cMessage *msg) {
   if (msg == configurationComputedEvent) {
-    // #########################################################
-    std::cout << "Configurator (time from handleMessage): " << simTime()
-              << " prio: " << msg->getSchedulingPriority() << " schedule: "
-              << ((Output *)gateSchedulingOutput)->hasSchedule() << endl;
-    // #########################################################
     if (((Output *)gateSchedulingOutput)->hasSchedule()) {
       configureGateScheduling();
       configureApplicationOffsets();
     }
-
-  } else
-    throw cRuntimeError("Unknown message type");
+  }else
+      throw cRuntimeError("Unknown message type");
 }
 
 void ExternalGateScheduleConfigurator::handleParameterChange(const char *name) {
   if (!strcmp(name, "configuration")) {
     clearConfiguration();
     configuration = monitor->getStreamConfigurations();
-
     if (configurationComputedEvent->isScheduled()) {
       cancelEvent(configurationComputedEvent);
     }
-
     computeConfiguration();
-
-    configurationComputedEvent->setSchedulingPriority(0);
+    //configurationComputedEvent->setSchedulingPriority(0);
     scheduleAt(commitTime, configurationComputedEvent);
-    // #######################################################
-    std::cout << "cycle: " << gateCycleDuration
-              << "  Configurator (time from ParameterChange): "
-              << simTime() + scheduleComputingTime << endl;
-    // #######################################################
-  }
+  }//endif
+
   if (!strcmp(name, "gateCycleDuration")) {
     gateCycleDuration = par("gateCycleDuration");
   }
@@ -144,9 +124,9 @@ void ExternalGateScheduleConfigurator::printJson(
         stream << "\n" << indent << "}";
       }
     } else
-      throw cRuntimeError("Unknown object type");
+        throw cRuntimeError("Unknown object type");
   } else
-    stream << value.str();
+      stream << value.str();
 }
 
 ExternalGateScheduleConfigurator::Output *
@@ -157,19 +137,15 @@ ExternalGateScheduleConfigurator::computeGateScheduling(
   writeDistributionsToFile();
 
   Output *scheduleOutput = nullptr;
-
   if (invokeScheduler()) {
     scheduleOutput = (Output *)readOutputFromFile(input,
                                         configurationFilePar->stdstringValue());
-
   } else {
-    commitTime = simTime(); // !
+    commitTime = simTime();
     scheduleOutput =  new Output();
   }
 
   if (!scheduleOutput->hasSchedule() && commitTime > SIMTIME_ZERO) {
-    std::cout << commitTime << "  " << SIMTIME_ZERO <<  endl;
-
     for (auto &application : input.applications) {
       auto appModule =
           (DynamicPacketSource *)(application->module->getSubmodule("source"));
@@ -201,23 +177,19 @@ bool ExternalGateScheduleConfigurator::invokeScheduler() const {
   if (std::system(commandFromINI.c_str()) != 0) {
     if (monitor->par("stopWhenNotSchedulable").boolValue() || commitTime == SIMTIME_ZERO)
        throw cRuntimeError("Command execution failed, make sure LIBTSNDGM_ROOT is set and a scheduler tool is installed");
-
     configured = false;
   }
   chdir(currentDir);
   return configured;
 }
 
-// ########################################  WRITE
-// ################################################
-// #################################################################################################
+// ####################### WRITE ###########################
 
 void ExternalGateScheduleConfigurator::writeDistributionsToFile() const {
   cValueMap *json = new cValueMap();
   cValueArray *jsonDistributions = new cValueArray();
   json->set("distributions", jsonDistributions);
   auto distributions = monitor->getDistributions();
-
   if (distributions != nullptr) {
     for (const auto &pair : *distributions) {
       auto bridgeName = pair.first;
@@ -228,9 +200,8 @@ void ExternalGateScheduleConfigurator::writeDistributionsToFile() const {
       entry->set("type", histogram->getName());
       jsonDistributions->add(cValue(entry));
     }
-  }
+  }//endif
   write(histogramsFilePar->stdstringValue(), json);
-
   delete json;
 }
 
@@ -239,12 +210,11 @@ void ExternalGateScheduleConfigurator::writeStreamsToFile(
   auto jsonStreams = convertInputToJsonStreams(input);
   cValueMap *metaData = new cValueMap();
   jsonStreams->set("META", metaData);
-  metaData->set("simulation_time", simTime().inUnit(SIMTIME_US));
-  metaData->set("simulation_time_unit", "us");
+  metaData->set("simulation_time", simTime().inUnit(SIMTIME_NS));
+  metaData->set("simulation_time_unit", "ns");
   metaData->set("schedule_type", "Hypercycle");
   metaData->set("fixed_priority", monitor->isFixedPriority());
   write(streamsFilePar->stdstringValue(), jsonStreams);
-
   delete jsonStreams;
 }
 
@@ -273,9 +243,7 @@ void ExternalGateScheduleConfigurator::write(std::string fileName,
   this->printJson(stream, cValue(json));
 }
 
-// ###############################################################################################
-// ##################################### CONVERT
-// #################################################
+// ############################# CONVERT ###########################
 
 cValueMap *ExternalGateScheduleConfigurator::convertInputToJsonStreams(
     const Input &input) const {
@@ -287,7 +255,7 @@ cValueMap *ExternalGateScheduleConfigurator::convertInputToJsonStreams(
     cValueMap *jsonFlow = new cValueMap();
     jsonFlows->add(jsonFlow);
     jsonFlow->set("name", flow->name);
-    jsonFlow->set("type", "unicast");
+    jsonFlow->set("type", "unicast"); //multicast
 
     Application *dynApplication = (Application *)(flow->startApplication);
 
@@ -295,28 +263,27 @@ cValueMap *ExternalGateScheduleConfigurator::convertInputToJsonStreams(
                   dynApplication->device->module->getFullName());
     jsonFlow->set("pcp", flow->gateIndex);
     jsonFlow->set("packet_periodicity",
-                  dynApplication->packetInterval.dbl() * 1000000);
-    jsonFlow->set("packet_periodicity_unit", "us");
+                  dynApplication->packetInterval.inUnit(SIMTIME_NS));
+    jsonFlow->set("packet_periodicity_unit", "ns");
     jsonFlow->set("packet_size", b(dynApplication->packetLength).get());
     jsonFlow->set("packet_size_unit", "bit");
     jsonFlow->set("hard_constraint_time_latency",
-                  dynApplication->maxLatency.dbl() * 1000000);
+                  dynApplication->maxLatency.inUnit(SIMTIME_NS));
     jsonFlow->set("hard_constraint_time_jitter",
-                  dynApplication->maxJitter.dbl() * 1000000);
-    jsonFlow->set("hard_constraint_time_unit", "us");
+                  dynApplication->maxJitter.inUnit(SIMTIME_NS));
+    jsonFlow->set("hard_constraint_time_unit", "ns");
     // jsonFlow->set("weight", dynApplication->weight);
-    jsonFlow->set("phase", dynApplication->phase.dbl());
-    jsonFlow->set("phase_unit", "us");
+    jsonFlow->set("phase", dynApplication->phase.inUnit(SIMTIME_NS));
+    jsonFlow->set("phase_unit", "ns");
     jsonFlow->set("objective_type", dynApplication->objectiveType);
     // jsonFlow->set("packet_loss", dynApplication->packetLoss);
 
     cValueArray *endDevices = new cValueArray();
-    jsonFlow->set("end_devices", endDevices);
+    jsonFlow->set("target_devices", endDevices);
     endDevices->add(cValue(flow->endDevice->module->getFullName()));
 
     cValueArray *pdb_map = new cValueArray();
     jsonFlow->set("pdb_map", pdb_map);
-
     cValueArray *hops = new cValueArray();
     jsonFlow->set("route", hops);
     int wirelessCnt = 0;
@@ -336,14 +303,13 @@ cValueMap *ExternalGateScheduleConfigurator::convertInputToJsonStreams(
                                              nextNetworkNode->module);
       } // 3. for
     } // 2. for
-    jsonFlow->set("wirelessPath", cValue((bool)wirelessCnt));
+    jsonFlow->set("isWirelessPath", cValue((bool)wirelessCnt));
     if (wirelessCnt)
       jsonFlow->set("wirelessPathLinkCnt", wirelessCnt);
 
     int pdbSize = pdb_map->size();
-    double reliability = std::pow(
-        dynApplication->reliability,
-        1.0 / pdbSize); // #DetCom-link-th root of the reliability parameter
+    // #DetCom-link-th root of the reliability parameter
+    double reliability = std::pow(dynApplication->reliability, 1.0 / pdbSize);
     // int policy = dynApplication->policy;
     for (int i = 0; i < pdbSize; i++) {
       auto vMap = check_and_cast<cValueMap *>(pdb_map->get(i).objectValue());
@@ -354,126 +320,216 @@ cValueMap *ExternalGateScheduleConfigurator::convertInputToJsonStreams(
   return json;
 }
 
-cValueMap *ExternalGateScheduleConfigurator::convertInputToJsonNetwork(
-    const Input &input) const {
-  cValueMap *json = new cValueMap();
-  cValueArray *jsonDevices = new cValueArray();
-  json->set("end_devices", jsonDevices);  // END DEVICES
-  for (auto device : input.devices) {
-    cValueMap *jsonDevice = new cValueMap();
-    jsonDevices->add(jsonDevice);
-    jsonDevice->set("name", device->module->getFullName());
-    jsonDevice->set("device_type", (short)DeviceType::END_DEVICE);
-    jsonDevice->set("processing_delay", 0); // temporary hard coded
-    jsonDevice->set("processing_delay_unit", "us");
 
-    //################################
+
+
+/*cValueMap* ExternalGateScheduleConfigurator::convertInputToJsonNetwork(
+        const Input &input) const {
+    cValueMap *json = new cValueMap();
+    cValueArray *jsonDevices = new cValueArray();
+    json->set("end_devices", jsonDevices);  // END DEVICES
+    for (auto device : input.devices) {
+        cValueMap *jsonDevice = new cValueMap();
+        jsonDevices->add(jsonDevice);
+        jsonDevice->set("name", device->module->getFullName());
+        jsonDevice->set("device_type", (short) DeviceType::END_DEVICE);
+        jsonDevice->set("processing_delay", 0); // temporary hard coded
+        jsonDevice->set("processing_delay_unit", "us");
+
+        //################################
 
         auto jsonDevicePorts = new cValueArray();
         jsonDevice->set("ports", jsonDevicePorts);
         for (int j = 0; j < device->ports.size(); j++) {
-          auto port = device->ports[j];
-          auto jsonPort = new cValueMap();
-          jsonDevicePorts->add(jsonPort);
+            auto port = device->ports[j];
+            auto jsonPort = new cValueMap();
+            jsonDevicePorts->add(jsonPort);
 
-          auto nameNode = getExpandedNodeName(port->startNode->module);
-          jsonPort->set("port_name", nameNode + "-" + port->module->getFullName());
-          auto connectedToFullName = getExpandedNodeName(port->endNode->module);
-          jsonPort->set("connects_to", connectedToFullName);
+            auto nameNode = getExpandedNodeName(port->startNode->module);
+            jsonPort->set("port_name",
+                    nameNode + "-" + port->module->getFullName());
+            auto connectedToFullName = getExpandedNodeName(
+                    port->endNode->module);
+            jsonPort->set("connects_to", connectedToFullName);
 
-          DetComLinkType detComLinkType;
-          short link_type = isDetComLink(port->startNode->module,
-                                         port->endNode->module, detComLinkType);
-          jsonPort->set("wireless_link_descr",
-                        getDetComLinkDescription(detComLinkType));
-          jsonPort->set("link_type", link_type);
-          if (link_type)
-            jsonPort->set("multiple_subcarriers", true);
+            DetComLinkType detComLinkType;
+            short link_type = isDetComLink(port->startNode->module,
+                    port->endNode->module, detComLinkType);
+            jsonPort->set("link_type_descr",
+                    getDetComLinkDescription(detComLinkType));
+            jsonPort->set("link_type", link_type);
+            if (link_type)
+                jsonPort->set("multiple_subcarriers", true);
 
+            jsonPort->set("propagation_delay",
+                    port->propagationTime.inUnit(SIMTIME_NS)); //.dbl() * 1000000);
+            jsonPort->set("propagation_delay_unit", "ns");
+            jsonPort->set("data_rate", bps(port->datarate).get()); // / 1000000);
+            jsonPort->set("data_rate_unit", "bps");
+            //jsonPort->set("data_rate_size_unit", "bit");
+            //jsonPort->set("data_rate_time_unit", "us");
 
-          jsonPort->set("propagation_delay", port->propagationTime.dbl() * 1000000);
-          jsonPort->set("propagation_delay_unit", "us");
-          jsonPort->set("data_rate", bps(port->datarate).get() / 1000000);
-          jsonPort->set("data_rate_size_unit", "bit");
-          jsonPort->set("data_rate_time_unit", "us");
-
-          auto queue = port->module->findModuleByPath(".macLayer.queue");
-          jsonPort->set("num_queues",
-                        strcmp(queue->getModuleType()->getName(), "PacketQueue")
-                            ? queue->par("numTrafficClasses").intValue()
-                            : 0);
+            auto queue = port->module->findModuleByPath(".macLayer.queue");
+            jsonPort->set("num_queues",
+                    strcmp(queue->getModuleType()->getName(), "PacketQueue") ?
+                            queue->par("numTrafficClasses").intValue() : 0);
         }
 
-    //###############################
+        //###############################
 
+        (*hashMapNodeId)[std::string(device->module->getFullName())] =
+                device->module->getId();
+    }          //endfor devices
 
-    (*hashMapNodeId)[std::string(device->module->getFullName())] =
-        device->module->getId();
-  }
-  cValueArray *jsonSwitches = new cValueArray();
-  json->set("switches", jsonSwitches);              // SWITCHES
-  for (int i = 0; i < input.switches.size(); i++) {
-    auto switch_ = input.switches[i];
-    cValueMap *jsonSwitch = new cValueMap();
-    jsonSwitches->add(jsonSwitch);
+    cValueArray *jsonSwitches = new cValueArray();
+    json->set("switches", jsonSwitches);              // SWITCHES
+    for (int i = 0; i < input.switches.size(); i++) {
+        auto switch_ = input.switches[i];
+        cValueMap *jsonSwitch = new cValueMap();
+        jsonSwitches->add(jsonSwitch);
 
-    auto nameNetworkNode = getExpandedNodeName(switch_->module);
-    jsonSwitch->set("name", nameNetworkNode);
+        auto nameNetworkNode = getExpandedNodeName(switch_->module);
+        jsonSwitch->set("name", nameNetworkNode);
 
-    (*hashMapNodeId)[nameNetworkNode] = switch_->module->getId();
+        (*hashMapNodeId)[nameNetworkNode] = switch_->module->getId();
 
-    auto jsonPorts = new cValueArray();
-    jsonSwitch->set("ports", jsonPorts);
-    for (int j = 0; j < switch_->ports.size(); j++) {
-      auto port = switch_->ports[j];
-      auto jsonPort = new cValueMap();
-      jsonPorts->add(jsonPort);
+        auto jsonPorts = new cValueArray();
+        jsonSwitch->set("ports", jsonPorts);
+        for (int j = 0; j < switch_->ports.size(); j++) {
+            auto port = switch_->ports[j];
+            auto jsonPort = new cValueMap();
+            jsonPorts->add(jsonPort);
 
-      auto nameNode = getExpandedNodeName(port->startNode->module);
-      jsonPort->set("port_name", nameNode + "-" + port->module->getFullName());
-      auto connectedToFullName = getExpandedNodeName(port->endNode->module);
-      jsonPort->set("connects_to", connectedToFullName);
+            auto nameNode = getExpandedNodeName(port->startNode->module);
+            jsonPort->set("port_name",
+                    nameNode + "-" + port->module->getFullName());
+            auto connectedToFullName = getExpandedNodeName(
+                    port->endNode->module);
+            jsonPort->set("connects_to", connectedToFullName);
 
-      DetComLinkType detComLinkType;
-      short link_type = isDetComLink(port->startNode->module,
-                                     port->endNode->module, detComLinkType);
-      jsonPort->set("wireless_link_descr",
+            DetComLinkType detComLinkType;
+            short link_type = isDetComLink(port->startNode->module,
+                    port->endNode->module, detComLinkType);
+            jsonPort->set("wireless_link_descr",
                     getDetComLinkDescription(detComLinkType));
-      jsonPort->set("link_type", link_type);
-      if (link_type)
-        jsonPort->set("multiple_subcarriers", true);
+            jsonPort->set("link_type", link_type);
+            if (link_type)
+                jsonPort->set("multiple_subcarriers", true);
 
-      jsonSwitch->set("processing_delay", 0); // temporary hard coded
-      jsonSwitch->set("processing_delay_unit", "us");
-      jsonSwitch->set("device_type", getSwitchType(port->startNode->module));
-      jsonPort->set("propagation_delay", port->propagationTime.dbl() * 1000000);
-      jsonPort->set("propagation_delay_unit", "us");
-      jsonPort->set("data_rate", bps(port->datarate).get() / 1000000);
-      jsonPort->set("data_rate_size_unit", "bit");
-      jsonPort->set("data_rate_time_unit", "us");
+            jsonSwitch->set("processing_delay", 0); // temporary hard coded
+            jsonSwitch->set("processing_delay_unit", "us");
+            jsonSwitch->set("device_type",
+                    getSwitchType(port->startNode->module));
+            jsonPort->set("propagation_delay",
+                    port->propagationTime.inUnit(SIMTIME_NS)); //.dbl() * 1000000);
+            jsonPort->set("propagation_delay_unit", "ns");
+            jsonPort->set("data_rate", bps(port->datarate).get()); // / 1000000);
+            jsonPort->set("data_rate_unit", "bps");
+            //jsonPort->set("data_rate_size_unit", "bit");
+            //jsonPort->set("data_rate_time_unit", "us");
 
-      auto queue = port->module->findModuleByPath(".macLayer.queue");
-      jsonPort->set("num_queues",
-                    strcmp(queue->getModuleType()->getName(), "PacketQueue")
-                        ? queue->par("numTrafficClasses").intValue()
-                        : 0);
+            auto queue = port->module->findModuleByPath(".macLayer.queue");
+            jsonPort->set("num_queues",
+                    strcmp(queue->getModuleType()->getName(), "PacketQueue") ?
+                            queue->par("numTrafficClasses").intValue() : 0);
+        }
     }
-  }
-  return json;
+    return json;
+} */
+
+
+//################################ copy  ################################
+
+cValueMap* ExternalGateScheduleConfigurator::convertInputToJsonNetwork(
+        const Input &input) const {
+    cValueMap *json = new cValueMap();
+
+    cValueArray *jsonDevices = new cValueArray();
+    json->set("end_devices", jsonDevices);  // END DEVICES
+    for (auto device_ : input.devices) {
+        cValueMap *jsonDevice = convertJsonDevice(device_);
+        jsonDevices->add(jsonDevice);
+    }
+
+    cValueArray *jsonSwitches = new cValueArray();
+    json->set("switches", jsonSwitches);
+    for (auto switch_ : input.switches) {
+        cValueMap *jsonSwitch = convertJsonDevice(switch_);
+        jsonSwitches->add(jsonSwitch);
+    }
+
+    return json;
 }
 
-// #############################################################################################
+cValueMap* ExternalGateScheduleConfigurator::convertJsonDevice(
+        Input::NetworkNode *device) const {
+    cValueMap *jsonDevice = new cValueMap();
+
+    auto nameNetworkNode = getExpandedNodeName(device->module);
+    jsonDevice->set("name", nameNetworkNode);
+    jsonDevice->set("device_type", getSwitchType(device->module));
+    jsonDevice->set("processing_delay", 0); // temporary hard coded
+    jsonDevice->set("processing_delay_unit", "ns");
+
+    (*hashMapNodeId)[nameNetworkNode] = device->module->getId();
+
+    auto jsonDevicePorts = new cValueArray();
+    jsonDevice->set("ports", jsonDevicePorts);
+    for (int j = 0; j < device->ports.size(); j++) {
+        auto port = device->ports[j];
+        auto jsonPort = new cValueMap();
+        jsonDevicePorts->add(jsonPort);
+
+        auto nameNode = getExpandedNodeName(port->startNode->module);
+        jsonPort->set("port_name",
+                nameNode + "-" + port->module->getFullName());
+        auto connectedToFullName = getExpandedNodeName(port->endNode->module);
+        jsonPort->set("connects_to", connectedToFullName);
+
+        DetComLinkType detComLinkType;
+        short link_type = isDetComLink(port->startNode->module,
+                port->endNode->module, detComLinkType);
+        jsonPort->set("link_type_descr",
+                getDetComLinkDescription(detComLinkType));
+        jsonPort->set("link_type", link_type);
+        if (link_type)
+            jsonPort->set("multiple_subcarriers", true);
+
+        jsonPort->set("propagation_delay",
+                port->propagationTime.inUnit(SIMTIME_NS));
+        jsonPort->set("propagation_delay_unit", "ns");
+        jsonPort->set("data_rate", bps(port->datarate).get());
+        jsonPort->set("data_rate_unit", "bps");
+
+        auto queue = port->module->findModuleByPath(".macLayer.queue");
+        jsonPort->set("num_queues",
+                strcmp(queue->getModuleType()->getName(), "PacketQueue") ?
+                        queue->par("numTrafficClasses").intValue() : 0);
+    }
+    return jsonDevice;
+}
+
+
+
 // #############################################################################################
 
 std::string
 ExternalGateScheduleConfigurator::getExpandedNodeName(cModule *module) const {
   auto fullNameNetworkNode = std::string(module->getFullName());
-  auto type = getSwitchType(module);
+  /*auto type = getSwitchType(module);
   auto nameNetworkNode =
       (1 < type && type < 4)
           ? std::string(module->getParentModule()->getName()) + "." +
                 std::string(module->getFullName())
-          : std::string(module->getFullName());
+          : std::string(module->getFullName());*/
+
+  auto type = getSwitchType(module);
+  auto nameNetworkNode =
+        (type == 2 || type == 3)
+            ? std::string(module->getParentModule()->getName()) + "." +
+                    fullNameNetworkNode
+            : fullNameNetworkNode;
+
   return nameNetworkNode;
 }
 
@@ -505,67 +561,56 @@ bool ExternalGateScheduleConfigurator::addEntryToPDBMap(cValueArray *pdb_map,
   auto nameNetworkNode = getExpandedNodeName(source);
   auto nameNextNetworkNode = getExpandedNodeName(target);
   size_t mapSize = pdb_map->size();
-  if (isDetComLink(source, target, linkType)) {
 
+  if (isDetComLink(source, target, linkType)) {
     cValueMap *pdb = new cValueMap();
     cValueMap *link = new cValueMap();
     pdb->set("link", link);
     link->set("currentNodeName", nameNetworkNode);
     link->set("nextNodeName", nameNextNetworkNode);
 
-    if (linkType == DetComLinkType::DSTT_DSTT) {
-      pdb_map->add(pdb);
-      std::string egress =
-          (nameNextNetworkNode.find('.') != std::string::npos)
-              ? nameNextNetworkNode.substr(nameNextNetworkNode.find('.') + 1)
-              : nameNextNetworkNode;
-      pdb->set("key", nameNetworkNode + "-" + egress);
-
-      auto expr1 =
-          ((TsnTranslator *)source)->getDistributionExpression("delayUplink");
-      auto expr2 =
-          ((TsnTranslator *)target)->getDistributionExpression("delayDownlink");
-
-      cMsgPar *convolveExpr = new cMsgPar("expression");
-      cMsgPar *details = new cMsgPar("details");
-      details->setStringValue(
-          (std::string(source->getParentModule()->getName()) + "." +
-           source->getFullName() + "-" + target->getFullName())
-              .c_str());
-      convolveExpr->setStringValue((expr1->str() + "+" + expr2->str()).c_str());
-
-      std::cout << " details: " << details->str()
-                << " expr: " << convolveExpr->stringValue() << endl;
-      monitor->notify(this->getFullName(), convolveExpr, details);
-      delete details;
-      delete expr1;
-      delete expr2;
-      delete convolveExpr;
-
-    } else {
-      auto delayParam = {nameNetworkNode + getDetComLinkDescription(linkType),
-                         nameNextNetworkNode +
-                             getDetComLinkDescription(linkType)};
-      for (auto key : delayParam) {
-        auto distributions = monitor->getDistributions();
-        if (distributions->find(key) != distributions->end()) {
-          pdb_map->add(pdb);
-          pdb->set("key", key);
-          break;
-        } // endif
-      } // endfor
+    std::string key;
+    switch (linkType) {
+        case DetComLinkType::DSTT_NWTT:
+        {
+            key = nameNetworkNode + getDetComLinkDescription(linkType);
+            break;
+        }
+        case DetComLinkType::NWTT_DSTT:
+        {
+            key = nameNextNetworkNode + getDetComLinkDescription(linkType);
+            break;
+        }
+        case DetComLinkType::DSTT_DSTT:
+        {
+            std::string egress = (nameNextNetworkNode.find('.') != std::string::npos)
+                             ? nameNextNetworkNode.substr(nameNextNetworkNode.find('.') + 1)
+                             : nameNextNetworkNode;
+            key = nameNetworkNode + "-" + egress;
+            monitor->computeConvolution(source, target);
+            break;
+        }
+    }
+    auto distributions = monitor->getDistributions();
+    if (distributions->find(key) != distributions->end()) {
+       pdb_map->add(pdb);
+       pdb->set("key", key);
     }
     if (mapSize == pdb_map->size()) {
       delete pdb;
     }
     return true;
-  } // endif
+  } // endif isDetComLink
 
   return false;
 }
 
 short ExternalGateScheduleConfigurator::getSwitchType(cModule *module) const {
   auto type = DeviceType::UNSPECIFIED;
+
+  if (!strcmp(module->getModuleType()->getName(), "TsnDevice")) {
+    type = DeviceType::END_DEVICE;
+  }
   if (!strcmp(module->getModuleType()->getName(), "TsnSwitch")) {
     type = DeviceType::TSN_BRIDGE;
   }
@@ -596,8 +641,7 @@ std::string ExternalGateScheduleConfigurator::getDetComLinkDescription(
 }
 
 void ExternalGateScheduleConfigurator::addFlows(Input &input) const {
-  EV_DEBUG << "Computing flows from configuration" << EV_FIELD(configuration)
-           << EV_ENDL;
+  EV_DEBUG << "Computing flows from configuration" << EV_FIELD(configuration) << EV_ENDL;
   for (int k = 0; k < configuration->size(); k++) {
     auto entry =
         check_and_cast<cValueMap *>(configuration->get(k).objectValue());
@@ -606,12 +650,11 @@ void ExternalGateScheduleConfigurator::addFlows(Input &input) const {
     auto sourceNode = (Node *)topology->getNodeFor(source);
     auto startDevice = input.getDevice(source);
 
-    cModule *destination =
-        getModuleByPath(entry->get("destination").stringValue());
+    cModule *destination = getModuleByPath(entry->get("destination").stringValue());
     auto destinationNode = (Node *)topology->getNodeFor(destination);
     auto endDevice = input.getDevice(destination);
-
-    auto startApplication = new Application(); // new Input::Application();
+    // ADD Application
+    auto startApplication = new Application();
     auto startApplicationModule = startDevice->module->getModuleByPath(
         (std::string(".") +
          std::string(entry->get("application").stringValue()))
@@ -624,73 +667,50 @@ void ExternalGateScheduleConfigurator::addFlows(Input &input) const {
     startApplication->device = startDevice;
     startApplication->pcp = entry->get("pcp").intValue();
     startApplication->packetLength =
-        b(entry->get("packetLength").doubleValueInUnit("b") +
-          464); // add Header +58B
+        b(entry->get("packetLength").doubleValueInUnit("b") + 464); // add Header +58B
     startApplication->packetInterval =
-        entry->get("packetInterval").doubleValueInUnit("s"); // packetInterval;
-    startApplication->maxLatency =
-        entry->containsKey("maxLatency")
-            ? entry->get("maxLatency").doubleValueInUnit("s")
-            : -1;
-    startApplication->maxJitter =
-        entry->containsKey("maxJitter")
-            ? entry->get("maxJitter").doubleValueInUnit("s")
-            : 0;
+        entry->get("packetInterval").doubleValueInUnit("s");
+    startApplication->maxLatency = entry->get("maxLatency").doubleValueInUnit("s");
+    startApplication->maxJitter = entry->get("maxJitter").doubleValueInUnit("s");
     // startApplication->packetLoss = entry->get("packetLoss").intValue();
     startApplication->objectiveType = entry->get("objectiveType").intValue();
     // startApplication->weight = entry->get("weight").doubleValue();
     simtime_t phase = entry->get("phase").doubleValueInUnit("us");
-    startApplication->phase = phase <= 0 ? 0 : phase;
+    startApplication->phase = (phase <= 0) ? 0 : phase;
     // startApplication->policy = entry->get("policy").intValue();
     startApplication->reliability = entry->get("reliability").doubleValue();
 
     input.applications.push_back(startApplication);
-    // EV_DEBUG << "Adding flow from configuration" << EV_FIELD(source) <<
-    // EV_FIELD(destination) << EV_FIELD(pcp) << EV_FIELD(packetLength) <<
-    // EV_FIELD(packetInterval, packetInterval.ustr()) << EV_FIELD(maxLatency,
-    // maxLatency.ustr()) << EV_FIELD(maxJitter, maxJitter.ustr()) << EV_ENDL;
-
+    // ADD Flow
     auto flow = new Input::Flow();
     if (!entry->containsKey("name"))
       throw cRuntimeError("Cannot identify the flow!");
     flow->name = entry->get("name").stringValue();
     flow->gateIndex = entry->get("gateIndex").intValue();
-    // flow->cutthroughSwitchingHeaderSize =
-    // entry->containsKey("cutthroughSwitchingHeaderSize") ?
-    // b(entry->get("cutthroughSwitchingHeaderSize").doubleValueInUnit("b")) :
-    // b(0);
     flow->startApplication = startApplication;
     flow->endDevice = endDevice;
-
+    // ADD Route
     cValueArray *pathFragments;
     if (entry->containsKey("pathFragments"))
       pathFragments = check_and_cast<cValueArray *>(
           entry->get("pathFragments").objectValue());
     else {
       pathFragments = new cValueArray();
-      // auto pathFragment = new cValueArray();
       for (auto node : computeShortestNodePath(
-               sourceNode, destinationNode)) { // berechne Route: vector
+               sourceNode, destinationNode)) {
         auto nameNode = getExpandedNodeName(node->module);
-        // pathFragment->add(nameNode);
         pathFragments->add(nameNode);
       }
-      // pathFragments = new cValueArray();
-      // pathFragments->add(pathFragment);
     }
-
-    //   for (int l = 0; l < pathFragments->size(); l++) {
     auto path = new Input::PathFragment();
-    //    auto pathFragment =
-    //    check_and_cast<cValueArray*>(pathFragments->get(l).objectValue());
-    for (int m = 0; m < pathFragments->size(); m++) { //
+    for (int m = 0; m < pathFragments->size(); m++) {
       for (auto networkNode : input.networkNodes) {
-        auto name = pathFragments->get(m).stdstringValue(); //
+        auto name = pathFragments->get(m).stdstringValue();
         auto nameNode = getExpandedNodeName(networkNode->module);
         if (nameNode == name) {
-          if (m != pathFragments->size() - 1) { //
+          if (m != pathFragments->size() - 1) {
             auto startNode = networkNode;
-            auto endNodeName = pathFragments->get(m + 1).stdstringValue(); //
+            auto endNodeName = pathFragments->get(m + 1).stdstringValue();
             auto outputPort =
                 *std::find_if(startNode->ports.begin(), startNode->ports.end(),
                               [&](const auto &port) {
@@ -707,16 +727,10 @@ void ExternalGateScheduleConfigurator::addFlows(Input &input) const {
       } // endfor
     } // endfor
     flow->pathFragments.push_back(path);
-    //   }//endfor
     if (!entry->containsKey("pathFragments"))
       delete pathFragments;
     input.flows.push_back(flow);
-
-  } // endfor
-  /*std::sort(input.flows.begin(), input.flows.end(), [] (const Input::Flow *r1,
-  const Input::Flow *r2) { return r1->startApplication->pcp >
-  r2->startApplication->pcp;
-  });*/
+  } // endfor configuration
 }
 
 ExternalGateScheduleConfigurator::Input::Port *
@@ -761,13 +775,12 @@ ExternalGateScheduleConfigurator::Output *
 ExternalGateScheduleConfigurator::convertJsonToOutput(
     const Input &input, const cValueMap *json) const {
   auto output = new Output();
-  auto jsonMETA =
-      check_and_cast<cValueMap *>(json->get("META").objectValue()); // META data
+  // META DATA
+  auto jsonMETA = check_and_cast<cValueMap *>(json->get("META").objectValue());
   int scheduled = jsonMETA->containsKey("scheduled") ? jsonMETA->get("scheduled").intValue() : 0;
-  if (monitor->par("stopWhenNotSchedulable").boolValue()) {
-      if (input.flows.size() > scheduled)
+  if (monitor->par("stopWhenNotSchedulable").boolValue() && input.flows.size() > scheduled)
           throw cRuntimeError("Simulation was stopped because not all flows were scheduled.");
-  }
+
   if (scheduled == 0) return output;
 
   commitTime = SimTime(jsonMETA->get("commit_time").intValue(), SIMTIME_NS);
@@ -775,19 +788,16 @@ ExternalGateScheduleConfigurator::convertJsonToOutput(
       SimTime(jsonMETA->get("computing_time").intValue(), SIMTIME_NS);
   gateCycleDuration =
       SimTime(jsonMETA->get("hypercycle").intValue(), SIMTIME_NS);
-  std::cout << "cycle: " << gateCycleDuration
-            << " computing_time : " << scheduleComputingTime << "  "
-            << commitTime << " from CONFIGURATOR: " << std::endl;
-
+  // GATE CONTROL LISTS
   auto jsonGCL = check_and_cast<cValueMap *>(
-      json->get("GCL").objectValue()); // Gate control lists
+      json->get("GCL").objectValue());
 
   for (auto &gcl : jsonGCL->getFields()) { // 1.for
     auto linkName = gcl.first;
     auto port = getConfigurablePort(input, linkName);
     auto &schedules = output->gateSchedules[port];
     auto queues = check_and_cast<cValueMap *>(gcl.second.objectValue());
-    for (auto &queue : queues->getFields()) {
+    for (auto &queue : queues->getFields()) { //2.for
       auto queueIndex = std::stoi(queue.first.substr(1));
       cValueMap *queueMap =
           check_and_cast<cValueMap *>(queue.second.objectValue());
@@ -809,9 +819,11 @@ ExternalGateScheduleConfigurator::convertJsonToOutput(
       schedule->offset =
           SimTime(queueMap->get("offset").intValue(), SIMTIME_NS);
       schedules.push_back(schedule);
-    } // endfor
-  } // 1.for
-  auto talkers = check_and_cast<cValueMap *>( // APPLICATIONS
+    } // 2.endfor
+  } // 1.endfor
+
+  // APPLICATIONS
+  auto talkers = check_and_cast<cValueMap *>(
       json->get("TALKERS").objectValue());
   for (auto &field : talkers->getFields()) {
     const std::string &key = field.first;
@@ -828,16 +840,13 @@ ExternalGateScheduleConfigurator::convertJsonToOutput(
       throw cRuntimeError("Cannot find flow: %s", flowID.c_str());
     auto flow = *flowIt;
     auto application = flow->startApplication;
-    // double firstSendingTime = field.second.intValue(); //ns
     auto startTime = SimTime(field.second.intValue(), SIMTIME_NS);
-    // while (startTime < 0) startTime += application->packetInterval.dbl();
     if (output->applicationStartTimes.find(application) ==
         output->applicationStartTimes.end()) {
       output->applicationStartTimes[application] = startTime;
     } // endif
     output->applicationStartTimesArray[application].push_back(startTime);
-  } // endfor
-
+  } // endfor applications
   for (auto& offsetsPair : output->applicationStartTimesArray) {
       auto& offsets = offsetsPair.second;
       std::sort(offsets.begin(), offsets.end(), [](simtime_t a, simtime_t b) { return a < b; });
@@ -846,29 +855,7 @@ ExternalGateScheduleConfigurator::convertJsonToOutput(
   return output;
 }
 
-void ExternalGateScheduleConfigurator::clearConfiguration() {
 
-  deleteOldConfigurationPar();
-  if (gateSchedulingInput == nullptr ||
-      (Output *)gateSchedulingOutput == nullptr)
-    return;
-  if (topology != nullptr)
-    topology->clear();
-
-  delete gateSchedulingInput;
-  gateSchedulingInput = nullptr;
-
-  auto scheduleMap = gateSchedulingOutput->gateSchedules;
-  for (auto it = scheduleMap.begin(); it != scheduleMap.end(); ++it) {
-    std::vector<Output::Schedule *> &schedules = it->second;
-    for (Output::Schedule *schedule : schedules) {
-      Schedule *oldSchedule = (Schedule *)schedule;
-      oldSchedule->~Schedule();
-    } // endfor
-  } // endfor
-  delete (Output *)gateSchedulingOutput;
-  gateSchedulingOutput = nullptr;
-}
 
 // TODO fix me...
 void ExternalGateScheduleConfigurator::configureGateScheduling() {
@@ -931,12 +918,39 @@ void ExternalGateScheduleConfigurator::configureApplicationOffsets() {
               // ##################################################
               cValueMap *element = appModule->getConfiguration();
               monitor->updateStreamConfigurations(element);
+              take(element);
+              drop(element);
+             // dropAndDelete(element);
               delete element;
             } // endif
           } // endfor
 
       //#################################
 }
+
+
+void ExternalGateScheduleConfigurator::clearConfiguration() {
+  deleteOldConfigurationPar();
+  if (gateSchedulingInput == nullptr || (Output *)gateSchedulingOutput == nullptr)
+    return;
+  if (topology != nullptr)
+    topology->clear();
+
+  delete gateSchedulingInput;
+  gateSchedulingInput = nullptr;
+
+  auto scheduleMap = gateSchedulingOutput->gateSchedules;
+  for (auto it = scheduleMap.begin(); it != scheduleMap.end(); ++it) {
+    std::vector<Output::Schedule *> &schedules = it->second;
+    for (Output::Schedule *schedule : schedules) {
+      Schedule *oldSchedule = (Schedule *)schedule;
+      oldSchedule->~Schedule();
+    } // endfor
+  } // endfor
+  delete (Output *)gateSchedulingOutput;
+  gateSchedulingOutput = nullptr;
+}
+
 
 void ExternalGateScheduleConfigurator::deleteOldConfigurationPar() {
   if (configuration != nullptr) {
@@ -958,9 +972,10 @@ ExternalGateScheduleConfigurator::~ExternalGateScheduleConfigurator() {
 
   delete hashMapNodeId;
 
-  if (configurationComputedEvent != nullptr)
+  if (configurationComputedEvent != nullptr) {
     drop(configurationComputedEvent);
-  delete configurationComputedEvent;
+    delete configurationComputedEvent;
+  }
 }
 
 } // namespace d6g

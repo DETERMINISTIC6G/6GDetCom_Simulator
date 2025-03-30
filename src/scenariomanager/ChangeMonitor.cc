@@ -17,8 +17,6 @@
 #include "DynamicScenarioObserver.h"
 
 #include <numeric> // lcm
-// #include <bits/stdc++.h>
-// #include <algorithm>
 
 namespace d6g {
 
@@ -101,9 +99,7 @@ void ChangeMonitor::prepareChangesForProcessing(int initialized) {
   for (long interval : intervals) {
     hyperperiod = std::lcm(hyperperiod, interval);
   }
-  // ##################################################
-  std::cout << "Hyperperiod: " << hyperperiod << endl;
-  // ##################################################
+
   gateScheduleConfigurator->par("gateCycleDuration")
       .setValue(cValue(hyperperiod, "ns"));
 
@@ -259,6 +255,7 @@ cValueMap *ChangeMonitor::convertMappingToCValue(const Mapping &mapping) {
 }
 
 void ChangeMonitor::updateStreamConfigurations(cValueMap *element) {
+  take(element);
   std::string application = element->get("application").stringValue();
   std::string source = element->get("source").stringValue();
   std::string destination = element->get("destination").stringValue();
@@ -278,9 +275,9 @@ void ChangeMonitor::updateStreamConfigurations(cValueMap *element) {
       streamConfigurations.erase(it);
       streamConfigurations.shrink_to_fit();
     }
-  } else { // not found
-    if (!element->get("enabled").boolValue())
-      return;
+  } else //{ // not found
+    if (element->get("enabled").boolValue()) {
+      //return;
     streamConfigurations.resize(streamConfigurations.size() + 1);
     addEntryToStreamConfigurations(element, streamConfigurations.size() - 1);
     auto path = (source + "." + application + ".source");
@@ -289,6 +286,7 @@ void ChangeMonitor::updateStreamConfigurations(cValueMap *element) {
     sourceModule->flowName =
         streamConfigurations[streamConfigurations.size() - 1].name;
   }
+
 }
 
 void ChangeMonitor::updateDistributions(std::string bridge,
@@ -296,6 +294,7 @@ void ChangeMonitor::updateDistributions(std::string bridge,
   // ###################################################
   std::cout << "updateDistributions " << bridge << endl;
   // ##################################################
+
   take(element);
   auto it = distributions->find(bridge);
   if (it != distributions->end() && it->second != nullptr) { // replace if found
@@ -313,7 +312,7 @@ void ChangeMonitor::updateDistributions(std::string bridge,
     it->second = element;
   } else { // not found
     if (!element->size()) {
-
+      drop(element);
       delete element; // delete if no new histogram
       return;
     }
@@ -348,29 +347,42 @@ void ChangeMonitor::stopApplicationsWithStopReq() {
  *
  * @param  Module name responsible for notifying the monitor
  * @param  (optional)
- * @param  (optional)
+ *
  */
-void ChangeMonitor::notify(std::string source, cObject *obj, cObject *details) {
+void ChangeMonitor::scheduleTimer(std::string source, cObject *details) {
   bubble(("Changes in " + source + " announced.").c_str());
 
-  if (source == "gateScheduleConfigurator") {
-    auto convolveExpr = new cDynamicExpression();
-    convolveExpr->parse(check_and_cast<cMsgPar *>(obj)->stringValue());
-    cMsgPar *histogramDetails = new cMsgPar("convolution");
-
-    auto element = observer->createHistogram(*convolveExpr, histogramDetails);
-    auto bridgePort =
-        std::string(check_and_cast<cMsgPar *>(details)->stringValue());
-    this->take(element);
-    updateDistributions(bridgePort, element);
-    delete convolveExpr;
-    delete histogramDetails;
-
-  } else if (!timer->isScheduled()) {
+   if (!timer->isScheduled()) {
     scheduleClockEventAt(
         getClockTime() + schedulerCallDelayParameter->doubleValue(), timer);
   }
 }
+
+void ChangeMonitor::computeConvolution(cModule *source, cModule *target) {
+    auto key = std::string(source->getParentModule()->getName()) + "." +
+            source->getFullName() + "-" + target->getFullName();
+    auto expr1 =
+              ((TsnTranslator *)source)->getDistributionExpression("delayUplink");
+    auto expr2 =
+              ((TsnTranslator *)target)->getDistributionExpression("delayDownlink");
+
+    auto convString = expr1->str() + "+" + expr2->str();
+    delete expr1;
+    delete expr2;
+
+    auto convolveExpr = new cDynamicExpression();
+    convolveExpr->parse(convString.c_str());
+
+    cMsgPar *histogramDetails = new cMsgPar("convolution");
+    auto element = observer->createHistogram(*convolveExpr, histogramDetails);
+    this->take(element);
+    updateDistributions(key, element);
+
+    delete convolveExpr;
+    delete histogramDetails;
+
+}
+
 
 ChangeMonitor::~ChangeMonitor() {
   for (auto &pair : *distributions) {

@@ -109,7 +109,8 @@ protected:
     cValueArray* getStreamConfigurations();
     inline bool isFixedPriority() {return fixedPriority;}
 
-    void notify(std::string source, cObject *obj=nullptr, cObject *details=nullptr);
+    void scheduleTimer(std::string source, cObject *details=nullptr);
+    void computeConvolution(cModule *source, cModule *target);
 
     ~ChangeMonitor() override;
 };

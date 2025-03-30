@@ -60,9 +60,9 @@ class ExternalGateScheduleConfigurator
     int objectiveType;
     // int packetLoss;
     // int policy;
-    double reliability;  // 0.9999;
+    double reliability;
     simtime_t phase = 0; // already running
-                         // double weight; //= 1.0;
+    // double weight; //= 1.0;
   };
 
   class Output : public GateScheduleConfiguratorBase::Output {
@@ -156,6 +156,7 @@ private:
   /*Create separate JSON files for Streams and Network and Distributions */
   cValueMap *convertInputToJsonStreams(const Input &input) const;
   cValueMap *convertInputToJsonNetwork(const Input &input) const;
+  cValueMap *convertJsonDevice(Input::NetworkNode *device) const;
 
   void deleteOldConfigurationPar();
 
