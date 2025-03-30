@@ -47,10 +47,10 @@ void DynamicScenarioObserver::receiveSignal(cComponent *source,
        << " from source: " << source->getFullName() << endl;
   }
   if (signalID == parameterChangeSignal) {
-    EV << "Received message (app): " << msg->getName()
-       << " from source: " << source->getFullPath() << endl;
-    std::cout << "CHANGES" << "   "
-                                << source->getFullPath() << " time: " << simTime() << endl;
+      std::cout << "MONITOR: received msg " << msg->getName()
+       << " from " << source->getFullPath()
+       << " at " << simTime() << "s" << endl;
+
     DynamicPacketSource *sourceModule =
         dynamic_cast<DynamicPacketSource *>(source);
     if (sourceModule) {
@@ -63,8 +63,10 @@ void DynamicScenarioObserver::receiveSignal(cComponent *source,
     monitor->scheduleTimer(source->getFullPath());
   }
   if (signalID == distributionChangeSignal) {
-    std::cout << "Received message (distribution): " << msg->getName()
-              << " from source: " << source->getFullPath() << endl;
+    std::cout << "MONITOR: received msg " << msg->getName()
+    << " from " << source->getFullPath()
+    << " at " << simTime() << "s" << endl;
+
     TsnTranslator *sourceModule = dynamic_cast<TsnTranslator *>(source);
     if (sourceModule) {
       std::string paramName =

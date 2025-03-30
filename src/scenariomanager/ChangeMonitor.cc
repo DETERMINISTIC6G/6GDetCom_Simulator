@@ -26,6 +26,7 @@ void ChangeMonitor::initialize(int stage) {
   if (stage == INITSTAGE_LOCAL) {
     schedulerCallDelayParameter = &par("schedulerCallDelay");
     timer = new ClockEvent("changeEventCollectionTimer");
+
     fixedPriority = par("isPortQueuesCountConsistentGlobally").boolValue();
     pcpMapping = check_and_cast<cValueArray *>(par("mapping").objectValue());
 
@@ -45,7 +46,9 @@ void ChangeMonitor::initialize(int stage) {
 
 void ChangeMonitor::handleMessage(cMessage *msg) {
   if (msg == timer) {
-    prepareChangesForProcessing(1);
+      std::cout << "MONITOR: scheduler call at "
+            << simTime() << "s" << endl;
+      prepareChangesForProcessing(1);
   } else {
     throw cRuntimeError("Unknown message type.");
   }
@@ -135,7 +138,7 @@ void ChangeMonitor::configureInitStreamsAndDistributions() {
         DynamicPacketSource *sourceModule =
             dynamic_cast<DynamicPacketSource *>(mod);
         cValueMap *element = sourceModule->getConfiguration();
-        if (!element->get("enabled").boolValue()) {
+        if (!element->get("enabled").boolValue()) {  // not enabled
           delete element;
           continue;
         }
@@ -170,10 +173,10 @@ void ChangeMonitor::addEntriesToDistributionsFor(
     auto element = observer->createHistogram(*dynExpr);
     take(element);
     drop(element);
-    auto bridgePort = std::string(translator->getParentModule()->getName()) +
+    auto key = std::string(translator->getParentModule()->getName()) +
                       "." + std::string(translator->getFullName()) + "_" +
                       param;
-    updateDistributions(bridgePort, element);
+    updateDistributions(key, element);
     delete dynExpr;
   } // endfor
 }
@@ -185,6 +188,8 @@ void ChangeMonitor::addEntryToStreamConfigurations(cValueMap *element, int i) {
       element->containsKey("name")
           ? element->get("name").stringValue()
           : (std::string("flow") + std::to_string(flowIndex++)).c_str();
+
+  //mapping.stopReq = element->get("stopReq").boolValue();
 
   mapping.pcp = element->get("pcp").intValue();
 
@@ -235,6 +240,7 @@ cValueArray *ChangeMonitor::convertToCValueArray(
 cValueMap *ChangeMonitor::convertMappingToCValue(const Mapping &mapping) {
   cValueMap *map = new cValueMap();
   map->set("name", cValue(mapping.name));
+  //map->set("stopReq", cValue(mapping.stopReq));
   map->set("pcp", cValue(mapping.pcp));
   map->set("gateIndex", cValue(mapping.gateIndex));
   map->set("application", cValue(mapping.application));
@@ -268,35 +274,54 @@ void ChangeMonitor::updateStreamConfigurations(cValueMap *element) {
                    });
   if (it != streamConfigurations.end()) { // found
     int i = std::distance(streamConfigurations.begin(), it);
-    if (element->get("enabled").boolValue()) {
-      addEntryToStreamConfigurations(element, i);
-    } else {
-      streamWantsToStop.push_back(source + "." + application + ".source");
-      streamConfigurations.erase(it);
-      streamConfigurations.shrink_to_fit();
+    if (!(element->get("stopReq").boolValue())) { //enabled  // element->get("enabled").boolValue() ||
+
+        addEntryToStreamConfigurations(element, i);
+    } else { // not enabled
+      if (element->get("enabled").boolValue())
+          streamWantsToStop.push_back(source + "." + application + ".source");
+          streamConfigurations.erase(it);
+          streamConfigurations.shrink_to_fit();
     }
   } else //{ // not found
-    if (element->get("enabled").boolValue()) {
+    if (!(element->get("stopReq").boolValue())) {//element->get("enabled").boolValue()) { // enabled
       //return;
-    streamConfigurations.resize(streamConfigurations.size() + 1);
-    addEntryToStreamConfigurations(element, streamConfigurations.size() - 1);
-    auto path = (source + "." + application + ".source");
-    DynamicPacketSource *sourceModule =
-        check_and_cast<DynamicPacketSource *>(getModuleByPath(path.c_str()));
-    sourceModule->flowName =
-        streamConfigurations[streamConfigurations.size() - 1].name;
+
+        if (element->get("enabled").boolValue()) { //#######
+                      std::cout << "already started at " << simTime() << " : "
+                              << std::string(element->get("source").stringValue()) +
+                              "." + std::string(element->get("application").stringValue())
+                              << ", " << element->get("name").stringValue() <<  endl;
+                  }
+
+        streamConfigurations.resize(streamConfigurations.size() + 1);
+        addEntryToStreamConfigurations(element, streamConfigurations.size() - 1);
+        auto path = (source + "." + application + ".source");
+        DynamicPacketSource *sourceModule =
+                check_and_cast<DynamicPacketSource *>(getModuleByPath(path.c_str()));
+        if (sourceModule->flowName == "")
+            sourceModule->flowName =
+                    streamConfigurations[streamConfigurations.size() - 1].name;
   }
+
+  if (!element->get("stopReq").boolValue() && !element->get("enabled").boolValue()) { //#######
+              std::cout << "want to run at " << simTime() << " : "
+                      << std::string(element->get("source").stringValue()) +
+                      "." + std::string(element->get("application").stringValue())
+                      << ", " << element->get("name").stringValue() <<  endl;
+          }else if (element->get("stopReq").boolValue() && !element->get("enabled").boolValue()) { //#######
+              std::cout << "Already stopped at " << simTime() << " : "
+                      << std::string(element->get("source").stringValue()) +
+                      "." + std::string(element->get("application").stringValue())
+                      << ", " << element->get("name").stringValue() <<  endl;
+          }
 
 }
 
-void ChangeMonitor::updateDistributions(std::string bridge,
+void ChangeMonitor::updateDistributions(std::string key,
                                         cValueArray *element) {
-  // ###################################################
-  std::cout << "updateDistributions " << bridge << endl;
-  // ##################################################
-
   take(element);
-  auto it = distributions->find(bridge);
+  auto it = distributions->find(key);
   if (it != distributions->end() && it->second != nullptr) { // replace if found
     take(it->second);
     drop(it->second);
@@ -316,7 +341,7 @@ void ChangeMonitor::updateDistributions(std::string bridge,
       delete element; // delete if no new histogram
       return;
     }
-    (*distributions)[bridge] = element; // create a new entry
+    (*distributions)[key] = element; // create a new entry
   }
 }
 
@@ -328,12 +353,16 @@ cValueArray *ChangeMonitor::getStreamConfigurations() {
   return convertToCValueArray(streamConfigurations);
 }
 
-void ChangeMonitor::stopApplicationsWithStopReq() {
+/**
+ * @brief Add the source modules with a stop-production request
+ *          to the sources vector in the output
+ *
+ */
+void ChangeMonitor::addApplicationsWithStopReq(std::vector<cModule *> &sources) {
     for (auto& appPath : streamWantsToStop) {
-        auto application = check_and_cast<DynamicPacketSource *>(getModuleByPath(appPath.c_str()));
-        std::cout << "stopApplicationsWithStopReq" << "   " << appPath
-                                               << " time: " << simTime() << endl;
-        application->stopIfNotScheduled();
+        auto application = getModuleByPath(appPath.c_str());
+        std::cout << "want to stop at " << simTime() << " : " << appPath <<  endl;
+        sources.push_back(application);
     }
     streamWantsToStop.clear();
 

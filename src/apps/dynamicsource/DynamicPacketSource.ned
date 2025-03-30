@@ -19,7 +19,7 @@ import inet.queueing.source.ActivePacketSource;
 
 
 //
-// TODO auto-generated module
+// 
 //
 simple DynamicPacketSource extends ActivePacketSource
 {
@@ -38,13 +38,11 @@ simple DynamicPacketSource extends ActivePacketSource
       
       // hard constraint time
       double maxJitter @unit(ms)  = default(productionInterval * 0.05);
-      //When the production interval is changed, adjust the deadline accordingly
+      //When the production interval is changed, adjust the deadline in ScenarioManager accordingly
       double maxLatency @mutable @unit(ms) = default(productionInterval);
             
       // additional  Traffic Class Requirements
-      int pcp = default(0); //
-      //int gateIndex = default(0);
-      
+      int pcp = default(0);           
       string objectiveType @enum("NO_OBJECTIVE", "LATENESS", "TARDINESS", "JITTER", "TARDINESS_AND_JITTER") = default("TARDINESS_AND_JITTER");
       //int packetLoss = default(0);
       //int policy = default(0); // packet delay budget

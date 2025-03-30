@@ -102,9 +102,9 @@ protected:
 
   public:
     void updateStreamConfigurations(cValueMap* element);
-    void updateDistributions(std::string,  cValueArray* element);
+    void updateDistributions(std::string key,  cValueArray* element);
 
-    void stopApplicationsWithStopReq();
+    void addApplicationsWithStopReq(std::vector<cModule *> &sources);
     std::map<std::string, cValueArray*> *getDistributions();
     cValueArray* getStreamConfigurations();
     inline bool isFixedPriority() {return fixedPriority;}

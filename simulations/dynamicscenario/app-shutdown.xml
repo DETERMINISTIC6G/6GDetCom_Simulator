@@ -2,19 +2,21 @@
 <script>
 
 	<at t="1">
-		<set-param module="device2.app[0].source"
+		<!-- <set-param module="device2.app[0].source"
 			par="pendingEnabled" value="true" />
 		<set-param module="device1.app[0].source"
-			par="pendingEnabled" value="true" />
+			par="pendingEnabled" value="true" />  -->
 		<set-param module="device5.app[0].source"
-			par="pendingEnabled" value="false" />
+			par="enabled" value="false" />			<!-- direct green -->
 		<set-param module="device3.app[0].source"
 			par="pendingEnabled" value="false" />
 	</at>
 
 	<at t="5">
 		<set-param module="device2.app[0].source"
-			par="pendingProductionInterval" value="20ms" />
+			par="productionInterval" value="100ms" />			<!-- direct blue-->
+		<set-param module="device2.app[0].source" par="maxLatency"
+			value="100ms" />	
 		<set-param module="device2.app[0].source"
 			par="pendingPacketLength" value="1200B" />
 	</at>
@@ -25,7 +27,7 @@
 
 
 	<set-param t="30" module="device2.app[0].source"
-		par="pendingEnabled" value="true" />
+		par="enabled" value="true" />				<!-- direct blue-->
 
 	<set-param t="50" module="device5.app[0].source"
 		par="pendingEnabled" value="true" />
@@ -42,8 +44,8 @@
 			par="pendingProductionInterval" value="40ms" />
 		<set-param module="device2.app[1].source" par="maxLatency"
 			value="40ms" />
-		<set-param module="device2.app[1].source"
-			par="pendingEnabled" value="true" />
+	<!-- 	<set-param module="device2.app[1].source"
+			par="pendingEnabled" value="true" /> -->
 	</at>
 
 	<set-param t="90" module="device2.app[1].source"

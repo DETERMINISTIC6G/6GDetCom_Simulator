@@ -65,30 +65,32 @@ class ExternalGateScheduleConfigurator
     // double weight; //= 1.0;
   };
 
-  class Output : public GateScheduleConfiguratorBase::Output {
-  public:
-    std::map<Input::Application *, std::vector<simtime_t>>
-        applicationStartTimesArray;
+    class Output: public GateScheduleConfiguratorBase::Output {
+    public:
+        std::map<Input::Application*, std::vector<simtime_t>> applicationStartTimesArray;
+        std::vector<cModule*> sources;
 
-  public:
-    bool hasSchedule() { return gateSchedules.size(); }
+    public:
+        bool hasSchedule() {
+            return gateSchedules.size();
+        }
 
-  public:
-    ~Output() {
+    public:
+        ~Output() {
 
-      /*for (auto it = gateSchedules.begin(); it != gateSchedules.end(); ++it) {
+            /*for (auto it = gateSchedules.begin(); it != gateSchedules.end(); ++it) {
 
-       std::vector<Output::Schedule*> &schedules = it->second;
+             std::vector<Output::Schedule*> &schedules = it->second;
 
-       for (Output::Schedule *schedule : schedules) {
-       Schedule *oldSchedule = (Schedule*) schedule;
-       oldSchedule->~Schedule();
-       }//endfor
+             for (Output::Schedule *schedule : schedules) {
+             Schedule *oldSchedule = (Schedule*) schedule;
+             oldSchedule->~Schedule();
+             }//endfor
 
-       }//endfor
-       */
-    }
-  };
+             }//endfor
+             */
+        }
+    };
 
   template <typename... Args>
   std::string format(const std::string &fmt, Args... args) const {
@@ -116,12 +118,13 @@ private:
   mutable simtime_t gateCycleDuration = 0;
 
 protected:
+
+  /*extend GateScheduleConfiguratorBase*/
   virtual void initialize(int stage) override;
   virtual void handleParameterChange(const char *name) override;
   virtual void handleMessage(cMessage *msg) override;
-  virtual void clearConfiguration() override;
 
-  /*extend GateScheduleConfiguratorBase*/
+  virtual void clearConfiguration() override;
   virtual void addFlows(Input &input) const override;
   virtual void configureGateScheduling() override;
   virtual void configureApplicationOffsets() override;
@@ -139,7 +142,7 @@ protected:
 
   virtual inline std::string getExpandedNodeName(cModule *module) const;
   inline std::string getDetComLinkDescription(DetComLinkType type) const;
-  inline short getSwitchType(cModule *mod) const;
+  inline short getDeviceType(cModule *mod) const;
   Input::Port *getConfigurablePort(const Input &input,
                                    std::string &linkName) const;
 

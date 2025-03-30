@@ -40,10 +40,12 @@ enum class StreamObjectives {
 };
 
 private:
-    char enabledParameter;
-    bool hasSchedulerPermission;
-    bool isFirstTimeRun;
+    volatile bool ignoreChange = false;
 
+    bool hasSchedulerPermission = false;
+    bool isFirstTimeRun = true; // The app has never been started
+
+    bool wantToRun;
     cPar *runningState = nullptr;
 
     ClockEvent *parameterChangeEvent = nullptr;
@@ -65,6 +67,8 @@ protected:
 
     virtual void scheduleProductionTimer(clocktime_t delay) override;
     virtual void scheduleProductionTimerAndProducePacket() override;
+
+    //These methods are used by Configurator and Monitor
     virtual bool stopIfNotScheduled();
     virtual void setNewConfiguration(const std::vector<simtime_t>& simtimeVector);
     virtual void cancelLastChanges();
@@ -72,7 +76,6 @@ protected:
 
 public:
     virtual cValueMap* getConfiguration() const;
-
     int objective(const char* type) const;
 
     ~DynamicPacketSource() override;

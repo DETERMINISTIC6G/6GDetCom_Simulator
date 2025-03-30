@@ -24,17 +24,15 @@ void DynamicPacketSource::initialize(int stage)
 {
     ActivePacketSource::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-        enabledParameter = par("pendingEnabled").boolValue();
+
         runningState = &par("enabled");
-        std::cout << "INITIAL" << " state " << runningState->boolValue()  <<"   " << " time: " << simTime() << endl;
-        isFirstTimeRun = true;
-        hasSchedulerPermission = false;
+        wantToRun = par("pendingEnabled").boolValue();
 
         parameterChangeEvent = new ClockEvent("parameter-change");
         productionTimer->setSchedulingPriority(10);
 
         cValueArray *productionOffsets = check_and_cast<cValueArray *>(par("productionOffsets").objectValue());
-        //std::vector<simtime_t> test = productionOffsets->asObjectVector();
+        //std::vector<intval_t> test = productionOffsets->asIntVectorInUnit("ns");
         std::vector<simtime_t> tempVector(productionOffsets->size());
         for (int i = 0; i < productionOffsets->size(); i++) {
              const cValue& value = (*productionOffsets)[i];
@@ -42,7 +40,7 @@ void DynamicPacketSource::initialize(int stage)
         }
         computeProductionOffsets(tempVector);
     }else if (stage == INITSTAGE_LAST) {
-        isFirstTimeRun = ! static_cast<bool>(enabledParameter);
+        isFirstTimeRun = runningState->boolValue();
     }
 }
 
@@ -59,8 +57,6 @@ void DynamicPacketSource::handleMessage(cMessage *msg) {
             producePacket();
         }
     } else if (msg == parameterChangeEvent) {
-        std::cout << "pendingEnabledMessage 2" << "   "
-                                              << " time: " << simTime() << endl;
         emit(DynamicScenarioObserver::parameterChangeSignal, msg);
     } else
         throw cRuntimeError("Unknown message type.");
@@ -68,66 +64,53 @@ void DynamicPacketSource::handleMessage(cMessage *msg) {
 
 
 void DynamicPacketSource::handleParameterChange(const char *name) {
-    bool configuratorChanges = false;
     if (!strcmp(name, "pendingEnabled")) {
-        std::cout << "pendingEnabled" << " state " << runningState->boolValue()  <<"   " << " time: " << simTime() << endl;
-
-        if (enabledParameter > 1) configuratorChanges = true;
-        enabledParameter = par("pendingEnabled").boolValue();
-       // if (enabledParameter)  isFirstTimeRun = false;
+        wantToRun = par("pendingEnabled").boolValue();
         hasSchedulerPermission = false;
     }
-
     if (!strcmp(name, "enabled")) {
-
-        if (enabledParameter > 1) {
-                    configuratorChanges = true;
-                    //return;
-                }
-        enabledParameter = par("enabled").boolValue();
-        if (!enabledParameter && productionTimer->isScheduled()) {
+        wantToRun = runningState->boolValue();
+        if (!runningState->boolValue() && productionTimer->isScheduled()) {
             hasSchedulerPermission = false;
             cancelEvent(productionTimer);
-        }
-        else if (enabledParameter == 1 && !productionTimer->isScheduled()) {
-            if (!configuratorChanges) hasSchedulerPermission = false;
+        } else if (runningState->boolValue()
+                && !productionTimer->isScheduled()) {
+            if (!ignoreChange) {
+                hasSchedulerPermission = false;
+                scheduleProductionTimer(0);
+            }
             isFirstTimeRun = false;
-            std::cout << "enabledParameter (zuerst)"  << " time: " << simTime() << endl;
-            scheduleProductionTimer(0);
         }
-
-
     }
-
     if (!strcmp(name, "initialProductionOffset")) {
         initialProductionOffset = par("initialProductionOffset");
-        std::cout << "initialProductionOffset (zuerst)"  << " time: " << simTime() << endl;
         if (productionTimer->isScheduled()) { //Stop the production of packets from the old configuration
             cancelEvent(productionTimer);
         }
-        if (hasSchedulerPermission && enabledParameter) {
+        if (hasSchedulerPermission) {
             scheduleProductionTimer(initialProductionOffset);
-
         }
-    }//endif initialProductionOffset
+    } //endif initialProductionOffset
 
-    if (!strcmp(name, "pendingProductionInterval") || !strcmp(name, "pendingPacketLength")) {
+    if (!strcmp(name, "pendingProductionInterval")
+            || !strcmp(name, "pendingPacketLength")) {
         hasSchedulerPermission = false;
     }
-
     if (!strcmp(name, "productionInterval") || !strcmp(name, "packetLength")) {
-        if (enabledParameter > 1) configuratorChanges = true;
-        enabledParameter = runningState->boolValue();
-        //return;
+        if (!ignoreChange) {
+            par("pendingProductionInterval").setValue(par("productionInterval").getValue());
+            par("pendingPacketLength").setValue(par("packetLength").getValue());
+            return;
+        }
     }
-
-    if (!strcmp(name, "maxLatency")) return;
+    if (!strcmp(name, "maxLatency"))
+        return;
 
     /* Send the signal only once if multiple parameters change simultaneously.
      * Do not send a signal if the configurator requests the app to stop/start
      * or it already configures the new production offsets. */
-    if (strcmp(name, "initialProductionOffset") && !parameterChangeEvent->isScheduled() && !configuratorChanges)
-        //scheduleAt(simTime(), parameterChangeEvent);
+    if (strcmp(name, "initialProductionOffset")
+            && !parameterChangeEvent->isScheduled() && !ignoreChange)
         scheduleClockEventAt(getClockTime(), parameterChangeEvent);
 }
 
@@ -161,10 +144,8 @@ cValueMap* DynamicPacketSource::getConfiguration() const{
     cModule *deviceModule = appModule->getParentModule();
 
     cValueMap *map = new cValueMap();
-    map->set("enabled", static_cast<bool>(enabledParameter)); //par("pendingEnabled").boolValue());//
-    std::cout << flowName << "   " << "pendingEnabled: "
-                            << par("pendingEnabled").boolValue() << " time: " << simTime() << endl;
-
+    map->set("enabled", runningState->boolValue());
+    map->set("stopReq", !wantToRun);
 
     if (flowName != "") {
         map->set("name", cValue(flowName));
@@ -193,13 +174,11 @@ cValueMap* DynamicPacketSource::getConfiguration() const{
 void DynamicPacketSource::setNewConfiguration(const std::vector<simtime_t>& productionTimesInHyperCycleVector) {
     hasSchedulerPermission = true;
 
-    std::cout << "setNewConfiguration (zuerst)"  << " time: " << simTime() << endl;
-    enabledParameter = 2;
+    ignoreChange = true;
     par("enabled").setBoolValue(true);
-    enabledParameter = 2;
     par("productionInterval").setValue(par("pendingProductionInterval").getValue());
-    enabledParameter = 2;
     par("packetLength").setValue(par("pendingPacketLength").getValue());
+    ignoreChange = false;
 
     offsets.clear();
     nextProductionIndex = 0;
@@ -215,6 +194,7 @@ void DynamicPacketSource::setNewConfiguration(const std::vector<simtime_t>& prod
         computeProductionOffsets(tempVector);
     }//endif
 
+    //start
     par("initialProductionOffset") = productionTimesInHyperCycleVector[0].dbl();
 }
 
@@ -230,10 +210,10 @@ void DynamicPacketSource::computeProductionOffsets(const std::vector<simtime_t>&
 
 bool DynamicPacketSource::stopIfNotScheduled() {
     if (!(hasSchedulerPermission && runningState->boolValue())) {
-        enabledParameter = 2;
+        ignoreChange = true;
         par("enabled").setBoolValue(false);
-        enabledParameter = 3;
         par("pendingEnabled").setBoolValue(false);
+        ignoreChange = false;
         return true;
     }
     return false;
@@ -241,10 +221,10 @@ bool DynamicPacketSource::stopIfNotScheduled() {
 
 void DynamicPacketSource::cancelLastChanges() {
     if (!runningState->boolValue()) {
-        enabledParameter = 2;
+        ignoreChange = true;
         par("enabled").setBoolValue(false);
-        enabledParameter = 3;
         par("pendingEnabled").setBoolValue(false);
+        ignoreChange = false;
     }else {
         hasSchedulerPermission = true;
     }
