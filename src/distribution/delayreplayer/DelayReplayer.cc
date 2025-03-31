@@ -6,27 +6,47 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
 #include "DelayReplayer.h"
-#include <algorithm>
-#include <omnetpp.h>
+
 #include <inet/common/Units.h>
+#include <omnetpp.h>
+
+#include <algorithm>
 
 #include "fstream"
 #include "inet/common/XMLUtils.h"
 
 namespace d6g {
-
 Define_Module(DelayReplayer);
 
-void DelayReplayer::initialize(int stage) {
+void DelayReplayer::initialize(int stage)
+{
     if (stage == INITSTAGE_LOCAL) {
         const char *csvfile = par("csvFilename").stringValue();
         offset = par("offset");
         timestampOffset = par("timestampOffset").doubleValue();
         readCSV(csvfile);
+        if (mode == CYCLE && offset > 0 && !delays.empty()) {
+            int offsetToApply = offset % delays.size(); // Ensure offset doesn't exceed vector size
+            std::advance(delayIterator, offsetToApply);
+        }
     }
 }
 
-void DelayReplayer::readCSV(const char *filename) {
+void DelayReplayer::setOffset(cValue &offset)
+{
+    delayIterator = delays.begin();
+    this->offset = offset;
+    int offsetToApply = this->offset % delays.size(); // Ensure offset doesn't exceed vector size
+    std::advance(delayIterator, offsetToApply);
+}
+
+void DelayReplayer::setTimestampOffset(cValue &timestampOffset)
+{
+    this->timestampOffset = timestampOffset.doubleValueInUnit("s");
+}
+
+void DelayReplayer::readCSV(const char *filename)
+{
     delays.clear();
     std::string line;
     std::ifstream infile(filename);
@@ -41,7 +61,8 @@ void DelayReplayer::readCSV(const char *filename) {
         if (mode == NONE) {
             if (line.find(',') != std::string::npos) {
                 mode = TIME_BASED;
-            } else {
+            }
+            else {
                 mode = CYCLE;
             }
         }
@@ -51,7 +72,8 @@ void DelayReplayer::readCSV(const char *filename) {
             delayValue = delayExpr.evaluate(this);
             startValue = cValue(-1, "s");
             delays.emplace_back(startValue, delayValue);
-        } else if (mode == TIME_BASED) {
+        }
+        else if (mode == TIME_BASED) {
             std::stringstream str(line);
             getline(str, delayTimeStr, ',');
             getline(str, startTimeStr, ',');
@@ -65,13 +87,10 @@ void DelayReplayer::readCSV(const char *filename) {
         }
     }
     delayIterator = delays.begin();
-    if (mode == CYCLE && offset > 0 && !delays.empty()) {
-        int offsetToApply = offset % delays.size(); // Ensure offset doesn't exceed vector size
-        std::advance(delayIterator, offsetToApply);
-    }
 }
 
-cValue DelayReplayer::getRand() {
+cValue DelayReplayer::getRand()
+{
     if (mode == CYCLE) {
         if (delayIterator == delays.end()) {
             delayIterator = delays.begin();
@@ -79,34 +98,34 @@ cValue DelayReplayer::getRand() {
         cValue value = delayIterator->delayTime;
         ++delayIterator;
         return value;
-    } else if (mode == TIME_BASED) {
+    }
+    else if (mode == TIME_BASED) {
         // Add timestampOffset to current simulation time
         return getDelayFromTargetValue(simTime().dbl() + timestampOffset);
-    } else {
+    }
+    else {
         throw cRuntimeError("No operation mode selected");
     }
 }
 
-cValue DelayReplayer::getDelayFromTargetValue(double targetTime) const{
+cValue DelayReplayer::getDelayFromTargetValue(double targetTime) const
+{
     // binary search
-    auto it = std::upper_bound(delays.begin(), delays.end(), targetTime,
-            [](double tTime, const DelayEntry& entry) {
-                return tTime < entry.startTime.doubleValueInUnit("s");
-            });
+    auto it = std::upper_bound(delays.begin(), delays.end(), targetTime, [](double tTime, const DelayEntry &entry) {
+        return tTime < entry.startTime.doubleValueInUnit("s");
+    });
 
     if (it == delays.begin()) {
-        throw cRuntimeError(
-                "Target time is before the start of any delay period");
+        throw cRuntimeError("Target time is before the start of any delay period");
     }
 
     --it; // Move iterator to the correct interval
 
     if (targetTime >= it->startTime.doubleValueInUnit("s")) {
         return it->delayTime;
-    } else {
-        throw cRuntimeError(
-                "No suitable delay interval found for the target time");
+    }
+    else {
+        throw cRuntimeError("No suitable delay interval found for the target time");
     }
 }
-
 } /* namespace d6g */

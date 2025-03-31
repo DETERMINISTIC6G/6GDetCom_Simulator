@@ -72,6 +72,9 @@ namespace d6g {
          */
         cValue getDelayFromTargetValue(double targetTime) const;
 
+        void setOffset(cValue &offset);
+        void setTimestampOffset(cValue &timestampOffset);
+
     private:
         /*!
          * Self check to make sure that the delayreplayer is correct
