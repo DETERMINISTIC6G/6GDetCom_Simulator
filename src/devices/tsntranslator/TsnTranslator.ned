@@ -39,7 +39,7 @@ module TsnTranslator extends TsnSwitch
         // Determines the type of queue to be used for egress traffic shaping.
         // If egress traffic shaping is enabled, "Ieee8021qTimeAwareShaper" is used.
         // Otherwise, a standard "PacketQueue" is used.
-        tt[*].macLayer.queue.typename = default(hasEgressTrafficShaping ? "Ieee8021qTimeAwareShaper" : "PacketQueue");
+        tt[*].macLayer.queue.typename = default("PacketQueue");
 
         // Chooses the appropriate PHY layer type.
         // "EthernetStreamThroughPhyLayer" is used if cut-through switching is enabled.
