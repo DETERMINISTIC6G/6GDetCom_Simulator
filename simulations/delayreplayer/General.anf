@@ -700,7 +700,7 @@ Show over_underflow cell?
             <property name="secondary_ordering_regex_list" value=""/>
             <property name="drawstyle" value="Solid"/>
             <property name="show_overflows" value="true"/>
-            <property name="legend_show" value="true"/>
+            <property name="legend_show" value="false"/>
             <property name="simplify" value="false"/>
             <property name="yaxis_max" value=""/>
             <property name="Plot.Antialias" value="true"/>
