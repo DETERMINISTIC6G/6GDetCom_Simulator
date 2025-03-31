@@ -33,7 +33,7 @@ simple DynamicPacketSource extends ActivePacketSource
       //after the decision and permission of the scheduler
       volatile double pendingProductionInterval @unit(s) @mutable = default(productionInterval);
       volatile int pendingPacketLength @unit(b) @mutable = default(packetLength);              
-      volatile bool pendingEnabled @mutable = default(true); // start and stop the app dynamically
+      volatile bool pendingEnabled @mutable = default(enabled); // start and stop the app dynamically
       
       
       // hard constraint time

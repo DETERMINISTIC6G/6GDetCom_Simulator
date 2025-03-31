@@ -38,8 +38,9 @@ import inet.linklayer.configurator.gatescheduling.contract.IGateScheduleConfigur
 simple ExternalGateScheduleConfigurator extends GateScheduleConfiguratorBase like IGateScheduleConfigurator
 {
     parameters:
-    
-    gateCycleDuration @mutable = default(0s); //hyperperiod is also automatically calculated in the monitor module
+    //the globally used gate scheduling period in each PeriodicGate modules
+    //hyperperiod is also automatically calculated
+    gateCycleDuration @mutable = default(0s); 
         
     string command;
     

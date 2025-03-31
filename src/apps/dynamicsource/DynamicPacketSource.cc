@@ -40,7 +40,7 @@ void DynamicPacketSource::initialize(int stage)
         }
         computeProductionOffsets(tempVector);
     }else if (stage == INITSTAGE_LAST) {
-        isFirstTimeRun = runningState->boolValue();
+        isFirstTimeRun = ! runningState->boolValue();
     }
 }
 

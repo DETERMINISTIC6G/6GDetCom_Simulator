@@ -14,9 +14,9 @@
 
 	<at t="5">
 		<set-param module="device2.app[0].source"
-			par="productionInterval" value="100ms" />			<!-- direct blue-->
+			par="productionInterval" value="90ms" />			<!-- direct blue-->
 		<set-param module="device2.app[0].source" par="maxLatency"
-			value="100ms" />	
+			value="90ms" />	
 		<set-param module="device2.app[0].source"
 			par="pendingPacketLength" value="1200B" />
 	</at>

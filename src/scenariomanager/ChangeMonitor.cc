@@ -138,7 +138,8 @@ void ChangeMonitor::configureInitStreamsAndDistributions() {
         DynamicPacketSource *sourceModule =
             dynamic_cast<DynamicPacketSource *>(mod);
         cValueMap *element = sourceModule->getConfiguration();
-        if (!element->get("enabled").boolValue()) {  // not enabled
+        if ((element->get("stopReq").boolValue())) {
+       // if (!element->get("enabled").boolValue()) {  // not enabled
           delete element;
           continue;
         }
@@ -261,60 +262,69 @@ cValueMap *ChangeMonitor::convertMappingToCValue(const Mapping &mapping) {
 }
 
 void ChangeMonitor::updateStreamConfigurations(cValueMap *element) {
-  take(element);
-  std::string application = element->get("application").stringValue();
-  std::string source = element->get("source").stringValue();
-  std::string destination = element->get("destination").stringValue();
+    take(element);
+    std::string application = element->get("application").stringValue();
+    std::string source = element->get("source").stringValue();
+    std::string destination = element->get("destination").stringValue();
 
-  auto it =
-      std::find_if(streamConfigurations.begin(), streamConfigurations.end(),
-                   [&](const ChangeMonitor::Mapping &m) {
-                     return m.application == application &&
-                            m.source == source && m.destination == destination;
-                   });
-  if (it != streamConfigurations.end()) { // found
-    int i = std::distance(streamConfigurations.begin(), it);
-    if (!(element->get("stopReq").boolValue())) { //enabled  // element->get("enabled").boolValue() ||
+    auto it = std::find_if(streamConfigurations.begin(),
+            streamConfigurations.end(),
+            [&](const ChangeMonitor::Mapping &m) {
+                return m.application == application && m.source == source
+                        && m.destination == destination;
+            });
+    if (it != streamConfigurations.end()) { // found
+        int i = std::distance(streamConfigurations.begin(), it);
+        if (!(element->get("stopReq").boolValue())) { //enabled  // element->get("enabled").boolValue() ||
 
-        addEntryToStreamConfigurations(element, i);
-    } else { // not enabled
-      if (element->get("enabled").boolValue())
-          streamWantsToStop.push_back(source + "." + application + ".source");
-          streamConfigurations.erase(it);
-          streamConfigurations.shrink_to_fit();
-    }
-  } else //{ // not found
-    if (!(element->get("stopReq").boolValue())) {//element->get("enabled").boolValue()) { // enabled
-      //return;
-
-        if (element->get("enabled").boolValue()) { //#######
-                      std::cout << "already started at " << simTime() << " : "
-                              << std::string(element->get("source").stringValue()) +
-                              "." + std::string(element->get("application").stringValue())
-                              << ", " << element->get("name").stringValue() <<  endl;
-                  }
+            addEntryToStreamConfigurations(element, i);
+        } else { // not enabled
+            if (element->get("enabled").boolValue())
+                streamWantsToStop.push_back(
+                        source + "." + application + ".source");
+            streamConfigurations.erase(it);
+            streamConfigurations.shrink_to_fit();
+        }
+    } else //{ // not found
+    if (!(element->get("stopReq").boolValue())) { //element->get("enabled").boolValue()) { // enabled
+        //return;
 
         streamConfigurations.resize(streamConfigurations.size() + 1);
-        addEntryToStreamConfigurations(element, streamConfigurations.size() - 1);
+        addEntryToStreamConfigurations(element,
+                streamConfigurations.size() - 1);
         auto path = (source + "." + application + ".source");
         DynamicPacketSource *sourceModule =
-                check_and_cast<DynamicPacketSource *>(getModuleByPath(path.c_str()));
-        if (sourceModule->flowName == "")
+                check_and_cast<DynamicPacketSource*>(
+                        getModuleByPath(path.c_str()));
+        if (sourceModule->flowName == "") {
             sourceModule->flowName =
                     streamConfigurations[streamConfigurations.size() - 1].name;
-  }
+            std::cout << streamConfigurations[streamConfigurations.size() - 1]
+                    << std::endl;
+        }
+        if (element->get("enabled").boolValue()) { //#######
+            std::cout << "already started at " << simTime() << " : "
+                    << std::string(element->get("source").stringValue()) + "."
+                            + std::string(
+                                    element->get("application").stringValue())
+                    << endl;
+        }
 
-  if (!element->get("stopReq").boolValue() && !element->get("enabled").boolValue()) { //#######
-              std::cout << "want to run at " << simTime() << " : "
-                      << std::string(element->get("source").stringValue()) +
-                      "." + std::string(element->get("application").stringValue())
-                      << ", " << element->get("name").stringValue() <<  endl;
-          }else if (element->get("stopReq").boolValue() && !element->get("enabled").boolValue()) { //#######
-              std::cout << "Already stopped at " << simTime() << " : "
-                      << std::string(element->get("source").stringValue()) +
-                      "." + std::string(element->get("application").stringValue())
-                      << ", " << element->get("name").stringValue() <<  endl;
-          }
+    }
+
+    if (!element->get("stopReq").boolValue()
+            && !element->get("enabled").boolValue()) { //#######
+        std::cout << "want to run at " << simTime() << " : "
+                << std::string(element->get("source").stringValue()) + "."
+                        + std::string(element->get("application").stringValue())
+                << endl;
+    } else if (element->get("stopReq").boolValue()
+            && !element->get("enabled").boolValue()) { //#######
+        std::cout << "already stopped at " << simTime() << " : "
+                << std::string(element->get("source").stringValue()) + "."
+                        + std::string(element->get("application").stringValue())
+                << endl;
+    }
 
 }
 
