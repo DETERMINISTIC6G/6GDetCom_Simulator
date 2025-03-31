@@ -26,7 +26,7 @@ simple ChangeMonitor
     parameters:
         string clockModule = default("");
         
-        volatile double schedulerCallDelay @unit(s) = default(2s);
+        volatile double schedulerCallDelay @unit(s) = default(0s);
         
         string gateScheduleConfigurator = default("gateScheduleConfigurator");
         
