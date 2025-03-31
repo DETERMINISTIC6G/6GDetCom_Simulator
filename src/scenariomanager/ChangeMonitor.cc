@@ -424,14 +424,16 @@ void ChangeMonitor::computeConvolution(cModule *source, cModule *target) {
 
 
 ChangeMonitor::~ChangeMonitor() {
-  for (auto &pair : *distributions) {
-    if (pair.second != nullptr) {
-      delete pair.second;
+    if (distributions != nullptr) {
+        for (auto &pair : *distributions) {
+            if (pair.second != nullptr) {
+                delete pair.second;
+            }
+        }
+        delete distributions;
     }
-  }
-  delete distributions;
-  cancelAndDeleteClockEvent(timer);
-  delete observer;
+    cancelAndDeleteClockEvent(timer);
+    delete observer;
 }
 
 } // namespace d6g
