@@ -35,6 +35,7 @@ void DelayReplayerContainer::initialize(int stage)
                 auto timestampOffset = replayerConfig->get("timestampOffset");
                 currentDelayReplayer->setTimestampOffset(timestampOffset);
             }
+            delayreplayers[id] = currentDelayReplayer;
         }
     }
 }
