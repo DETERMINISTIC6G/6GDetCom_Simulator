@@ -33,6 +33,16 @@ void ExternalGateScheduleConfigurator::initialize(int stage) {
     configurationComputedEvent->setSchedulingPriority(0);
 
     hashMapNodeId = new std::map<std::string, uint16_t>();
+
+    auto schedulerRootEnv = getenv("SCHEDULER_ROOT");
+    if (!schedulerRootEnv) {
+      throw cRuntimeError("SCHEDULER_ROOT environment variable not set");
+    }
+    schedulerRoot = schedulerRootEnv;
+    // Check if path exists
+    if (!exists(schedulerRoot)) {
+      throw cRuntimeError("SCHEDULER_ROOT path does not exist");
+    }
   } else if (stage == INITSTAGE_GATE_SCHEDULE_CONFIGURATION) {
         // query monitor if it exists
         if ((monitor = check_and_cast<ChangeMonitor *>(
@@ -138,9 +148,11 @@ ExternalGateScheduleConfigurator::computeGateScheduling(
 
   Output *scheduleOutput = nullptr;
 
+    auto filepath = schedulerRoot / configurationFilePar->stdstringValue();
+
   if (invokeScheduler()) {
     scheduleOutput = (Output *)readOutputFromFile(input,
-                                        configurationFilePar->stdstringValue());
+                                        filepath);
   } else {
     commitTime = simTime();
     scheduleOutput =  new Output();
@@ -168,8 +180,7 @@ bool ExternalGateScheduleConfigurator::invokeScheduler() const {
   bool configured = true;
   char currentDir[PATH_MAX];
   getcwd(currentDir, sizeof(currentDir));
-  auto dir = getenv("LIBTSNDGM_ROOT");
-  chdir(dir);
+  chdir(schedulerRoot.c_str());
   std::string commandFromINI =
       format(command, networkFilePar->stdstringValue().c_str(),
              streamsFilePar->stdstringValue().c_str(),
@@ -177,7 +188,7 @@ bool ExternalGateScheduleConfigurator::invokeScheduler() const {
              configurationFilePar->stdstringValue().c_str());
   if (std::system(commandFromINI.c_str()) != 0) {
     if (monitor->par("stopWhenNotSchedulable").boolValue() || commitTime == SIMTIME_ZERO)
-       throw cRuntimeError("Command execution failed, make sure LIBTSNDGM_ROOT is set and a scheduler tool is installed");
+       throw cRuntimeError("Command execution failed, make sure SCHEDULER_ROOT is set and a scheduler tool is installed");
     configured = false;
   }
   chdir(currentDir);
@@ -237,8 +248,8 @@ void ExternalGateScheduleConfigurator::writeNetworkToFile(
 void ExternalGateScheduleConfigurator::write(std::string fileName,
                                              cValueMap *json) const {
   std::ofstream stream;
-  auto path = fileName;
-  stream.open(path.c_str());
+  auto path = schedulerRoot / fileName;
+  stream.open(path);
   if (stream.fail())
     throw cRuntimeError("Cannot open file %s", fileName.c_str());
   this->printJson(stream, cValue(json));

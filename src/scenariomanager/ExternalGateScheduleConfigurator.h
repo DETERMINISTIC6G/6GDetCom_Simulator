@@ -21,6 +21,7 @@
 #include "inet/queueing/gate/PeriodicGate.h"
 #include <omnetpp.h>
 
+#include <__filesystem/filesystem_error.h>
 #include <sstream>
 
 using namespace omnetpp;
@@ -116,6 +117,7 @@ private:
   mutable simtime_t scheduleComputingTime = 0;
   mutable simtime_t commitTime = 0;
   mutable simtime_t gateCycleDuration = 0;
+  std::filesystem::path schedulerRoot;
 
 protected:
 
