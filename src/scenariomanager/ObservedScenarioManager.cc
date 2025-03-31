@@ -21,16 +21,17 @@ Define_Module(ObservedScenarioManager);
 
 void ObservedScenarioManager::initialize() { ScenarioManager::initialize(); }
 
-void ObservedScenarioManager::handleMessage(cMessage *msg) {
-  // ScenarioManager::handleMessage(msg);
-  auto node = check_and_cast<ScenarioTimer *>(msg)->getXmlNode();
+void ObservedScenarioManager::handleMessage(cMessage *msg)
+{
+    // ScenarioManager::handleMessage(msg);
+    auto node = check_and_cast<ScenarioTimer *>(msg)->getXmlNode();
 
-  processCommand(node);
-  numDone++;
-  if (msg->isSelfMessage()) {
-    emit(DynamicScenarioObserver::scenarioEventSignal, msg);
-  }
-  delete msg;
+    processCommand(node);
+    numDone++;
+    if (msg->isSelfMessage()) {
+        emit(DynamicScenarioObserver::scenarioEventSignal, msg);
+    }
+    delete msg;
 }
 
 /*ObservedScenarioManager::~ObservedScenarioManager() {

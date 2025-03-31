@@ -30,24 +30,23 @@ namespace d6g {
 
 class ChangeMonitor;
 
-class DynamicScenarioObserver : public cListener, public cModule {
+class DynamicScenarioObserver : public cListener, public cModule
+{
 
-private:
-  ChangeMonitor *monitor = nullptr;
+  private:
+    ChangeMonitor *monitor = nullptr;
 
-public:
-  static const simsignal_t scenarioEventSignal;
-  static const simsignal_t parameterChangeSignal;
-  static const simsignal_t distributionChangeSignal;
+  public:
+    static const simsignal_t scenarioEventSignal;
+    static const simsignal_t parameterChangeSignal;
+    static const simsignal_t distributionChangeSignal;
 
-public:
-  DynamicScenarioObserver(ChangeMonitor *monitor);
+  public:
+    DynamicScenarioObserver(ChangeMonitor *monitor);
 
-  virtual void receiveSignal(cComponent *source, simsignal_t signalID,
-                             cObject *obj, cObject *details) override;
-  cValueArray *createHistogram(cDynamicExpression &dynExpr,
-                               cObject *details = nullptr);
-  // void convolveDistributions(cModule *networkNode, cModule *nextNetworkNode);
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
+    cValueArray *createHistogram(cDynamicExpression &dynExpr, cObject *details = nullptr);
+    // void convolveDistributions(cModule *networkNode, cModule *nextNetworkNode);
 };
 
 } /* namespace d6g */
