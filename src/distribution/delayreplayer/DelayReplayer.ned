@@ -37,6 +37,8 @@ simple DelayReplayer
 {
     parameters:
         string csvFilename;
+        int offset = default(0); // Starting position for CYCLE mode
+        double timestampOffset @unit(s) = default(0s); // Time offset for TIME_BASED mode
         @class(DelayReplayer);
         @display("i=block/delay");
 }

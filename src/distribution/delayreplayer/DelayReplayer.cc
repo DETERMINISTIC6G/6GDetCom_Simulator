@@ -20,6 +20,8 @@ Define_Module(DelayReplayer);
 void DelayReplayer::initialize(int stage) {
     if (stage == INITSTAGE_LOCAL) {
         const char *csvfile = par("csvFilename").stringValue();
+        offset = par("offset");
+        timestampOffset = par("timestampOffset").doubleValue();
         readCSV(csvfile);
     }
 }
@@ -63,6 +65,10 @@ void DelayReplayer::readCSV(const char *filename) {
         }
     }
     delayIterator = delays.begin();
+    if (mode == CYCLE && offset > 0 && !delays.empty()) {
+        int offsetToApply = offset % delays.size(); // Ensure offset doesn't exceed vector size
+        std::advance(delayIterator, offsetToApply);
+    }
 }
 
 cValue DelayReplayer::getRand() {
@@ -74,7 +80,8 @@ cValue DelayReplayer::getRand() {
         ++delayIterator;
         return value;
     } else if (mode == TIME_BASED) {
-        return getDelayFromTargetValue(simTime().dbl());
+        // Add timestampOffset to current simulation time
+        return getDelayFromTargetValue(simTime().dbl() + timestampOffset);
     } else {
         throw cRuntimeError("No operation mode selected");
     }

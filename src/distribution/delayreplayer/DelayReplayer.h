@@ -41,6 +41,8 @@ namespace d6g {
     private:
         std::vector<DelayEntry> delays; ///< Vector to store the delays
         std::vector<DelayEntry>::iterator delayIterator; ///< Iterator to traverse through the delays.
+        int offset = 0; ///< Starting position for CYCLE mode
+        double timestampOffset = 0.0; ///< Time offset for TIME_BASED mode
 
     protected:
         virtual void initialize(int stage) override;
