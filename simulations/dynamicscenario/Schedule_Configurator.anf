@@ -713,7 +713,7 @@ utils.export_data_if_needed(df, props)
             <property name="vector_end_time" value=""/>
             <property name="linecolor" value=""/>
             <property name="legend_prefer_result_titles" value="true"/>
-            <property name="title" value="mean bit life time per packet"/>
+            <property name="title" value="end-to-end delay"/>
             <property name="legend_automatic" value="true"/>
             <property name="vector_operations" value=""/>
             <property name="sorting" value="true"/>
