@@ -14,7 +14,6 @@
 // 
 
 #include "DynamicPacketSource.h"
-#include "inet/applications/udpapp/UdpSocketIo.h"
 
 namespace d6g {
 
@@ -24,21 +23,22 @@ void DynamicPacketSource::initialize(int stage)
 {
     ActivePacketSource::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-
         runningState = &par("enabled");
-        wantToRun = par("pendingEnabled").boolValue();
+        pendingEnabledState = par("pendingEnabled").boolValue();
 
         parameterChangeEvent = new ClockEvent("parameter-change");
         productionTimer->setSchedulingPriority(10);
 
         cValueArray *productionOffsets = check_and_cast<cValueArray *>(par("productionOffsets").objectValue());
-        //std::vector<intval_t> test = productionOffsets->asIntVectorInUnit("ns");
-        std::vector<simtime_t> tempVector(productionOffsets->size());
-        for (int i = 0; i < productionOffsets->size(); i++) {
-             const cValue& value = (*productionOffsets)[i];
-             tempVector.push_back(SimTime(value.intValueInUnit("ns"), SIMTIME_NS));
+        if (productionOffsets->size() > 1) {
+            initialProductionOffset = productionOffsets->get(0).doubleValueInUnit("s");
+            std::vector<simtime_t> tempVector;
+            for (int i = 0; i < productionOffsets->size(); i++) {
+                 const cValue &value = (*productionOffsets)[i];
+                 tempVector.push_back(SimTime(value.doubleValueInUnit("s")));
+            }
+            computeProductionOffsets(tempVector);
         }
-        computeProductionOffsets(tempVector);
     }else if (stage == INITSTAGE_LAST) {
         isFirstTimeRun = ! runningState->boolValue();
     }
@@ -65,11 +65,11 @@ void DynamicPacketSource::handleMessage(cMessage *msg) {
 
 void DynamicPacketSource::handleParameterChange(const char *name) {
     if (!strcmp(name, "pendingEnabled")) {
-        wantToRun = par("pendingEnabled").boolValue();
+        pendingEnabledState = par("pendingEnabled").boolValue();
         hasSchedulerPermission = false;
     }
     if (!strcmp(name, "enabled")) {
-        wantToRun = runningState->boolValue();
+        pendingEnabledState = runningState->boolValue();
         if (!runningState->boolValue() && productionTimer->isScheduled()) {
             hasSchedulerPermission = false;
             cancelEvent(productionTimer);
@@ -103,11 +103,11 @@ void DynamicPacketSource::handleParameterChange(const char *name) {
             return;
         }
     }
-    if (!strcmp(name, "maxLatency"))
+    if (!strcmp(name, "maxLatency") || !strcmp(name, "maxJitter"))
         return;
 
     /* Send the signal only once if multiple parameters change simultaneously.
-     * Do not send a signal if the configurator requests the app to stop/start
+     * Do not send a signal if the configurator module requests the app to stop/start
      * or it already configures the new production offsets. */
     if (strcmp(name, "initialProductionOffset")
             && !parameterChangeEvent->isScheduled() && !ignoreChange)
@@ -145,28 +145,25 @@ cValueMap* DynamicPacketSource::getConfiguration() const{
 
     cValueMap *map = new cValueMap();
     map->set("enabled", runningState->boolValue());
-    map->set("stopReq", !wantToRun);
+    map->set("stopReq", !pendingEnabledState);
 
-    if (flowName != "") {
-        map->set("name", cValue(flowName));
+    if (streamName != "") {
+        map->set("name", cValue(streamName));
     }
     map->set("pcp", par("pcp").intValue());
-    //map->set("gateIndex", par("gateIndex").intValue());
     map->set("application", cValue(appModule->getFullName()));
     map->set("source", cValue(deviceModule->getFullName()));
     map->set("destination", appModule->getSubmodule("io")->par("destAddress").stringValue());
-
     map->set("reliability", par("reliability").doubleValue());
-    //map->set("policy", par("policy").intValue());
     map->set("packetLength", par("pendingPacketLength").getValue());
     map->set("packetInterval", par("pendingProductionInterval").getValue());
-
     map->set("phase", isFirstTimeRun ? par("initialProductionOffset").getValue() : cValue(0, "us"));
     map->set("maxLatency", par("maxLatency").getValue());
     map->set("maxJitter", par("maxJitter").getValue());
-    //map->set("weight", par("weight").doubleValue());
-    map->set("objectiveType", objective(par("objectiveType")));//par("objectiveType").intValue());
+    map->set("objectiveType", objective(par("objectiveType")));
     //map->set("packetLoss", par("packetLoss").intValue());
+    //map->set("weight", par("weight").doubleValue());
+    //map->set("policy", par("policy").intValue());
 
     return map;
 }
@@ -207,7 +204,6 @@ void DynamicPacketSource::computeProductionOffsets(const std::vector<simtime_t>&
     }
 }
 
-
 bool DynamicPacketSource::stopIfNotScheduled() {
     if (!(hasSchedulerPermission && runningState->boolValue())) {
         ignoreChange = true;
@@ -217,17 +213,6 @@ bool DynamicPacketSource::stopIfNotScheduled() {
         return true;
     }
     return false;
-}
-
-void DynamicPacketSource::cancelLastChanges() {
-    if (!runningState->boolValue()) {
-        ignoreChange = true;
-        par("enabled").setBoolValue(false);
-        par("pendingEnabled").setBoolValue(false);
-        ignoreChange = false;
-    }else {
-        hasSchedulerPermission = true;
-    }
 }
 
 int DynamicPacketSource::objective(const char* type) const {
@@ -248,20 +233,4 @@ int DynamicPacketSource::objective(const char* type) const {
 DynamicPacketSource::~DynamicPacketSource() {
         cancelAndDeleteClockEvent(parameterChangeEvent);
     }
-
-/*
- * setSilent() {
-ignoreChange = true;
-par.setValue(xyz); -> ruft handleParameterChange();
-}
-
-handleParameterChange() {
-if (ignoreChange){
-ignoreChage=false
-return
-}
-// normaler handleparameterchange code
-}
- * */
-
 } //namespace

@@ -140,7 +140,7 @@ void ChangeMonitor::configureInitStreamsAndDistributions()
                 }
                 streamConfigurations.resize(sourceNumber + 1);
                 addEntryToStreamConfigurations(element, sourceNumber);
-                sourceModule->flowName = streamConfigurations[sourceNumber].name; // set unique flow name
+                sourceModule->streamName = streamConfigurations[sourceNumber].name; // set unique flow name
                 sourceNumber++;
                 delete element;
             }
@@ -286,8 +286,8 @@ void ChangeMonitor::updateStreamConfigurations(cValueMap *element)
             addEntryToStreamConfigurations(element, streamConfigurations.size() - 1);
             auto path = (source + "." + application + ".source");
             DynamicPacketSource *sourceModule = check_and_cast<DynamicPacketSource *>(getModuleByPath(path.c_str()));
-            if (sourceModule->flowName == "") {
-                sourceModule->flowName = streamConfigurations[streamConfigurations.size() - 1].name;
+            if (sourceModule->streamName == "") {
+                sourceModule->streamName = streamConfigurations[streamConfigurations.size() - 1].name;
                 std::cout << streamConfigurations[streamConfigurations.size() - 1] << std::endl;
             }
             if (element->get("enabled").boolValue()) { // #######

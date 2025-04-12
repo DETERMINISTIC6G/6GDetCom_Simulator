@@ -16,7 +16,7 @@
 #ifndef __DYNAMIC_SCENARIO_EXTERNALGATESCHEDULECONFIGURATOR_H_
 #define __DYNAMIC_SCENARIO_EXTERNALGATESCHEDULECONFIGURATOR_H_
 
-#include <__filesystem/filesystem_error.h>
+#include <filesystem>
 #include <omnetpp.h>
 
 #include <sstream>
@@ -112,7 +112,7 @@ class ExternalGateScheduleConfigurator : public TSNschedGateScheduleConfigurator
     cPar *configurationFilePar = nullptr;
 
     ClockEvent *configurationComputedEvent = nullptr;
-    mutable simtime_t scheduleComputingTime = 0;
+    //mutable simtime_t scheduleComputingTime = 0;
     mutable simtime_t commitTime = 0;
     mutable simtime_t gateCycleDuration = 0;
     std::filesystem::path schedulerRoot;
@@ -141,7 +141,7 @@ class ExternalGateScheduleConfigurator : public TSNschedGateScheduleConfigurator
     inline short getDeviceType(cModule *mod) const;
     Input::Port *getConfigurablePort(const Input &input, std::string &linkName) const;
 
-    bool invokeScheduler() const;
+    void invokeScheduler() const;
 
   private:
     void inline write(std::string fileName, cValueMap *json) const;

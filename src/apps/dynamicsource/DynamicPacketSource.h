@@ -21,6 +21,7 @@
 #include "../../scenariomanager/DynamicScenarioObserver.h"
 #include "../../devices/tsntranslator/TsnTranslator.h"
 #include "../../scenariomanager/ExternalGateScheduleConfigurator.h"
+#include "inet/applications/udpapp/UdpSocketIo.h"
 
 #include "inet/common/clock/ClockUserModuleMixin.h"
 
@@ -30,9 +31,6 @@ using namespace inet::queueing;
 
 namespace d6g {
 
-/**
- *
- */
 class DynamicPacketSource: public ActivePacketSource {
 
 enum class StreamObjectives {
@@ -40,16 +38,19 @@ enum class StreamObjectives {
 };
 
 private:
+    /* Set new parameters quietly (without triggering effects)*/
     volatile bool ignoreChange = false;
-
+    /* 'Pending' parameters are only adopted if the stream has been scheduled;
+     * otherwise, stop the packet production */
     bool hasSchedulerPermission = false;
-    bool isFirstTimeRun = true; // The app has never been started
+    /*Configure initialProductionOffsets either initially or on first start (only allowed once)*/
+    bool isFirstTimeRun = true;
 
-    bool wantToRun;
+    bool pendingEnabledState;
     cPar *runningState = nullptr;
 
     ClockEvent *parameterChangeEvent = nullptr;
-    std::string flowName = "";
+    std::string streamName = "";
 
     std::vector<simtime_t> offsets;
     size_t nextProductionIndex = 0;
@@ -68,18 +69,15 @@ protected:
     virtual void scheduleProductionTimer(clocktime_t delay) override;
     virtual void scheduleProductionTimerAndProducePacket() override;
 
-    //These methods are used by Configurator and Monitor
+    //These methods are used by ExternalGateScheduleConfigurator or ChangeMonitor modules
     virtual bool stopIfNotScheduled();
     virtual void setNewConfiguration(const std::vector<simtime_t>& simtimeVector);
-    virtual void cancelLastChanges();
-
 
 public:
     virtual cValueMap* getConfiguration() const;
     int objective(const char* type) const;
 
     ~DynamicPacketSource() override;
-
 };
 
 } //namespace

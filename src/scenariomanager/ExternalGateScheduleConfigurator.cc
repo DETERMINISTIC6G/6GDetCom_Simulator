@@ -146,43 +146,22 @@ void ExternalGateScheduleConfigurator::printJson(std::ostream &stream, const cVa
         stream << value.str();
 }
 
+
 ExternalGateScheduleConfigurator::Output *
 ExternalGateScheduleConfigurator::computeGateScheduling(const Input &input) const
 {
     writeStreamsToFile(input);
     writeNetworkToFile(input);
     writeDistributionsToFile();
-
-    Output *scheduleOutput = nullptr;
-
     auto filepath = schedulerRoot / configurationFilePar->stdstringValue();
 
-    if (invokeScheduler()) {
-        scheduleOutput = (Output *)readOutputFromFile(input, filepath);
-    }
-    else {
-        commitTime = simTime();
-        scheduleOutput = new Output();
-    }
-
-    if (!scheduleOutput->hasSchedule() && commitTime > SIMTIME_ZERO) {
-        for (auto &application : input.applications) {
-            auto appModule = (DynamicPacketSource *)(application->module->getSubmodule("source"));
-            appModule->cancelLastChanges();
-            cValueMap *element = appModule->getConfiguration();
-            monitor->updateStreamConfigurations(element);
-            delete element;
-        } // endfor
-        bubble(format("No schedule for the event at %.2f has been calculated.",
-                      simTime().dbl() - monitor->par("schedulerCallDelay").doubleValueInUnit("s"))
-                   .c_str());
-    }
+    invokeScheduler();
+    Output *scheduleOutput = (Output *)readOutputFromFile(input, filepath);
     return scheduleOutput;
 }
 
-bool ExternalGateScheduleConfigurator::invokeScheduler() const
+void ExternalGateScheduleConfigurator::invokeScheduler() const
 {
-    bool configured = true;
     char currentDir[PATH_MAX];
     getcwd(currentDir, sizeof(currentDir));
     chdir(schedulerRoot.c_str());
@@ -190,13 +169,13 @@ bool ExternalGateScheduleConfigurator::invokeScheduler() const
         format(command, networkFilePar->stdstringValue().c_str(), streamsFilePar->stdstringValue().c_str(),
                histogramsFilePar->stdstringValue().c_str(), configurationFilePar->stdstringValue().c_str());
     if (std::system(commandFromINI.c_str()) != 0) {
-        if (monitor->par("stopWhenNotSchedulable").boolValue() || commitTime == SIMTIME_ZERO)
-            throw cRuntimeError(
-                "Command execution failed, make sure SCHEDULER_ROOT is set and a scheduler tool is installed");
-        configured = false;
+        auto eventTime = simTime().dbl() - monitor->par("schedulerCallDelay").doubleValueInUnit("s");
+        std::string errorMsg =
+                format("No schedule for the event at %.2fs has been calculated.",
+                eventTime > 0 ? eventTime : 0);
+        throw cRuntimeError("%s", errorMsg.c_str());
     }
     chdir(currentDir);
-    return configured;
 }
 
 // ####################### WRITE ###########################
@@ -447,22 +426,25 @@ bool ExternalGateScheduleConfigurator::addEntryToPDBMap(cValueArray *pdb_map, cM
 
         std::string key;
         switch (linkType) {
-        case DetComLinkType::DSTT_NWTT: {
-            key = nameNetworkNode + getDetComLinkDescription(linkType);
-            break;
-        }
-        case DetComLinkType::NWTT_DSTT: {
-            key = nameNextNetworkNode + getDetComLinkDescription(linkType);
-            break;
-        }
-        case DetComLinkType::DSTT_DSTT: {
-            std::string egress = (nameNextNetworkNode.find('.') != std::string::npos)
-                                     ? nameNextNetworkNode.substr(nameNextNetworkNode.find('.') + 1)
-                                     : nameNextNetworkNode;
-            key = nameNetworkNode + "-" + egress;
-            monitor->computeConvolution(source, target);
-            break;
-        }
+            case DetComLinkType::DSTT_NWTT: {
+                key = nameNetworkNode + getDetComLinkDescription(linkType);
+                break;
+            }
+            case DetComLinkType::NWTT_DSTT: {
+                key = nameNextNetworkNode + getDetComLinkDescription(linkType);
+                break;
+            }
+            case DetComLinkType::DSTT_DSTT: {
+                std::string egress = (nameNextNetworkNode.find('.') != std::string::npos)
+                                         ? nameNextNetworkNode.substr(nameNextNetworkNode.find('.') + 1)
+                                         : nameNextNetworkNode;
+                key = nameNetworkNode + "-" + egress;
+                monitor->computeConvolution(source, target);
+                break;
+            }
+            case DetComLinkType::NO_DETCOM_LINK: {
+                ;
+            }
         }
         auto distributions = monitor->getDistributions();
         if (distributions->find(key) != distributions->end()) {
@@ -638,14 +620,16 @@ ExternalGateScheduleConfigurator::convertJsonToOutput(const Input &input, const 
     // META DATA
     auto jsonMETA = check_and_cast<cValueMap *>(json->get("META").objectValue());
     int scheduled = jsonMETA->containsKey("scheduled") ? jsonMETA->get("scheduled").intValue() : 0;
-    if (monitor->par("stopWhenNotSchedulable").boolValue() && input.flows.size() > scheduled)
-        throw cRuntimeError("Simulation was stopped because not all flows were scheduled.");
-
-    if (scheduled == 0)
-        return output;
+    if ((monitor->par("stopWhenNotSchedulable").boolValue()
+            && input.flows.size() > scheduled) || !scheduled) {
+        delete output;
+        throw cRuntimeError("The simulation was halted due to the incomplete scheduling of flows.");
+    }
+    //if (scheduled == 0)
+        //return output;
 
     commitTime = SimTime(jsonMETA->get("commit_time").intValue(), SIMTIME_NS);
-    scheduleComputingTime = SimTime(jsonMETA->get("computing_time").intValue(), SIMTIME_NS);
+    //scheduleComputingTime = SimTime(jsonMETA->get("computing_time").intValue(), SIMTIME_NS);
     gateCycleDuration = SimTime(jsonMETA->get("hypercycle").intValue(), SIMTIME_NS);
     // GATE CONTROL LISTS
     auto jsonGCL = check_and_cast<cValueMap *>(json->get("GCL").objectValue());
@@ -753,7 +737,7 @@ void ExternalGateScheduleConfigurator::configureApplicationOffsets()
         auto sourceModule = applicationModule->getSubmodule("source");
         const auto &offsets = output->applicationStartTimesArray[it.first];
 
-        std::cout << "starting at " << simTime() << "s" << " : " << ((DynamicPacketSource *)sourceModule)->flowName
+        std::cout << "starting at " << simTime() << "s" << " : " << ((DynamicPacketSource *)sourceModule)->streamName
                   << endl;
         ((DynamicPacketSource *)sourceModule)->setNewConfiguration(offsets);
     }
@@ -762,7 +746,7 @@ void ExternalGateScheduleConfigurator::configureApplicationOffsets()
         auto appModule = check_and_cast<DynamicPacketSource *>(application);
         if (appModule->stopIfNotScheduled()) {
             // ##################################################
-            std::cout << "stopped at " << simTime() << "s" << " : " << appModule->flowName << " in  "
+            std::cout << "stopped at " << simTime() << "s" << " : " << appModule->streamName << " in  "
                       << appModule->getFullPath() << endl;
             // ##################################################
             cValueMap *element = appModule->getConfiguration();
@@ -777,14 +761,15 @@ void ExternalGateScheduleConfigurator::configureApplicationOffsets()
 void ExternalGateScheduleConfigurator::clearConfiguration()
 {
     deleteOldConfigurationPar();
-    if (gateSchedulingInput == nullptr || (Output *)gateSchedulingOutput == nullptr)
-        return;
+    //if (gateSchedulingInput == nullptr || (Output *)gateSchedulingOutput == nullptr)
+        //return;
     if (topology != nullptr)
         topology->clear();
-
-    delete gateSchedulingInput;
+    if (gateSchedulingInput != nullptr)
+        delete gateSchedulingInput;
     gateSchedulingInput = nullptr;
 
+    if ((Output *)gateSchedulingOutput != nullptr) {
     auto scheduleMap = gateSchedulingOutput->gateSchedules;
     for (auto it = scheduleMap.begin(); it != scheduleMap.end(); ++it) {
         std::vector<Output::Schedule *> &schedules = it->second;
@@ -794,6 +779,7 @@ void ExternalGateScheduleConfigurator::clearConfiguration()
         } // endfor
     } // endfor
     delete (Output *)gateSchedulingOutput;
+    }
     gateSchedulingOutput = nullptr;
 }
 
