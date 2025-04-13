@@ -16,17 +16,14 @@
 package d6g.scenariomanager;
 
 import inet.common.scenario.ScenarioManager;
-//import DynamicScenarioObserver;
-
 
 //
-// TODO auto-generated module
+// This module extends ScenarioManager module by adding a signal for an observer when new scenario events occur.
 //
 simple ObservedScenarioManager extends ScenarioManager
 {
     parameters:
-        @class(ObservedScenarioManager);
-        
+        @class(ObservedScenarioManager);        
      	@signal[scenario-event](type=cMessage);
      	
     

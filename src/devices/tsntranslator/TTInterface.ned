@@ -7,9 +7,8 @@
 
 package d6g.devices.tsntranslator;
 
-import inet.linklayer.ethernet.LayeredEthernetInterface;
-import inet.node.tsn.TsnSwitch;
-import inet.linklayer.contract.IEthernetInterface;
+import inet.linklayer.ethernet.modular.LayeredEthernetInterface;
+
 
 // This module extends the LayeredEthernetInterface module.
 // However, as its purpose is to connect multiple TsnTranslator modules within a DetCom node, no additional delay and
@@ -17,8 +16,9 @@ import inet.linklayer.contract.IEthernetInterface;
 // This module only works in combination when connecting it with another TTInterface using the TTChannel module.
 //
 // See the DetCom to see how this module is implemented.
-module TTInterface extends LayeredEthernetInterface {
+module TTInterface extends LayeredEthernetInterface
+{
     parameters:
-    	phyLayer.interFrameGapInserter.duration = default(0s); // duration of the inter frame gap inserter 
-    	bitrate = default(inf Mbps); // bitrate of UE communication link
+        phyLayer.interFrameGapInserter.duration = default(0s); // duration of the inter frame gap inserter 
+        bitrate = default(inf Mbps); // bitrate of UE communication link
 }

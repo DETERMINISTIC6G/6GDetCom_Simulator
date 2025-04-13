@@ -22,13 +22,11 @@
 #include "../apps/dynamicsource/DynamicPacketSource.h"
 #include "inet/linklayer/configurator/gatescheduling/base/GateScheduleConfiguratorBase.h"
 
-// #include "inet/linklayer/configurator/gatescheduling/common/TSNschedGateScheduleConfigurator.h"
 #include "inet/common/clock/ClockUserModuleMixin.h"
 #include "inet/common/scenario/ScenarioTimer_m.h"
 
 using namespace omnetpp;
 using namespace inet;
-// using namespace inet::common;
 
 namespace d6g {
 
@@ -36,6 +34,8 @@ class DynamicScenarioObserver;
 
 class ChangeMonitor : public inet::ClockUserModuleMixin<cSimpleModule>
 {
+
+  friend class DynamicScenarioObserver;
 
   protected:
     class Mapping
@@ -75,23 +75,23 @@ class ChangeMonitor : public inet::ClockUserModuleMixin<cSimpleModule>
     ClockEvent *timer = nullptr;
     cPar *schedulerCallDelayParameter = nullptr;
     int flowIndex = 0;
-    bool fixedPriority;
 
     // zmq::message_t testMsg;
 
     std::vector<Mapping> streamConfigurations;
     std::map<std::string, cValueArray *> *distributions = nullptr;
-    std::vector<std::string> streamWantsToStop;
+    std::vector<std::string> streamStopRequested;
 
     cValueArray *pcpMapping = nullptr;
 
   private:
     void prepareChangesForProcessing(int initialized);
     void configureInitStreamsAndDistributions();
-    cValueArray *convertToCValueArray(const std::vector<Mapping> &configMappings);
-    cValueMap *convertMappingToCValue(const Mapping &mapping);
+    cValueArray *convertToCValueArray(const std::vector<Mapping> &configMappings) const;
+    cValueMap *convertMappingToCValue(const Mapping &mapping) const;
     void addEntryToStreamConfigurations(cValueMap *element, int i);
-    void addEntriesToDistributionsFor(TsnTranslator *translator);
+    //void addEntriesToDistributionsFor(TsnTranslator *translator);
+    void scheduleTimer(std::string source, cObject *details = nullptr);
 
   protected:
     virtual int numInitStages() const override { return 2; }
@@ -100,17 +100,20 @@ class ChangeMonitor : public inet::ClockUserModuleMixin<cSimpleModule>
     void subscribeForDynamicChanges();
     int classify(int pcp);
 
+
   public:
     void updateStreamConfigurations(cValueMap *element);
     void updateDistributions(std::string key, cValueArray *element);
+    void addApplicationsWithStopReqToOutput(std::vector<cModule *> &sources);
+    void computeConvolutionAndUpdateDistributions(cModule *source, cModule *target);
 
-    void addApplicationsWithStopReq(std::vector<cModule *> &sources);
-    std::map<std::string, cValueArray *> *getDistributions();
-    cValueArray *getStreamConfigurations();
-    inline bool isFixedPriority() { return fixedPriority; }
+    std::map<std::string, cValueArray *> *getDistributions() const;
+    cValueArray *getStreamConfigurations() const;
 
-    void scheduleTimer(std::string source, cObject *details = nullptr);
-    void computeConvolution(cModule *source, cModule *target);
+    inline bool isFixedPriority() {
+        int numTrafficClasses = par("globallyNumTrafficClasses").intValue();
+        return numTrafficClasses > 0;
+    };
 
     ~ChangeMonitor() override;
 };

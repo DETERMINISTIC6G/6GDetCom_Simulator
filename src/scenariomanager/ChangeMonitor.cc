@@ -14,9 +14,7 @@
 //
 
 #include "ChangeMonitor.h"
-
 #include <numeric> // lcm
-
 #include "DynamicScenarioObserver.h"
 
 namespace d6g {
@@ -29,7 +27,6 @@ void ChangeMonitor::initialize(int stage)
         schedulerCallDelayParameter = &par("schedulerCallDelay");
         timer = new ClockEvent("changeEventCollectionTimer");
 
-        fixedPriority = par("isPortQueuesCountConsistentGlobally").boolValue();
         pcpMapping = check_and_cast<cValueArray *>(par("mapping").objectValue());
 
         observer = new DynamicScenarioObserver(this);
@@ -42,7 +39,7 @@ void ChangeMonitor::initialize(int stage)
     }
     else if (stage == INITSTAGE_NETWORK_INTERFACE_CONFIGURATION) {
         configureInitStreamsAndDistributions();
-        prepareChangesForProcessing(0); //
+        prepareChangesForProcessing(0);
     }
 }
 
@@ -92,8 +89,7 @@ void ChangeMonitor::subscribeForDynamicChanges()
  */
 void ChangeMonitor::prepareChangesForProcessing(int initialized)
 {
-    int hyperperiod = 1;
-
+    intval_t  hyperperiod = 1;
     std::vector<long> intervals;
     for (const auto &mapping : streamConfigurations) {
         intervals.push_back(std::round(mapping.packetInterval.doubleValueInUnit("ns")));
@@ -101,9 +97,7 @@ void ChangeMonitor::prepareChangesForProcessing(int initialized)
     for (long interval : intervals) {
         hyperperiod = std::lcm(hyperperiod, interval);
     }
-
     gateScheduleConfigurator->par("gateCycleDuration").setValue(cValue(hyperperiod, "ns"));
-
     if (initialized) {
         gateScheduleConfigurator->par("configuration").setObjectValue(nullptr);
     }
@@ -111,30 +105,15 @@ void ChangeMonitor::prepareChangesForProcessing(int initialized)
 
 void ChangeMonitor::configureInitStreamsAndDistributions()
 {
-    streamConfigurations.clear(); // configMappings.shrink_to_fit();
-
-    // read if the configurations were set in the .ini file
-    auto mappingParameter = check_and_cast<cValueArray *>(gateScheduleConfigurator->par("configuration").objectValue());
-    if (mappingParameter->size()) {
-        streamConfigurations.resize(mappingParameter->size());
-        for (int i = 0; i < mappingParameter->size(); i++) {
-            auto element = check_and_cast<cValueMap *>(mappingParameter->get(i).objectValue());
-            addEntryToStreamConfigurations(element, i);
-            delete element;
-        }
-        // request the configurations themselves otherwise
-    }
-    else {
-        cSimulation *sim = getSimulation();
+    streamConfigurations.clear();
+    cSimulation *sim = getSimulation();
         int sourceNumber = 0;
         for (int i = 0; i < sim->getLastComponentId(); ++i) {
             cModule *mod = sim->getModule(i);
             if (mod && !strcmp(mod->getNedTypeName(), "d6g.apps.dynamicsource.DynamicPacketSource")) { // app source
-                                                                                                       // module
                 DynamicPacketSource *sourceModule = dynamic_cast<DynamicPacketSource *>(mod);
                 cValueMap *element = sourceModule->getConfiguration();
-                if ((element->get("stopReq").boolValue())) {
-                    // if (!element->get("enabled").boolValue()) {  // not enabled
+                if ((element->get("stopReq").boolValue())) {// not enabled
                     delete element;
                     continue;
                 }
@@ -148,31 +127,27 @@ void ChangeMonitor::configureInitStreamsAndDistributions()
                      mod->par("isDstt"))
             { // DSTT translator
                 TsnTranslator *sourceModule = dynamic_cast<TsnTranslator *>(mod);
-                addEntriesToDistributionsFor(sourceModule);
+                //addEntriesToDistributionsFor(sourceModule);
+                // both: Uplink and Downlink
+                auto delayParam = {"Uplink", "Downlink"};
+                   for (std::string param : delayParam) {
+                      auto dynExpr = sourceModule->getDistributionExpression(("delay" + param).c_str());
+                      auto element = observer->createHistogram(*dynExpr);
+                      take(element);
+                        //drop(element);
+                      auto key = std::string(sourceModule->getParentModule()->getName()) + "." +
+                                   std::string(sourceModule->getFullName()) + "_" + param;
+                      updateDistributions(key, element);
+                      delete dynExpr;
+                    } // endfor
             } // translator
         } // endfor
-    }
-    // #################################################
     for (const auto &mapping : streamConfigurations) {
         std::cout << mapping << std::endl;
     }
-    // #################################################
 }
 
-void ChangeMonitor::addEntriesToDistributionsFor(TsnTranslator *translator)
-{ // both: Uplink and Downlink
-    auto delayParam = {"Uplink", "Downlink"};
-    for (std::string param : delayParam) {
-        auto dynExpr = translator->getDistributionExpression(("delay" + param).c_str());
-        auto element = observer->createHistogram(*dynExpr);
-        take(element);
-        drop(element);
-        auto key = std::string(translator->getParentModule()->getName()) + "." +
-                   std::string(translator->getFullName()) + "_" + param;
-        updateDistributions(key, element);
-        delete dynExpr;
-    } // endfor
-}
+
 
 void ChangeMonitor::addEntryToStreamConfigurations(cValueMap *element, int i)
 {
@@ -180,22 +155,15 @@ void ChangeMonitor::addEntryToStreamConfigurations(cValueMap *element, int i)
 
     mapping.name = element->containsKey("name") ? element->get("name").stringValue()
                                                 : (std::string("flow") + std::to_string(flowIndex++)).c_str();
-
-    // mapping.stopReq = element->get("stopReq").boolValue();
-
     mapping.pcp = element->get("pcp").intValue();
-
-    mapping.gateIndex = // element->get("gateIndex").intValue();
-        element->containsKey("gateIndex") ? element->get("gateIndex").intValue() : classify(mapping.pcp);
-
+    mapping.gateIndex = element->containsKey("gateIndex") ? element->get("gateIndex").intValue()
+                                                : classify(mapping.pcp);
     mapping.application = element->get("application").stringValue();
     mapping.source = element->get("source").stringValue();
     mapping.destination = element->get("destination").stringValue();
-
     mapping.packetLength = element->get("packetLength");
     mapping.packetInterval = element->get("packetInterval");
     mapping.maxLatency = element->get("maxLatency");
-
     mapping.maxJitter = element->get("maxJitter");
     mapping.reliability = element->get("reliability").doubleValue();
     // mapping.policy = element->get("policy").intValue();
@@ -207,9 +175,9 @@ void ChangeMonitor::addEntryToStreamConfigurations(cValueMap *element, int i)
 
 int ChangeMonitor::classify(int pcp)
 {
-    if (!fixedPriority)
-        return pcp;
     int numTrafficClasses = par("globallyNumTrafficClasses").intValue();
+    if (numTrafficClasses <= 0)
+        return pcp;
     if (numTrafficClasses > pcpMapping->size())
         return 0;
     if (pcp < 0 || pcp > pcpMapping->size() - 1)
@@ -218,7 +186,7 @@ int ChangeMonitor::classify(int pcp)
     return pcpToGateIndex->get(numTrafficClasses - 1);
 }
 
-cValueArray *ChangeMonitor::convertToCValueArray(const std::vector<Mapping> &configMappings)
+cValueArray *ChangeMonitor::convertToCValueArray(const std::vector<Mapping> &configMappings) const
 {
     cValueArray *mappingParameter = new cValueArray();
     for (const auto &mapping : configMappings) {
@@ -228,11 +196,10 @@ cValueArray *ChangeMonitor::convertToCValueArray(const std::vector<Mapping> &con
     return mappingParameter;
 }
 
-cValueMap *ChangeMonitor::convertMappingToCValue(const Mapping &mapping)
+cValueMap *ChangeMonitor::convertMappingToCValue(const Mapping &mapping) const
 {
     cValueMap *map = new cValueMap();
     map->set("name", cValue(mapping.name));
-    // map->set("stopReq", cValue(mapping.stopReq));
     map->set("pcp", cValue(mapping.pcp));
     map->set("gateIndex", cValue(mapping.gateIndex));
     map->set("application", cValue(mapping.application));
@@ -265,29 +232,24 @@ void ChangeMonitor::updateStreamConfigurations(cValueMap *element)
         });
     if (it != streamConfigurations.end()) { // found
         int i = std::distance(streamConfigurations.begin(), it);
-        if (!(element->get("stopReq").boolValue())) { // enabled  //
-                                                      // element->get("enabled").boolValue() ||
-
+        if (!(element->get("stopReq").boolValue())) { //enabled: replace
             addEntryToStreamConfigurations(element, i);
         }
-        else { // not enabled
+        else { // not enabled: remove
             if (element->get("enabled").boolValue())
-                streamWantsToStop.push_back(source + "." + application + ".source");
+                streamStopRequested.push_back(source + "." + application + ".source");
             streamConfigurations.erase(it);
             streamConfigurations.shrink_to_fit();
         }
     }
-    else                                              //{ // not found
-        if (!(element->get("stopReq").boolValue())) { // element->get("enabled").boolValue())
-                                                      // { // enabled
-            // return;
-
+    else // not found
+        if (!(element->get("stopReq").boolValue())) {// enabled: add
             streamConfigurations.resize(streamConfigurations.size() + 1);
             addEntryToStreamConfigurations(element, streamConfigurations.size() - 1);
             auto path = (source + "." + application + ".source");
             DynamicPacketSource *sourceModule = check_and_cast<DynamicPacketSource *>(getModuleByPath(path.c_str()));
             if (sourceModule->streamName == "") {
-                sourceModule->streamName = streamConfigurations[streamConfigurations.size() - 1].name;
+                sourceModule->streamName = streamConfigurations[streamConfigurations.size() - 1].name; // set unique flow name
                 std::cout << streamConfigurations[streamConfigurations.size() - 1] << std::endl;
             }
             if (element->get("enabled").boolValue()) { // #######
@@ -310,21 +272,38 @@ void ChangeMonitor::updateStreamConfigurations(cValueMap *element)
                          std::string(element->get("application").stringValue())
                   << endl;
     }
+    drop(element);
+    delete element;
 }
+
+
+/*void ChangeMonitor::addEntriesToDistributionsFor(TsnTranslator *translator)
+{ // both: Uplink and Downlink
+    auto delayParam = {"Uplink", "Downlink"};
+    for (std::string param : delayParam) {
+        auto dynExpr = translator->getDistributionExpression(("delay" + param).c_str());
+        auto element = observer->createHistogram(*dynExpr);
+        take(element);
+        //drop(element);
+        auto key = std::string(translator->getParentModule()->getName()) + "." +
+                   std::string(translator->getFullName()) + "_" + param;
+        updateDistributions(key, element);
+        delete dynExpr;
+    } // endfor
+}*/
+
 
 void ChangeMonitor::updateDistributions(std::string key, cValueArray *element)
 {
     take(element);
     auto it = distributions->find(key);
     if (it != distributions->end() && it->second != nullptr) { // replace if found
-        take(it->second);
         drop(it->second);
         delete it->second;
         it->second = nullptr;
 
         if (!element->size()) { // delete entry if no new histogram
             distributions->erase(it);
-
             delete element;
             return;
         }
@@ -340,45 +319,34 @@ void ChangeMonitor::updateDistributions(std::string key, cValueArray *element)
     }
 }
 
-std::map<std::string, cValueArray *> *ChangeMonitor::getDistributions() { return distributions; }
+std::map<std::string, cValueArray *> *ChangeMonitor::getDistributions() const { return distributions; }
 
-cValueArray *ChangeMonitor::getStreamConfigurations() { return convertToCValueArray(streamConfigurations); }
+cValueArray *ChangeMonitor::getStreamConfigurations() const { return convertToCValueArray(streamConfigurations); }
 
 /**
- * @brief Add the source modules with a stop-production request
- *          to the sources vector in the output
+ * @brief Add the source modules with a stop-production request in the output
  *
  */
-void ChangeMonitor::addApplicationsWithStopReq(std::vector<cModule *> &sources)
+void ChangeMonitor::addApplicationsWithStopReqToOutput(std::vector<cModule *> &sources)
 {
-    for (auto &appPath : streamWantsToStop) {
+    for (auto &appPath : streamStopRequested) {
         auto application = getModuleByPath(appPath.c_str());
         std::cout << "want to stop at " << simTime() << " : " << appPath << endl;
         sources.push_back(application);
     }
-    streamWantsToStop.clear();
+    streamStopRequested.clear();
 }
 
-/**
- * @brief  Notify Monitor module
- *
- *
- *
- *
- * @param  Module name responsible for notifying the monitor
- * @param  (optional)
- *
- */
+
 void ChangeMonitor::scheduleTimer(std::string source, cObject *details)
 {
     bubble(("Changes in " + source + " announced.").c_str());
-
     if (!timer->isScheduled()) {
         scheduleClockEventAt(getClockTime() + schedulerCallDelayParameter->doubleValue(), timer);
     }
 }
 
-void ChangeMonitor::computeConvolution(cModule *source, cModule *target)
+void ChangeMonitor::computeConvolutionAndUpdateDistributions(cModule *source, cModule *target)
 {
     auto key =
         std::string(source->getParentModule()->getName()) + "." + source->getFullName() + "-" + target->getFullName();
@@ -394,12 +362,13 @@ void ChangeMonitor::computeConvolution(cModule *source, cModule *target)
 
     cMsgPar *histogramDetails = new cMsgPar("convolution");
     auto element = observer->createHistogram(*convolveExpr, histogramDetails);
-    this->take(element);
+    //this->take(element);
     updateDistributions(key, element);
 
     delete convolveExpr;
     delete histogramDetails;
 }
+
 
 ChangeMonitor::~ChangeMonitor()
 {

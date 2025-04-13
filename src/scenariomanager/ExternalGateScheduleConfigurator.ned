@@ -20,30 +20,39 @@ import inet.linklayer.configurator.gatescheduling.contract.IGateScheduleConfigur
 
 
 //
-// This module extends the GateScheduleConfiguratorBase module to dynamically configure the network
-// after multiple changes by ScenarioManagers. It calls an external scheduler tool for the calculation of the GCLs.
-// It prepares input files for the scheduler, which include network configurations, stream configurations,
-// and distributions over wireless links.
+// This module extends the GateScheduleConfiguratorBase module to dynamically configure the network at runtime
+// after multiple changes by ScenarioManagers. It calls an external scheduler tool to calculate the GCLs,
+// and configures all talkers/network elements interfaces, and the production offsets of the talkers.
+//
+// @see DynamicPacketSource
+// @see ObservedScenarioManager
+//
+// It also prepares input files for the external scheduler, including network and stream configurations, 
+// and wireless link distributions obtained from the Monitor module.
+//
+// @see ChangeMonitor
 //
 // <pre>
 // Command usage:
 // e.g.: "./path/scheduler -n %s -s %s -d %s -o %s"
+// Please make sure to set the SCHEDULER_ROOT environment variable!
 // Parameters:
 // -n %s: Specifies the network configuration (input-)file (networkFile). 
-// -s %s: Specifies the scheduler's configuration (input-)file (streamsFile).
+// -s %s: Specifies the streams configuration (input-)file (streamsFile).
 // -d %s: Specifies changes of wireless link distributions (histogramsFile).
-// -o %s: Defines the output file (configurationFile).
+// -o %s: Specifies the scheduler's output file (configurationFile).
 // (%s will be replaced with the filename)
 // </pre>
 simple ExternalGateScheduleConfigurator extends GateScheduleConfiguratorBase like IGateScheduleConfigurator
 {
     parameters:
     //the globally used gate scheduling period in each PeriodicGate modules
-    //hyperperiod is also automatically calculated
+    //hyperperiod is automatically calculated
     gateCycleDuration @mutable = default(0s); 
-        
+            
     string command;
-    
+    // All paths are relative to the SCHEDULER_ROOT variable and the folders must exist.
+    // Observe the correct order.
     volatile string networkFile;
     volatile string streamsFile;
     volatile string histogramsFile;

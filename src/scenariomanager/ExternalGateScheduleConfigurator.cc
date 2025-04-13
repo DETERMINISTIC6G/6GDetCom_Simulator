@@ -126,7 +126,9 @@ void ExternalGateScheduleConfigurator::printJson(std::ostream &stream, const cVa
                     cValue newSecond(originalSecond);
                     if (originalSecond.isNumeric()) {
                         if (originalSecond.getUnit()) {
-                            newSecond = originalSecond.str();
+                            //newSecond =  originalSecond.str();
+                            auto valueRaw = std::to_string(originalSecond.doubleValueRaw());
+                            newSecond.set(valueRaw + std::string(originalSecond.getUnit()));
                         }
                         else {
                             newSecond = std::isinf(originalSecond.doubleValue())
@@ -439,7 +441,7 @@ bool ExternalGateScheduleConfigurator::addEntryToPDBMap(cValueArray *pdb_map, cM
                                          ? nameNextNetworkNode.substr(nameNextNetworkNode.find('.') + 1)
                                          : nameNextNetworkNode;
                 key = nameNetworkNode + "-" + egress;
-                monitor->computeConvolution(source, target);
+                monitor->computeConvolutionAndUpdateDistributions(source, target);
                 break;
             }
             case DetComLinkType::NO_DETCOM_LINK: {
@@ -692,7 +694,7 @@ ExternalGateScheduleConfigurator::convertJsonToOutput(const Input &input, const 
         auto appModule = application->module->getSubmodule("source");
         output->sources.push_back(appModule);
     }
-    monitor->addApplicationsWithStopReq(output->sources);
+    monitor->addApplicationsWithStopReqToOutput(output->sources);
 
     return output;
 }
@@ -715,9 +717,9 @@ void ExternalGateScheduleConfigurator::configureGateScheduling()
             int gateIndex = newSchedule->gateIndex;
             auto gate = dynamic_cast<PeriodicGate *>(queue->getSubmodule("transmissionGate", gateIndex));
             gate->par("initiallyOpen") = newSchedule->open;
-            cPar &offsetPar = gate->par("offset");
 
-            offsetPar.setValue(cValue(newSchedule->offset.inUnit(SIMTIME_NS), "ns"));
+            cPar &offsetPar = gate->par("offset");
+            offsetPar.setValue(cValue(newSchedule->offset.inUnit(SIMTIME_NS), "ns")); // (!)
 
             cPar &durationsPar = gate->par("durations");
             durationsPar.copyIfShared();
@@ -751,9 +753,9 @@ void ExternalGateScheduleConfigurator::configureApplicationOffsets()
             // ##################################################
             cValueMap *element = appModule->getConfiguration();
             monitor->updateStreamConfigurations(element);
-            take(element);
+            /*take(element);
             drop(element);
-            delete element;
+            delete element;*/
         } // endif
     } // endfor
 }
