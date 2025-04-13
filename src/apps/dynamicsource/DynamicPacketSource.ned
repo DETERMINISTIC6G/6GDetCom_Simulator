@@ -49,7 +49,7 @@ simple DynamicPacketSource extends ActivePacketSource
       								"TARDINESS",
       								"JITTER",
       								"TARDINESS_AND_JITTER") = default("TARDINESS_AND_JITTER");     
-      double reliability = default(1.0);
+      double reliability = default(0.95);
       //double weight = default(1.0); //
       //int packetLoss = default(0);
       //int policy = default(0); // packet delay budget

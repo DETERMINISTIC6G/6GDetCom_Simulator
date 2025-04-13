@@ -48,7 +48,8 @@ class ExternalGateScheduleConfigurator : public TSNschedGateScheduleConfigurator
       public:
         ~Schedule()
         {
-            delete durations;
+            if (durations != nullptr)
+                delete durations;
             durations = nullptr;
         }
     };
@@ -62,6 +63,7 @@ class ExternalGateScheduleConfigurator : public TSNschedGateScheduleConfigurator
         double reliability;
         simtime_t phase = 0; // already running
                              // double weight; //= 1.0;
+
     };
 
     class Output : public GateScheduleConfiguratorBase::Output
@@ -69,6 +71,7 @@ class ExternalGateScheduleConfigurator : public TSNschedGateScheduleConfigurator
       public:
         std::map<Input::Application *, std::vector<simtime_t>> applicationStartTimesArray;
         std::vector<cModule *> sources;
+        std::map<cModule*, std::vector<cValueArray *>> psfpSchedules; // maps flow to schedules per psfp
 
       public:
         bool hasSchedule() { return gateSchedules.size(); }
@@ -76,18 +79,7 @@ class ExternalGateScheduleConfigurator : public TSNschedGateScheduleConfigurator
       public:
         ~Output()
         {
-
-            /*for (auto it = gateSchedules.begin(); it != gateSchedules.end(); ++it) {
-
-             std::vector<Output::Schedule*> &schedules = it->second;
-
-             for (Output::Schedule *schedule : schedules) {
-             Schedule *oldSchedule = (Schedule*) schedule;
-             oldSchedule->~Schedule();
-             }//endfor
-
-             }//endfor
-             */
+            ;
         }
     };
 
@@ -140,8 +132,10 @@ class ExternalGateScheduleConfigurator : public TSNschedGateScheduleConfigurator
     inline std::string getDetComLinkDescription(DetComLinkType type) const;
     inline short getDeviceType(cModule *mod) const;
     Input::Port *getConfigurablePort(const Input &input, std::string &linkName) const;
+    int findPsfpGate(cValueMap *classifierMap, cValueArray *decoderMap, int pcp) const;
 
     void invokeScheduler() const;
+    void configurePsfpGateScheduling();
 
   private:
     void inline write(std::string fileName, cValueMap *json) const;
@@ -149,11 +143,13 @@ class ExternalGateScheduleConfigurator : public TSNschedGateScheduleConfigurator
     void writeStreamsToFile(const Input &input) const;
     void writeNetworkToFile(const Input &input) const;
 
+
     bool addEntryToPDBMap(cValueArray *pdb_map, cModule *source, cModule *target) const;
     /*Create separate JSON files for Streams and Network and Distributions */
     cValueMap *convertInputToJsonStreams(const Input &input) const;
     cValueMap *convertInputToJsonNetwork(const Input &input) const;
     cValueMap *convertJsonDevice(Input::NetworkNode *device) const;
+
 
     void deleteOldConfigurationPar();
 
