@@ -46,8 +46,9 @@ jobs:
 
       - name: Build PD
         if: steps.cache-data.outputs.cache-hit != 'true'
+        shell: bash
         run: |
-          . /root/.bashrc
+          source "/root/omnetpp/setenv"
           cd deterministic6g_data/PD-Wireless-5G-1
           pip install requests pyarrow
           export PYTHONPATH=$PYTHONPATH:..
