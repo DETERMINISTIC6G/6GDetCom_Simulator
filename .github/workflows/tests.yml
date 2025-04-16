@@ -21,7 +21,7 @@ jobs:
         split: [ 0, 1, 2, 3 ]
       fail-fast: false
     container:
-      image: ghcr.io/omnetpp/omnetpp:u22.04-6.0.1
+      image: ghcr.io/omnetpp/omnetpp:u24.04-6.1.0
     steps:
       - name: Checkout Deterministic6G repository
         uses: actions/checkout@main
