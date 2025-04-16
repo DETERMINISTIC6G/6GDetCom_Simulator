@@ -26,7 +26,7 @@ jobs:
       - name: Checkout Deterministic6G repository
         uses: actions/checkout@main
         with:
-          path: deterministic6g
+          path: 6GDetCom_Simulator
 
       - name: Checkout deterministic6g_data repository
         uses: actions/checkout@main
@@ -64,12 +64,12 @@ jobs:
           path: inet
           ref: ${{ env.INET_VERSION }}
 
-      - run: mkdir -p /__w/deterministic6g/deterministic6g/ccache
+      - run: mkdir -p /__w/deterministic6g/6GDetCom_Simulator/ccache
 
       - name: "Cache ccache"
         uses: actions/cache@v4
         with:
-          path: /__w/deterministic6g/deterministic6g/ccache
+          path: /__w/deterministic6g/6GDetCom_Simulator/ccache
           key: native-ccache-${{ github.run_id }}
           # See: https://github.com/actions/cache/blob/main/tips-and-workarounds.md#update-a-cache
           restore-keys: native-ccache
@@ -85,11 +85,11 @@ jobs:
           cd inet
           source setenv
           export PATH=/usr/lib/ccache:$PATH
-          export CCACHE_DIR=/__w/deterministic6g/deterministic6g/ccache
+          export CCACHE_DIR=/__w/deterministic6g/6GDetCom_Simulator/ccache
           opp_featuretool disable VoipStream DiffServExamples GeneralShowcases Z3GateSchedulingConfigurator TSNShowcases
           make makefiles
           make MODE=release -j $(nproc)
-          cd ../deterministic6g
+          cd ../6GDetCom_Simulator
           make makefiles
           make
 
@@ -98,7 +98,7 @@ jobs:
         run: |
           source "/root/omnetpp/setenv"
           source inet/setenv
-          cd deterministic6g/tests/fingerprint
+          cd 6GDetCom_Simulator/tests/fingerprint
           SPLIT_N=4
           SPLIT_I=${{ matrix.split }}
           inet_fingerprinttest -n $SPLIT_N -i $SPLIT_I
@@ -108,4 +108,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: error-files
-          path: deterministic6g/tests/fingerprint/
+          path: 6GDetCom_Simulator/tests/fingerprint/
