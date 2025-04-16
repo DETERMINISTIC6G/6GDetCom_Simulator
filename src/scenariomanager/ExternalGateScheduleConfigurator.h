@@ -72,7 +72,6 @@ class ExternalGateScheduleConfigurator : public TSNschedGateScheduleConfigurator
       public:
         std::map<Input::Application *, std::vector<simtime_t>> applicationStartTimesArray;
         std::vector<cModule *> appsInputAndWithStopReq;
-        std::map<cModule*, std::vector<cValueArray *>> psfpSchedules; // maps flow to schedules per psfp
 
       public:
         bool hasSchedule() { return gateSchedules.size(); }
@@ -136,10 +135,8 @@ class ExternalGateScheduleConfigurator : public TSNschedGateScheduleConfigurator
     inline short getDeviceType(cModule *mod) const;
     Input::Port *getConfigurablePort(const Input &input, std::string &linkName) const;
     Input::NetworkNode *findConfigurableNetworkNode(const Input &input, std::string source) const;
-    int getPsfpGate(cValueMap *classifierMap, cValueArray *decoderMap, int pcp) const;
 
     void invokeScheduler() const;
-    virtual void configurePsfpGateScheduling();
 
   private:
     void inline write(std::string fileName, cValueMap *json) const;

@@ -28,7 +28,7 @@ simple DynamicPacketSource extends ActivePacketSource
 {
     parameters:
         
-      string streamName;
+      string streamName = default("");
       
       initialProductionOffset = 0ns;  
       // If you change these values, the effects are immediately visible in the network  

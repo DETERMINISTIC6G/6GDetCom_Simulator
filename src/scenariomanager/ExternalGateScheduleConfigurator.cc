@@ -53,7 +53,6 @@ void ExternalGateScheduleConfigurator::initialize(int stage)
             configuration = monitor->getStreamConfigurations();
             computeConfiguration();
             configureGateScheduling();
-            configurePsfpGateScheduling();
             configureApplicationOffsets();
             clearConfiguration();
         } // endif
@@ -67,7 +66,6 @@ void ExternalGateScheduleConfigurator::handleMessage(cMessage *msg)
     if (msg == configurationComputedEvent) {
         if (((Output *)gateSchedulingOutput)->hasSchedule()) {
             configureGateScheduling();
-            configurePsfpGateScheduling();
             configureApplicationOffsets();
         }
     }
@@ -441,60 +439,6 @@ ExternalGateScheduleConfigurator::convertJsonToOutput(const Input &input, const 
     }
     monitor->addApplicationsWithStopReqToOutput(output->appsInputAndWithStopReq);
 
-    //PSFP
-    auto jsonPSFP = check_and_cast<cValueMap *>(json->get("PSFP").objectValue());
-
-    for (auto &psfp : jsonPSFP->getFields()) {
-        auto mod = findModuleByPath(psfp.first.c_str());
-        auto classifier = mod->findModuleByPath(
-                ".bridging.streamFilter.ingress.classifier");
-        auto decoder = mod->findModuleByPath(".bridging.streamCoder.decoder");
-        if (decoder != nullptr && classifier != nullptr) {
-
-            cValueMap *classifierMap = check_and_cast<cValueMap*>(
-                    classifier->par("mapping").objectValue());
-            cValueArray *decoderMap = check_and_cast<cValueArray*>(
-                    decoder->par("mapping").objectValue());
-
-            for (int k = 0; k < classifierMap->size(); k++)
-                output->psfpSchedules[mod].push_back(new cValueArray());
-
-            auto dur = check_and_cast<cValueArray*>(psfp.second.objectValue());
-            int temp = 0;
-            cValueArray *durPSFP = new cValueArray();
-            for (int i = 0; i < dur->size(); i++) {
-                auto element = check_and_cast<cValueMap*>(
-                        (*dur)[i].objectValue());
-                int close = element->get("close").intValue();
-                int open = element->get("open").intValue();
-                auto frames = check_and_cast<cValueArray*>(
-                        element->get("frames").objectValue());
-                for (int j = 0; j < frames->size(); j++) {
-                    std::string flowID, packetNr;
-                    parseString((*frames)[j], flowID, packetNr, '#');
-                    auto flowIt = std::find_if(input.flows.begin(),
-                            input.flows.end(), [&](Input::Flow *flow) {
-                                return flow->name == flowID;
-                            });
-                    if (flowIt == input.flows.end())
-                        throw cRuntimeError("Cannot find flow: %s", flowID.c_str());
-                    auto flow = *flowIt;
-                    auto application = (Application*) flow->startApplication;
-                    int gate = getPsfpGate(classifierMap, decoderMap,
-                            application->pcp);
-                    if (gate >= 0) {
-                        output->psfpSchedules[mod][gate]->add(open);
-                        output->psfpSchedules[mod][gate]->add(close);
-                        std::cout << "  PSFP : " << gate << " " << flow->name
-                                << " " << application->pcp << endl;
-                    }
-                    //break;
-                }//3.endfor
-            }//2.endfor
-            delete durPSFP;
-        }
-    }//1.endfor
-
     return output;
 }
 
@@ -602,24 +546,6 @@ ExternalGateScheduleConfigurator::findConfigurableNetworkNode(const Input &input
        throw cRuntimeError("Cannot find TSN device: %s", source.c_str());
     auto sourceNode = *it;
     return sourceNode;
-}
-
-
-int ExternalGateScheduleConfigurator::getPsfpGate(cValueMap *classifierMap, cValueArray *decoderMap, int pcp) const
-{
-    const char* streamName = nullptr;
-    for (int i = 0; i < decoderMap->size(); ++i) {
-        auto *entry = check_and_cast<cValueMap*>((*decoderMap)[i].objectValue());
-        if (entry->get("pcp").intValue() == pcp) {
-            streamName = entry->get("stream").stringValue();
-            break;
-        }
-    }
-    int result = -1;
-    if (streamName && classifierMap->containsKey(streamName)) {
-        result = classifierMap->get(streamName).intValue();
-    }
-    return result;
 }
 
 
@@ -796,63 +722,6 @@ void ExternalGateScheduleConfigurator::configureGateScheduling()
 
 }
 
-void ExternalGateScheduleConfigurator::configurePsfpGateScheduling()
-{
-    auto psfpMap = ((Output*) gateSchedulingOutput)->psfpSchedules;
-    for (auto it = psfpMap.begin(); it != psfpMap.end(); ++it) {
-        auto device = it->first;
-        auto &schedules = it->second;
-        auto ingress = device->findModuleByPath(
-                ".bridging.streamFilter.ingress");
-        for (int i = 0; i < schedules.size(); i++) {
-            auto gate = dynamic_cast<PeriodicGate*>(ingress->getSubmodule(
-                    "gate", i));
-
-            cValueArray *openCloseTimes = schedules[i];
-            gate->par("initiallyOpen") = openCloseTimes->size() != 0;
-            if (!openCloseTimes->size())
-                continue;
-            auto *diffs = new cValueArray();
-            long prev = 0;
-            std::vector<long> times;
-            for (int k = 0; k < openCloseTimes->size(); ++k)
-                times.push_back((*openCloseTimes)[k].intValue());
-            std::sort(times.begin(), times.end(),
-                    [](const long a, const long b) {
-                        return a < b;
-                    });
-
-            std::vector<long> shiftTimes;
-
-            for (int j = 0; j < times.size(); ++j) {
-                long t = times[j];
-                long dur = t - prev;
-                shiftTimes.push_back(dur);
-                prev = t;
-            }
-            long offset = shiftTimes[0];
-            long slackTime = gateCycleDuration.inUnit(SIMTIME_NS)
-                    - std::accumulate(shiftTimes.begin(), shiftTimes.end(),
-                            0.0);
-
-            shiftTimes.erase(shiftTimes.begin());
-
-            shiftTimes.push_back(slackTime + offset);
-            for (int j = 0; j < shiftTimes.size(); j++)
-                diffs->add(cValue(shiftTimes[j], "ns"));
-
-            cPar &offsetPar = gate->par("offset");
-            offsetPar.setValue(cValue(offset, "ns"));
-
-            cPar &durationsPar = gate->par("durations");
-            durationsPar.copyIfShared();
-            durationsPar.setObjectValue(diffs->dup());
-            std::cout << device->getFullName() << "  PSFP : " << i << diffs->str() << endl;
-            delete diffs;
-        } // 2.endfor
-    } // 1.endfor
-}
-
 
 void ExternalGateScheduleConfigurator::configureApplicationOffsets()
 {
@@ -877,7 +746,6 @@ void ExternalGateScheduleConfigurator::configureApplicationOffsets()
 }
 
 
-
 //############################## CLEAR ###############################################
 
 void ExternalGateScheduleConfigurator::clearConfiguration()
@@ -897,14 +765,6 @@ void ExternalGateScheduleConfigurator::clearConfiguration()
                 Schedule *oldSchedule = (Schedule*) schedule;
                 oldSchedule->~Schedule();
             } // endfor
-        } // endfor
-        auto psfpMap = ((Output*) gateSchedulingOutput)->psfpSchedules;
-        for (auto it = psfpMap.begin(); it != psfpMap.end(); ++it) {
-            auto &psfpSchedules = it->second;
-            for (cValueArray *psfpSchedule : psfpSchedules) {
-                if (psfpSchedule != nullptr)
-                    delete psfpSchedule;
-            } // endfo
         } // endfor
         delete (Output*)gateSchedulingOutput;
     }
