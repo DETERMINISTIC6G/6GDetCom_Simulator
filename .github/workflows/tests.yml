@@ -105,8 +105,7 @@ jobs:
 
       - name: Upload error artifacts
         if: failure() # This ensures the step runs only if the workflow fails
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: error-files
-          path: |
-            deterministic6g/tests/fingerprint/
+          path: deterministic6g/tests/fingerprint/
