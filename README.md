@@ -44,10 +44,17 @@ Your workspace should have the following structure:
 ### INET installation
 If you already have INET installed, you can skip this step.
 
-1. Clone the INET repository with the correct version (make sure to follow the correct [Workspace Setup](#workspace-setup)):
+1. Clone the INET repository with the correct version (make sure to follow the correct [Workspace Setup](#workspace-setup)).
+NOTE: The current INET release (4.5.4) is not compatible with this version.
+We tested this release with the following commit of the INET master branch:
+https://github.com/inet-framework/inet/commit/6211cd63ebe479b9b01f5ccecc632d5c2e1952af
+Newer master commits may work.
 ```shell
-git clone --branch v4.5.2 https://github.com/inet-framework/inet.git
+git clone https://github.com/inet-framework/inet.git
+git checkout 6211cd63ebe479b9b01f5ccecc632d5c2e1952af
 ```
+We hope necessary fixes of the master branch will soon be included in an INET release.
+This documentation will be updated then.
 
 2. Build INET:
 ```shell
