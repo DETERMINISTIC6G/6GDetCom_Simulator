@@ -14,6 +14,7 @@
 //
 
 #include "ObservedScenarioManager.h"
+#include "inet/common/XMLUtils.h"
 
 namespace d6g {
 
@@ -23,7 +24,30 @@ void ObservedScenarioManager::initialize() { ScenarioManager::initialize(); }
 
 void ObservedScenarioManager::handleMessage(cMessage *msg)
 {
-    auto node = check_and_cast<ScenarioTimer *>(msg)->getXmlNode();
+    auto node = check_and_cast<ScenarioTimer*>(msg)->getXmlNode();
+    std::string tag = node->getTagName();
+    auto checkParamNotPermitted =
+            [&](const char *param) {
+                if (!strcmp(param, "initialProductionOffset")) {
+                    delete msg;
+                    throw cRuntimeError(
+                            "Changing \"%s\" parameter in the script is not permitted, except during initialization",
+                            param);
+                }
+            };
+    if (tag == "at") {
+        for (const cXMLElement *child = node->getFirstChild(); child; child =
+                child->getNextSibling()) {
+            const char *notPermittedParam =
+                    xmlutils::getMandatoryFilledAttribute(*child, "par");
+            checkParamNotPermitted(notPermittedParam);
+        }
+    }
+    if (tag == "set-param") {
+        const char *notPermittedParam = xmlutils::getMandatoryFilledAttribute(
+                *node, "par");
+        checkParamNotPermitted(notPermittedParam);
+    }
     processCommand(node);
     numDone++;
     if (msg->isSelfMessage()) {
@@ -32,8 +56,5 @@ void ObservedScenarioManager::handleMessage(cMessage *msg)
     delete msg;
 }
 
-/*ObservedScenarioManager::~ObservedScenarioManager() {
-       ;
-}*/
 
 } // namespace d6g

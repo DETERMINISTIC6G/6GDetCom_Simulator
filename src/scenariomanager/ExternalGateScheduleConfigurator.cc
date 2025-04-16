@@ -16,6 +16,7 @@
 #include "ExternalGateScheduleConfigurator.h"
 
 #include <fstream>
+#include <numeric>
 
 namespace d6g {
 
@@ -53,6 +54,7 @@ void ExternalGateScheduleConfigurator::initialize(int stage)
             configuration = monitor->getStreamConfigurations();
             computeConfiguration();
             configureGateScheduling();
+            configurePsfpGateScheduling();
             configureApplicationOffsets();
             clearConfiguration();
         } // endif
@@ -64,6 +66,7 @@ void ExternalGateScheduleConfigurator::handleMessage(cMessage *msg)
     if (msg == configurationComputedEvent) {
         if (((Output *)gateSchedulingOutput)->hasSchedule()) {
             configureGateScheduling();
+            configurePsfpGateScheduling();
             configureApplicationOffsets();
         }
     }
@@ -126,7 +129,6 @@ void ExternalGateScheduleConfigurator::printJson(std::ostream &stream, const cVa
                     cValue newSecond(originalSecond);
                     if (originalSecond.isNumeric()) {
                         if (originalSecond.getUnit()) {
-                            //newSecond =  originalSecond.str();
                             auto valueRaw = std::to_string(originalSecond.doubleValueRaw());
                             newSecond.set(valueRaw + std::string(originalSecond.getUnit()));
                         }
@@ -241,7 +243,7 @@ void ExternalGateScheduleConfigurator::write(std::string fileName, cValueMap *js
     this->printJson(stream, cValue(json));
 }
 
-// ############################# CONVERT ###########################
+// ############################# CONVERT INPUT JSON ###########################
 
 cValueMap *ExternalGateScheduleConfigurator::convertInputToJsonStreams(const Input &input) const
 {
@@ -266,21 +268,20 @@ cValueMap *ExternalGateScheduleConfigurator::convertInputToJsonStreams(const Inp
         jsonFlow->set("hard_constraint_time_latency", dynApplication->maxLatency.inUnit(SIMTIME_NS));
         jsonFlow->set("hard_constraint_time_jitter", dynApplication->maxJitter.inUnit(SIMTIME_NS));
         jsonFlow->set("hard_constraint_time_unit", "ns");
-        // jsonFlow->set("weight", dynApplication->weight);
         jsonFlow->set("phase", dynApplication->phase.inUnit(SIMTIME_NS));
         jsonFlow->set("phase_unit", "ns");
-        jsonFlow->set("objective_type", dynApplication->objectiveType);
-        // jsonFlow->set("packet_loss", dynApplication->packetLoss);
+        //jsonFlow->set("objective_type", dynApplication->objectiveType);
+        jsonFlow->set("custom_parameters", dynApplication->customParams);
 
-        cValueArray *endDevices = new cValueArray();
-        jsonFlow->set("target_devices", endDevices);
-        endDevices->add(cValue(flow->endDevice->module->getFullName()));
+        //cValueArray *endDevices = new cValueArray();
+        jsonFlow->set("target_device", cValue(flow->endDevice->module->getFullName()));//endDevices);
+        //endDevices->add(cValue(flow->endDevice->module->getFullName()));
 
-        cValueArray *pdb_map = new cValueArray();
+        cValueArray *pdb_map = new cValueArray(); // packet delay budget
         jsonFlow->set("pdb_map", pdb_map);
         cValueArray *hops = new cValueArray();
         jsonFlow->set("route", hops);
-        int wirelessCnt = 0;
+        bool isWirelessPath = false;
         for (int j = 0; j < flow->pathFragments.size(); j++) {
             auto pathFragment = flow->pathFragments[j];
             for (int k = 0; k < pathFragment->networkNodes.size() - 1; k++) {
@@ -293,21 +294,17 @@ cValueMap *ExternalGateScheduleConfigurator::convertInputToJsonStreams(const Inp
                 auto nameNextNetworkNode = getExpandedNodeName(nextNetworkNode->module);
                 hop->set("nextNodeName", nameNextNetworkNode);
                 // pdb map: find a distribution
-                wirelessCnt += (int)addEntryToPDBMap(pdb_map, networkNode->module, nextNetworkNode->module);
+                isWirelessPath |= addEntryToPDBMap(pdb_map, networkNode->module, nextNetworkNode->module);
             } // 3. for
         } // 2. for
-        jsonFlow->set("isWirelessPath", cValue((bool)wirelessCnt));
-        if (wirelessCnt)
-            jsonFlow->set("wirelessPathLinkCnt", wirelessCnt);
+        jsonFlow->set("isWirelessPath", isWirelessPath);
 
         int pdbSize = pdb_map->size();
         // #DetCom-link-th root of the reliability parameter
         double reliability = std::pow(dynApplication->reliability, 1.0 / pdbSize);
-        // int policy = dynApplication->policy;
         for (int i = 0; i < pdbSize; i++) {
             auto vMap = check_and_cast<cValueMap *>(pdb_map->get(i).objectValue());
             vMap->set("reliability", reliability);
-            // vMap->set("policy", dynApplication->policy);
         } // endfor
     } // 1.for
     return json;
@@ -316,21 +313,18 @@ cValueMap *ExternalGateScheduleConfigurator::convertInputToJsonStreams(const Inp
 cValueMap *ExternalGateScheduleConfigurator::convertInputToJsonNetwork(const Input &input) const
 {
     cValueMap *json = new cValueMap();
-
     cValueArray *jsonDevices = new cValueArray();
-    json->set("end_devices", jsonDevices); // END DEVICES
+    json->set("end_devices", jsonDevices);
     for (auto device_ : input.devices) {
         cValueMap *jsonDevice = convertJsonDevice(device_);
         jsonDevices->add(jsonDevice);
     }
-
     cValueArray *jsonSwitches = new cValueArray();
     json->set("switches", jsonSwitches);
     for (auto switch_ : input.switches) {
         cValueMap *jsonSwitch = convertJsonDevice(switch_);
         jsonSwitches->add(jsonSwitch);
     }
-
     return json;
 }
 
@@ -378,7 +372,141 @@ cValueMap *ExternalGateScheduleConfigurator::convertJsonDevice(Input::NetworkNod
     return jsonDevice;
 }
 
-// #############################################################################################
+
+// ############################# CONVERT OUTPUT JSON ###########################
+
+ExternalGateScheduleConfigurator::Output *
+ExternalGateScheduleConfigurator::convertJsonToOutput(const Input &input, const cValueMap *json) const
+{
+    // META DATA
+    auto jsonMETA = check_and_cast<cValueMap *>(json->get("META").objectValue());
+    int scheduled = jsonMETA->containsKey("scheduled") ? jsonMETA->get("scheduled").intValue() : 0;
+    if ((monitor->par("stopWhenNotSchedulable").boolValue()
+          && input.flows.size() != scheduled) || !scheduled) {
+        throw cRuntimeError("The simulation was halted due to the incomplete scheduling of flows.");
+    }
+    commitTime = SimTime(jsonMETA->get("commit_time").intValue(), SIMTIME_NS);
+    gateCycleDuration = SimTime(jsonMETA->get("hypercycle").intValue(), SIMTIME_NS);
+
+    auto output = new Output();
+
+    // GATE CONTROL LISTS
+    auto jsonGCL = check_and_cast<cValueMap *>(json->get("GCL").objectValue());
+    for (auto &gcl : jsonGCL->getFields()) { // 1.for
+        auto linkName = gcl.first;
+        auto port = getConfigurablePort(input, linkName);
+        auto &schedules = output->gateSchedules[port];
+        auto queues = check_and_cast<cValueMap *>(gcl.second.objectValue());
+        for (auto &queue : queues->getFields()) { // 2.for
+            auto queueIndex = std::stoi(queue.first.substr(1));
+            cValueMap *queueMap = check_and_cast<cValueMap *>(queue.second.objectValue());
+            auto schedule = new Schedule();
+            schedule->port = port;
+            schedule->gateIndex = queueIndex;
+            schedule->cycleDuration = gateCycleDuration;
+            schedule->open = queueMap->get("initial").intValue();
+
+            auto dur = check_and_cast<cValueArray *>(queueMap->get("durations").objectValue());
+            schedule->durations = new cValueArray();
+            for (int i = 0; i < dur->size(); i++) {
+                const cValue &value = (*dur)[i];
+                cValue newValue = cValue(value.intValue(), "ns");
+                schedule->durations->add(newValue);
+            }
+            dur = nullptr;
+            schedule->offset = SimTime(queueMap->get("offset").intValue(), SIMTIME_NS);
+            schedules.push_back(schedule);
+        } // 2.endfor
+    } // 1.endfor
+
+    // APPLICATIONS
+    auto talkers = check_and_cast<cValueMap *>(json->get("TALKERS").objectValue());
+    for (auto &field : talkers->getFields()) {
+        const std::string &key = field.first;
+        //std::stringstream ss(key);
+        std::string flowID, packetNr;
+        parseString(key, flowID, packetNr, '#');
+        //std::getline(ss, flowID, '#');
+        //std::getline(ss, packetNr);
+
+        auto flowIt = std::find_if(input.flows.begin(), input.flows.end(),
+                                   [&](Input::Flow *flow) { return flow->name == flowID; });
+        if (flowIt == input.flows.end())
+            throw cRuntimeError("Cannot find flow: %s", flowID.c_str());
+        auto flow = *flowIt;
+        auto application = flow->startApplication;
+        auto startTime = SimTime(field.second.intValue(), SIMTIME_NS);
+        if (output->applicationStartTimes.find(application) == output->applicationStartTimes.end()) {
+            output->applicationStartTimes[application] = startTime;
+        } // endif
+        output->applicationStartTimesArray[application].push_back(startTime);
+    } // endfor applications
+    for (auto &offsetsPair : output->applicationStartTimesArray) {
+        auto &offsets = offsetsPair.second;
+        std::sort(offsets.begin(), offsets.end(), [](simtime_t a, simtime_t b) { return a < b; });
+    }
+    for (auto &application : gateSchedulingInput->applications) {
+        auto appModule = application->module->getSubmodule("source");
+        output->appsInputAndWithStopReq.push_back(appModule);
+    }
+    monitor->addApplicationsWithStopReqToOutput(output->appsInputAndWithStopReq);
+
+    //PSFP
+    auto jsonPSFP = check_and_cast<cValueMap *>(json->get("PSFP").objectValue());
+
+    for (auto &psfp : jsonPSFP->getFields()) {
+        auto mod = findModuleByPath(psfp.first.c_str());
+        auto classifier = mod->findModuleByPath(".bridging.streamFilter.ingress.classifier");
+        auto decoder = mod->findModuleByPath(".bridging.streamCoder.decoder");
+        if (decoder != nullptr && classifier != nullptr) {
+            //throw cRuntimeError("Ingress traffic filtering configuration is missing.");
+
+        cValueMap *classifierMap = check_and_cast<cValueMap *>(classifier->par("mapping").objectValue());
+        cValueArray *decoderMap = check_and_cast<cValueArray *>(decoder->par("mapping").objectValue());
+
+        for (int k=0; k < classifierMap->size(); k++)
+            output->psfpSchedules[mod].push_back(new cValueArray());
+
+        auto dur = check_and_cast<cValueArray *>(psfp.second.objectValue());
+        int temp = 0;
+        cValueArray *durPSFP = new cValueArray();
+        for (int i = 0; i < dur->size(); i++) {
+            auto element = check_and_cast<cValueMap *>((*dur)[i].objectValue());
+            int close = element->get("close").intValue();
+            int open = element->get("open").intValue();
+            auto frames = check_and_cast<cValueArray *>(element->get("frames").objectValue());
+            for (int j=0; j<frames->size(); j++) {
+                //std::stringstream ss((*frames)[j]);
+                std::string flowID, packetNr;
+                parseString((*frames)[j], flowID, packetNr, '#');
+                //std::getline(ss, flowID, '#');
+                //std::getline(ss, packetNr);
+
+                auto flowIt = std::find_if(input.flows.begin(), input.flows.end(),
+                                                   [&](Input::Flow *flow) { return flow->name == flowID; });
+                if (flowIt == input.flows.end())
+                      throw cRuntimeError("Cannot find flow: %s", flowID.c_str());
+                auto flow = *flowIt;
+                auto application = (Application *) flow->startApplication;
+                int gate = getPsfpGate(classifierMap, decoderMap, application->pcp);
+                if (gate >= 0) {
+                     output->psfpSchedules[mod][gate]->add(open);
+                     output->psfpSchedules[mod][gate]->add(close);
+                     std::cout  <<"  PSFP : " << gate << " " << flow->name << " " << application->pcp  << endl;
+                }
+                //break;
+            }//3.endfor
+        }//2.endfor
+
+        delete durPSFP;
+       }
+    }//1.endfor
+
+    return output;
+}
+
+
+//##################################### GET ########################################################
 
 std::string ExternalGateScheduleConfigurator::getExpandedNodeName(cModule *module) const
 {
@@ -394,9 +522,10 @@ std::string ExternalGateScheduleConfigurator::getExpandedNodeName(cModule *modul
 bool ExternalGateScheduleConfigurator::isDetComLink(cModule *source, cModule *target,
                                                     DetComLinkType &detComLinkType) const
 {
-    const char *translator = "d6g.devices.tsntranslator.TsnTranslator";
+    //const char *translator = "d6g.devices.tsntranslator.TsnTranslator";
     detComLinkType = DetComLinkType::NO_DETCOM_LINK;
-    if (strcmp(source->getNedTypeName(), translator) || (strcmp(target->getNedTypeName(), translator)))
+    //if (strcmp(source->getNedTypeName(), translator) || (strcmp(target->getNedTypeName(), translator)))
+    if (strcmp(source->getModuleType()->getName(), "TsnTranslator") || strcmp(target->getModuleType()->getName(), "TsnTranslator"))
         return false;
     if (!source->par("isDstt") && !target->par("isDstt"))
         return false;
@@ -411,6 +540,113 @@ bool ExternalGateScheduleConfigurator::isDetComLink(cModule *source, cModule *ta
     detComLinkType = DetComLinkType::NWTT_DSTT;
     return true;
 }
+
+
+short ExternalGateScheduleConfigurator::getDeviceType(cModule *module) const
+{
+    auto type = DeviceType::UNSPECIFIED;
+
+    if (!strcmp(module->getModuleType()->getName(), "TsnDevice")) {
+        type = DeviceType::END_DEVICE;
+    }
+    if (!strcmp(module->getModuleType()->getName(), "TsnSwitch")) {
+        type = DeviceType::TSN_BRIDGE;
+    }
+    if (!strcmp(module->getModuleType()->getName(), "TsnTranslator")) {
+        if (module->par("isDstt")) {
+            type = DeviceType::DS_TT;
+        }
+        else {
+            type = DeviceType::NW_TT;
+        }
+    }
+    return (short)type;
+}
+
+
+std::string ExternalGateScheduleConfigurator::getDetComLinkDescription(DetComLinkType type) const
+{ // for DetCom links
+    switch (type) {
+    case DetComLinkType::DSTT_NWTT:
+        return "_Uplink";
+    case DetComLinkType::NWTT_DSTT:
+        return "_Downlink";
+    case DetComLinkType::DSTT_DSTT:
+        return "_Convolution";
+    case DetComLinkType::NO_DETCOM_LINK:
+        return "_NoDetComLink";
+    default:
+        return "_Unknown";
+    }
+}
+
+
+ExternalGateScheduleConfigurator::Input::Port *
+ExternalGateScheduleConfigurator::getConfigurablePort( // LINK : "[source,target]" as string
+    const Input &input, std::string &linkName) const
+{
+    linkName = linkName.substr(1, linkName.size() - 2);
+    //std::stringstream ss(linkName);
+    std::string source, target;
+    //std::getline(ss, source, ',');
+    //std::getline(ss, target);
+    parseString(linkName, source, target, ',');
+
+    /*auto it = std::find_if(input.networkNodes.begin(), input.networkNodes.end(),
+                           [&](Input::NetworkNode *switch_) { return getExpandedNodeName(switch_->module) == source; });
+    if (it == input.networkNodes.end())
+        throw cRuntimeError("Cannot find TSN device: %s", source.c_str());
+    auto sourceNode = *it;*/
+    auto sourceNode = findConfigurableNetworkNode(input,  source);
+
+    /*it = std::find_if(input.networkNodes.begin(), input.networkNodes.end(),
+                      [&](Input::NetworkNode *switch_) { return getExpandedNodeName(switch_->module) == target; });
+    if (it == input.networkNodes.end())
+        throw cRuntimeError("Cannot find connected TSN device: %s", target.c_str());
+    auto targetNode = *it;*/
+    auto targetNode = findConfigurableNetworkNode(input, target);
+
+
+    auto jt = std::find_if(sourceNode->ports.begin(), sourceNode->ports.end(), [&](Input::Port *port) {
+        return port->startNode == sourceNode && port->endNode == targetNode;
+    });
+    if (jt == sourceNode->ports.end())
+        throw cRuntimeError("Cannot find port: %s", linkName.c_str());
+    auto port = *jt;
+    return port;
+}
+
+ExternalGateScheduleConfigurator::Input::NetworkNode *
+ExternalGateScheduleConfigurator::findConfigurableNetworkNode(const Input &input, std::string source) const
+{
+    auto it = std::find_if(input.networkNodes.begin(), input.networkNodes.end(),
+                              [&](Input::NetworkNode *switch_) { return getExpandedNodeName(switch_->module) == source; });
+    if (it == input.networkNodes.end())
+       throw cRuntimeError("Cannot find TSN device: %s", source.c_str());
+    auto sourceNode = *it;
+    return sourceNode;
+}
+
+
+int ExternalGateScheduleConfigurator::getPsfpGate(cValueMap *classifierMap, cValueArray *decoderMap, int pcp) const
+{
+    const char* streamName = nullptr;
+    for (int i = 0; i < decoderMap->size(); ++i) {
+        auto *entry = check_and_cast<cValueMap*>((*decoderMap)[i].objectValue());
+        if (entry->get("pcp").intValue() == pcp) {
+            streamName = entry->get("stream").stringValue();
+            break;
+        }
+    }
+    int result = -1;
+    if (streamName && classifierMap->containsKey(streamName)) {
+        result = classifierMap->get(streamName).intValue();
+    }
+    return result;
+}
+
+
+//############################## ADD ########################################
 
 bool ExternalGateScheduleConfigurator::addEntryToPDBMap(cValueArray *pdb_map, cModule *source, cModule *target) const
 {
@@ -462,42 +698,7 @@ bool ExternalGateScheduleConfigurator::addEntryToPDBMap(cValueArray *pdb_map, cM
     return false;
 }
 
-short ExternalGateScheduleConfigurator::getDeviceType(cModule *module) const
-{
-    auto type = DeviceType::UNSPECIFIED;
 
-    if (!strcmp(module->getModuleType()->getName(), "TsnDevice")) {
-        type = DeviceType::END_DEVICE;
-    }
-    if (!strcmp(module->getModuleType()->getName(), "TsnSwitch")) {
-        type = DeviceType::TSN_BRIDGE;
-    }
-    if (!strcmp(module->getModuleType()->getName(), "TsnTranslator")) {
-        if (module->par("isDstt")) {
-            type = DeviceType::DS_TT;
-        }
-        else {
-            type = DeviceType::NW_TT;
-        }
-    }
-    return (short)type;
-}
-
-std::string ExternalGateScheduleConfigurator::getDetComLinkDescription(DetComLinkType type) const
-{ // for DetCom links
-    switch (type) {
-    case DetComLinkType::DSTT_NWTT:
-        return "_Uplink";
-    case DetComLinkType::NWTT_DSTT:
-        return "_Downlink";
-    case DetComLinkType::DSTT_DSTT:
-        return "_Convolution";
-    case DetComLinkType::NO_DETCOM_LINK:
-        return "_NoDetComLink";
-    default:
-        return "_Unknown";
-    }
-}
 
 void ExternalGateScheduleConfigurator::addFlows(Input &input) const
 {
@@ -512,6 +713,7 @@ void ExternalGateScheduleConfigurator::addFlows(Input &input) const
         cModule *destination = getModuleByPath(entry->get("destination").stringValue());
         auto destinationNode = (Node *)topology->getNodeFor(destination);
         auto endDevice = input.getDevice(destination);
+
         // ADD Application
         auto startApplication = new Application();
         auto startApplicationModule = startDevice->module->getModuleByPath(
@@ -527,15 +729,13 @@ void ExternalGateScheduleConfigurator::addFlows(Input &input) const
         startApplication->packetInterval = entry->get("packetInterval").doubleValueInUnit("s");
         startApplication->maxLatency = entry->get("maxLatency").doubleValueInUnit("s");
         startApplication->maxJitter = entry->get("maxJitter").doubleValueInUnit("s");
-        // startApplication->packetLoss = entry->get("packetLoss").intValue();
-        startApplication->objectiveType = entry->get("objectiveType").intValue();
-        // startApplication->weight = entry->get("weight").doubleValue();
-        simtime_t phase = entry->get("phase").doubleValueInUnit("us");
-        startApplication->phase = (phase <= 0) ? 0 : phase;
-        // startApplication->policy = entry->get("policy").intValue();
+        //startApplication->objectiveType = entry->get("objectiveType").intValue();
+        simtime_t phase = entry->get("phase").doubleValueInUnit("s");
+        startApplication->phase = (phase <= 0.0) ? 0.0 : phase;
         startApplication->reliability = entry->get("reliability").doubleValue();
-
+        startApplication->customParams = check_and_cast<cValueMap *>(entry->get("customParams").objectValue());
         input.applications.push_back(startApplication);
+
         // ADD Flow
         auto flow = new Input::Flow();
         if (!entry->containsKey("name"))
@@ -546,15 +746,15 @@ void ExternalGateScheduleConfigurator::addFlows(Input &input) const
         flow->endDevice = endDevice;
         // ADD Route
         cValueArray *pathFragments;
-        if (entry->containsKey("pathFragments"))
-            pathFragments = check_and_cast<cValueArray *>(entry->get("pathFragments").objectValue());
-        else {
+       // if (entry->containsKey("pathFragments"))
+       //     pathFragments = check_and_cast<cValueArray *>(entry->get("pathFragments").objectValue());
+       // else {
             pathFragments = new cValueArray();
             for (auto node : computeShortestNodePath(sourceNode, destinationNode)) {
                 auto nameNode = getExpandedNodeName(node->module);
                 pathFragments->add(nameNode);
             }
-        }
+      //  }
         auto path = new Input::PathFragment();
         for (int m = 0; m < pathFragments->size(); m++) {
             for (auto networkNode : input.networkNodes) {
@@ -578,184 +778,22 @@ void ExternalGateScheduleConfigurator::addFlows(Input &input) const
             } // endfor
         } // endfor
         flow->pathFragments.push_back(path);
-        if (!entry->containsKey("pathFragments"))
+       // if (!entry->containsKey("pathFragments"))
             delete pathFragments;
         input.flows.push_back(flow);
     } // endfor configuration
 }
 
-ExternalGateScheduleConfigurator::Input::Port *
-ExternalGateScheduleConfigurator::getConfigurablePort( // LINK : "[source,target]" as string
-    const Input &input, std::string &linkName) const
+
+void ExternalGateScheduleConfigurator::parseString(std::string s, std::string &leftString, std::string &rightString, char sep) const
 {
-    linkName = linkName.substr(1, linkName.size() - 2);
-    std::stringstream ss(linkName);
-    std::string source, target;
-    std::getline(ss, source, ',');
-    std::getline(ss, target);
-
-    auto it = std::find_if(input.networkNodes.begin(), input.networkNodes.end(),
-                           [&](Input::NetworkNode *switch_) { return getExpandedNodeName(switch_->module) == source; });
-    if (it == input.networkNodes.end())
-        throw cRuntimeError("Cannot find TSN device: %s", source.c_str());
-    auto sourceNode = *it;
-
-    it = std::find_if(input.networkNodes.begin(), input.networkNodes.end(),
-                      [&](Input::NetworkNode *switch_) { return getExpandedNodeName(switch_->module) == target; });
-    if (it == input.networkNodes.end())
-        throw cRuntimeError("Cannot find connected TSN device: %s", target.c_str());
-    auto targetNode = *it;
-
-    auto jt = std::find_if(sourceNode->ports.begin(), sourceNode->ports.end(), [&](Input::Port *port) {
-        return port->startNode == sourceNode && port->endNode == targetNode;
-    });
-    if (jt == sourceNode->ports.end())
-        throw cRuntimeError("Cannot find port: %s", linkName.c_str());
-    auto port = *jt;
-    return port;
+    std::stringstream ss(s);
+    std::getline(ss, leftString, sep);
+    std::getline(ss, rightString);
 }
 
-ExternalGateScheduleConfigurator::Output *
-ExternalGateScheduleConfigurator::convertJsonToOutput(const Input &input, const cValueMap *json) const
-{
-    auto output = new Output();
-    // META DATA
-    auto jsonMETA = check_and_cast<cValueMap *>(json->get("META").objectValue());
-    int scheduled = jsonMETA->containsKey("scheduled") ? jsonMETA->get("scheduled").intValue() : 0;
-    if ((monitor->par("stopWhenNotSchedulable").boolValue()
-            && input.flows.size() > scheduled) || !scheduled) {
-        delete output;
-        throw cRuntimeError("The simulation was halted due to the incomplete scheduling of flows.");
-    }
-    commitTime = SimTime(jsonMETA->get("commit_time").intValue(), SIMTIME_NS);
-    gateCycleDuration = SimTime(jsonMETA->get("hypercycle").intValue(), SIMTIME_NS);
-    // GATE CONTROL LISTS
-    auto jsonGCL = check_and_cast<cValueMap *>(json->get("GCL").objectValue());
 
-    for (auto &gcl : jsonGCL->getFields()) { // 1.for
-        auto linkName = gcl.first;
-        auto port = getConfigurablePort(input, linkName);
-        auto &schedules = output->gateSchedules[port];
-        auto queues = check_and_cast<cValueMap *>(gcl.second.objectValue());
-        for (auto &queue : queues->getFields()) { // 2.for
-            auto queueIndex = std::stoi(queue.first.substr(1));
-            cValueMap *queueMap = check_and_cast<cValueMap *>(queue.second.objectValue());
-            auto schedule = new Schedule();
-            schedule->port = port;
-            schedule->gateIndex = queueIndex;
-            schedule->cycleDuration = gateCycleDuration;
-            schedule->open = queueMap->get("initial").intValue();
-
-            auto dur = check_and_cast<cValueArray *>(queueMap->get("durations").objectValue());
-            schedule->durations = new cValueArray();
-            for (int i = 0; i < dur->size(); i++) {
-                const cValue &value = (*dur)[i];
-                cValue newValue = cValue(value.intValue(), "ns");
-                schedule->durations->add(newValue);
-            }
-            dur = nullptr;
-            schedule->offset = SimTime(queueMap->get("offset").intValue(), SIMTIME_NS);
-            schedules.push_back(schedule);
-        } // 2.endfor
-    } // 1.endfor
-
-    // APPLICATIONS
-    auto talkers = check_and_cast<cValueMap *>(json->get("TALKERS").objectValue());
-    for (auto &field : talkers->getFields()) {
-        const std::string &key = field.first;
-        std::stringstream ss(key);
-        std::string flowID, packetNr;
-        std::getline(ss, flowID, '#');
-        std::getline(ss, packetNr);
-
-        auto flowIt = std::find_if(input.flows.begin(), input.flows.end(),
-                                   [&](Input::Flow *flow) { return flow->name == flowID; });
-        if (flowIt == input.flows.end())
-            throw cRuntimeError("Cannot find flow: %s", flowID.c_str());
-        auto flow = *flowIt;
-        auto application = flow->startApplication;
-        auto startTime = SimTime(field.second.intValue(), SIMTIME_NS);
-        if (output->applicationStartTimes.find(application) == output->applicationStartTimes.end()) {
-            output->applicationStartTimes[application] = startTime;
-        } // endif
-        output->applicationStartTimesArray[application].push_back(startTime);
-    } // endfor applications
-    for (auto &offsetsPair : output->applicationStartTimesArray) {
-        auto &offsets = offsetsPair.second;
-        std::sort(offsets.begin(), offsets.end(), [](simtime_t a, simtime_t b) { return a < b; });
-    }
-    for (auto &application : gateSchedulingInput->applications) {
-        auto appModule = application->module->getSubmodule("source");
-        output->sources.push_back(appModule);
-    }
-    monitor->addApplicationsWithStopReqToOutput(output->sources);
-
-    //PSFP
-    auto jsonPSFP = check_and_cast<cValueMap *>(json->get("PSFP").objectValue());
-
-    for (auto &psfp : jsonPSFP->getFields()) {
-        auto mod = findModuleByPath(psfp.first.c_str());
-        auto classifier = mod->findModuleByPath(".bridging.streamFilter.ingress.classifier");
-        auto decoder = mod->findModuleByPath(".bridging.streamCoder.decoder");
-        if (decoder == nullptr || classifier == nullptr)
-            throw cRuntimeError("Ingress traffic filtering configuration is missing.");
-
-        cValueMap *classifierMap = check_and_cast<cValueMap *>(classifier->par("mapping").objectValue());
-        cValueArray *decoderMap = check_and_cast<cValueArray *>(decoder->par("mapping").objectValue());
-
-        for (int k=0; k < classifierMap->size(); k++)
-            output->psfpSchedules[mod].push_back(new cValueArray());
-
-        auto dur = check_and_cast<cValueArray *>(psfp.second.objectValue());
-        int temp = 0;
-        cValueArray *durPSFP = new cValueArray();
-        for (int i = 0; i < dur->size(); i++) {
-            auto element = check_and_cast<cValueMap *>((*dur)[i].objectValue());
-            int close = element->get("close").intValue();
-            int open = element->get("open").intValue();
-            auto frames = check_and_cast<cValueArray *>(element->get("frames").objectValue());
-            for (int j=0; j<frames->size(); j++) {
-                std::stringstream ss((*frames)[j]);
-                std::string flowID, packetNr;
-                std::getline(ss, flowID, '#');
-                std::getline(ss, packetNr);
-                auto flowIt = std::find_if(input.flows.begin(), input.flows.end(),
-                                                   [&](Input::Flow *flow) { return flow->name == flowID; });
-                if (flowIt == input.flows.end())
-                      throw cRuntimeError("Cannot find flow: %s", flowID.c_str());
-                auto flow = *flowIt;
-                auto application = (Application *) flow->startApplication;
-                int gate = findPsfpGate(classifierMap, decoderMap, application->pcp);
-                if (gate > 0) {
-                     output->psfpSchedules[mod][gate]->add(open);
-                     output->psfpSchedules[mod][gate]->add(close);
-                }
-            }//endfor
-        }//endfor
-
-        delete durPSFP;
-    }//endfor
-
-    //##############################
-    return output;
-}
-
-int ExternalGateScheduleConfigurator::findPsfpGate(cValueMap *classifierMap, cValueArray *decoderMap, int pcp) const
-{
-    const char* streamName = nullptr;
-    for (int i = 0; i < decoderMap->size(); ++i) {
-        auto *entry = check_and_cast<cValueMap*>((*decoderMap)[i].objectValue());
-        if (entry->get("pcp").intValue() == pcp) {
-            streamName = entry->get("stream").stringValue();
-            break;
-        }
-    }
-    int result = -1;
-    if (streamName && classifierMap->containsKey(streamName)) {
-        result = classifierMap->get(streamName).intValue();
-    }
-    return result;
-}
+//############################ CONFIGURE ##########################################
 
 // TODO fix me... In PeriodicGate, 'offset' is rounded to approximately ~99ns potentially (!)
 void ExternalGateScheduleConfigurator::configureGateScheduling()
@@ -777,49 +815,72 @@ void ExternalGateScheduleConfigurator::configureGateScheduling()
             gate->par("initiallyOpen") = newSchedule->open;
 
             cPar &offsetPar = gate->par("offset");
-            offsetPar.setValue(cValue(newSchedule->offset.inUnit(SIMTIME_NS), "ns")); // (!)
+            offsetPar.setValue(cValue(newSchedule->offset.inUnit(SIMTIME_NS), "ns")); // (!) here
 
             cPar &durationsPar = gate->par("durations");
             durationsPar.copyIfShared();
             durationsPar.setObjectValue(newSchedule->durations->dup());
         } // endfor
     } // endfor
-    configurePsfpGateScheduling();
+
 }
 
-void ExternalGateScheduleConfigurator::configurePsfpGateScheduling() {
+void ExternalGateScheduleConfigurator::configurePsfpGateScheduling()
+{
     auto psfpMap = ((Output*) gateSchedulingOutput)->psfpSchedules;
-            for (auto it = psfpMap.begin(); it != psfpMap.end(); ++it) {
-                auto device = it->first;
-                auto &schedules = it->second;
-                auto ingress = device->findModuleByPath(".bridging.streamFilter.ingress");
-                for (int i = 0; i < schedules.size(); i++) {
-                    auto gate = dynamic_cast<PeriodicGate *>(ingress->getSubmodule("gate", i));
+    for (auto it = psfpMap.begin(); it != psfpMap.end(); ++it) {
+        auto device = it->first;
+        auto &schedules = it->second;
+        auto ingress = device->findModuleByPath(
+                ".bridging.streamFilter.ingress");
+        for (int i = 0; i < schedules.size(); i++) {
+            auto gate = dynamic_cast<PeriodicGate*>(ingress->getSubmodule(
+                    "gate", i));
 
-                    auto *diffs = new cValueArray();
-                    long prev = 0;
-                    cValueArray *openCloseTimes = schedules[i];
-                    gate->par("initiallyOpen") = ! openCloseTimes->size(); //false;
+            cValueArray *openCloseTimes = schedules[i];
+            gate->par("initiallyOpen") = openCloseTimes->size() != 0;
+            if (!openCloseTimes->size())
+                continue;
+            auto *diffs = new cValueArray();
+            long prev = 0;
+            std::vector<long> times;
+            for (int k = 0; k < openCloseTimes->size(); ++k)
+                times.push_back((*openCloseTimes)[k].intValue());
+            std::sort(times.begin(), times.end(),
+                    [](const long a, const long b) {
+                        return a < b;
+                    });
 
-                    std::vector<long> times;
-                    for (int k = 0; k < openCloseTimes->size(); ++k)
-                        times.push_back((*openCloseTimes)[k].intValue());
-                    std::sort(times.begin(), times.end(), [](const long a, const long b) {return a < b;});
+            std::vector<long> shiftTimes;
 
-                    for (int j = 0; j < times.size(); ++j) {
-                            long t = times[j];
-                            long dur = t - prev;
-                            diffs->add(cValue(dur, "ns"));
-                            prev = t;
-                        }
+            for (int j = 0; j < times.size(); ++j) {
+                long t = times[j];
+                long dur = t - prev;
+                shiftTimes.push_back(dur);
+                prev = t;
+            }
+            long offset = shiftTimes[0];
+            long slackTime = gateCycleDuration.inUnit(SIMTIME_NS)
+                    - std::accumulate(shiftTimes.begin(), shiftTimes.end(),
+                            0.0);
 
-                    cPar &durationsPar = gate->par("durations");
-                    durationsPar.copyIfShared();
-                    durationsPar.setObjectValue(diffs->dup());
-                    std::cout << device->getFullName() <<"  PSFP : " << i << diffs->str() << endl;
-                    delete diffs;
-                } // endfor
-            } // endfor
+            shiftTimes.erase(shiftTimes.begin());
+
+            shiftTimes.push_back(slackTime + offset);
+            for (int j = 0; j < shiftTimes.size(); j++)
+                diffs->add(cValue(shiftTimes[j], "ns"));
+
+            cPar &offsetPar = gate->par("offset");
+            offsetPar.setValue(cValue(offset, "ns"));
+
+            cPar &durationsPar = gate->par("durations");
+            durationsPar.copyIfShared();
+            durationsPar.setObjectValue(diffs->dup());
+            std::cout << device->getFullName() << "  PSFP : " << i
+                    << diffs->str() << endl;
+            delete diffs;
+        } // 2.endfor
+    } // 1.endfor
 }
 
 
@@ -831,15 +892,15 @@ void ExternalGateScheduleConfigurator::configureApplicationOffsets()
         auto startOffset = it.second;
         auto applicationModule = it.first->module;
 
-        auto sourceModule = applicationModule->getSubmodule("source");
+        auto sourceModule = check_and_cast<DynamicPacketSource *>(applicationModule->getSubmodule("source"));
         const auto &offsets = output->applicationStartTimesArray[it.first];
 
-        std::cout << "starting at " << simTime() << "s" << " : " << ((DynamicPacketSource *)sourceModule)->streamName
+        std::cout << "starting at " << simTime() << "s" << " : " << sourceModule->streamName
                   << endl;
-        ((DynamicPacketSource *)sourceModule)->setNewConfiguration(offsets);
+        sourceModule->setNewConfiguration(offsets);
     }
 
-    for (auto &application : output->sources) {
+    for (auto &application : output->appsInputAndWithStopReq) {
         auto appModule = check_and_cast<DynamicPacketSource *>(application);
         if (appModule->stopIfNotScheduled()) {
             // ##################################################
@@ -852,6 +913,10 @@ void ExternalGateScheduleConfigurator::configureApplicationOffsets()
     } // endfor
 }
 
+
+
+//############################## CLEAR ###############################################
+
 void ExternalGateScheduleConfigurator::clearConfiguration()
 {
     deleteOldConfigurationPar();
@@ -861,25 +926,24 @@ void ExternalGateScheduleConfigurator::clearConfiguration()
         delete gateSchedulingInput;
     gateSchedulingInput = nullptr;
 
-    if ((Output *)gateSchedulingOutput != nullptr) {
-    auto scheduleMap = gateSchedulingOutput->gateSchedules;
-    for (auto it = scheduleMap.begin(); it != scheduleMap.end(); ++it) {
-        std::vector<Output::Schedule *> &schedules = it->second;
-        for (Output::Schedule *schedule : schedules) {
-            Schedule *oldSchedule = (Schedule *)schedule;
-            oldSchedule->~Schedule();
+    if (gateSchedulingOutput != nullptr) {
+        auto scheduleMap = gateSchedulingOutput->gateSchedules;
+        for (auto it = scheduleMap.begin(); it != scheduleMap.end(); ++it) {
+            std::vector<Output::Schedule*> &schedules = it->second;
+            for (Output::Schedule *schedule : schedules) {
+                Schedule *oldSchedule = (Schedule*) schedule;
+                oldSchedule->~Schedule();
+            } // endfor
         } // endfor
-    } // endfor
         auto psfpMap = ((Output*) gateSchedulingOutput)->psfpSchedules;
         for (auto it = psfpMap.begin(); it != psfpMap.end(); ++it) {
-            auto &schedules = it->second;
-            for (cValueArray *schedule : schedules) {
-                if (schedule != nullptr)
-                    delete schedule;
+            auto &psfpSchedules = it->second;
+            for (cValueArray *psfpSchedule : psfpSchedules) {
+                if (psfpSchedule != nullptr)
+                    delete psfpSchedule;
             } // endfo
         } // endfor
-
-    delete (Output *)gateSchedulingOutput;
+        delete (Output*)gateSchedulingOutput;
     }
     gateSchedulingOutput = nullptr;
 }
@@ -892,6 +956,7 @@ void ExternalGateScheduleConfigurator::deleteOldConfigurationPar()
             delete entry.objectValue();
         }
         configuration->clear();
+        drop(configuration);
         delete configuration;
         configuration = nullptr;
     }
@@ -907,6 +972,8 @@ ExternalGateScheduleConfigurator::~ExternalGateScheduleConfigurator()
     delete hashMapNodeId;
 
     if (configurationComputedEvent != nullptr) {
+        if (configurationComputedEvent->isScheduled())
+            cancelEvent(configurationComputedEvent);
         drop(configurationComputedEvent);
         delete configurationComputedEvent;
     }

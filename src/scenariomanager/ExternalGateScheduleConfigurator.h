@@ -25,14 +25,12 @@
 #include "inet/linklayer/configurator/gatescheduling/common/TSNschedGateScheduleConfigurator.h"
 #include "inet/queueing/gate/PeriodicGate.h"
 
+
 using namespace omnetpp;
 using namespace inet;
 
 namespace d6g {
 
-/**
- *
- */
 class ExternalGateScheduleConfigurator : public TSNschedGateScheduleConfigurator
 {
     enum class DeviceType { END_DEVICE = 0, TSN_BRIDGE = 1, DS_TT = 2, NW_TT = 3, UNSPECIFIED = 4 };
@@ -48,8 +46,9 @@ class ExternalGateScheduleConfigurator : public TSNschedGateScheduleConfigurator
       public:
         ~Schedule()
         {
-            if (durations != nullptr)
+            if (durations != nullptr) {
                 delete durations;
+            }
             durations = nullptr;
         }
     };
@@ -57,12 +56,18 @@ class ExternalGateScheduleConfigurator : public TSNschedGateScheduleConfigurator
     class Application : public Input::Application
     {
       public:
-        int objectiveType;
-        // int packetLoss;
-        // int policy;
+        //int objectiveType;
         double reliability;
         simtime_t phase = 0; // already running
-                             // double weight; //= 1.0;
+        cValueMap *customParams = nullptr;
+
+      public:
+        ~Application() {
+
+            if (customParams != nullptr)
+                delete customParams;
+        }
+
 
     };
 
@@ -70,7 +75,7 @@ class ExternalGateScheduleConfigurator : public TSNschedGateScheduleConfigurator
     {
       public:
         std::map<Input::Application *, std::vector<simtime_t>> applicationStartTimesArray;
-        std::vector<cModule *> sources;
+        std::vector<cModule *> appsInputAndWithStopReq;
         std::map<cModule*, std::vector<cValueArray *>> psfpSchedules; // maps flow to schedules per psfp
 
       public:
@@ -91,8 +96,9 @@ class ExternalGateScheduleConfigurator : public TSNschedGateScheduleConfigurator
         return std::string(buf.get(), buf.get() + size - 1);
     }
 
+
+
   private:
-    // std::map<std::string, cValueArray*> *distributions;
     std::map<std::string, uint16_t> *hashMapNodeId;
     ChangeMonitor *monitor = nullptr;
 
@@ -104,10 +110,11 @@ class ExternalGateScheduleConfigurator : public TSNschedGateScheduleConfigurator
     cPar *configurationFilePar = nullptr;
 
     ClockEvent *configurationComputedEvent = nullptr;
-    //mutable simtime_t scheduleComputingTime = 0;
+
     mutable simtime_t commitTime = 0;
     mutable simtime_t gateCycleDuration = 0;
     std::filesystem::path schedulerRoot;
+
 
   protected:
     /*extend GateScheduleConfiguratorBase*/
@@ -132,10 +139,11 @@ class ExternalGateScheduleConfigurator : public TSNschedGateScheduleConfigurator
     inline std::string getDetComLinkDescription(DetComLinkType type) const;
     inline short getDeviceType(cModule *mod) const;
     Input::Port *getConfigurablePort(const Input &input, std::string &linkName) const;
-    int findPsfpGate(cValueMap *classifierMap, cValueArray *decoderMap, int pcp) const;
+    Input::NetworkNode *findConfigurableNetworkNode(const Input &input, std::string source) const;
+    int getPsfpGate(cValueMap *classifierMap, cValueArray *decoderMap, int pcp) const;
 
     void invokeScheduler() const;
-    void configurePsfpGateScheduling();
+    virtual void configurePsfpGateScheduling();
 
   private:
     void inline write(std::string fileName, cValueMap *json) const;
@@ -143,13 +151,12 @@ class ExternalGateScheduleConfigurator : public TSNschedGateScheduleConfigurator
     void writeStreamsToFile(const Input &input) const;
     void writeNetworkToFile(const Input &input) const;
 
-
     bool addEntryToPDBMap(cValueArray *pdb_map, cModule *source, cModule *target) const;
+    void parseString(std::string s, std::string &leftString, std::string &rightString, char sep)  const;
     /*Create separate JSON files for Streams and Network and Distributions */
     cValueMap *convertInputToJsonStreams(const Input &input) const;
     cValueMap *convertInputToJsonNetwork(const Input &input) const;
     cValueMap *convertJsonDevice(Input::NetworkNode *device) const;
-
 
     void deleteOldConfigurationPar();
 

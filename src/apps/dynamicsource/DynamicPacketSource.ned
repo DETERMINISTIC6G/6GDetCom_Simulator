@@ -27,10 +27,15 @@ import inet.queueing.source.ActivePacketSource;
 simple DynamicPacketSource extends ActivePacketSource
 {
     parameters:
+        
+      string streamName;
+      
+      initialProductionOffset = 0ns;  
       // If you change these values, the effects are immediately visible in the network  
       productionInterval  @mutable;
       packetLength @mutable;
       volatile bool enabled @mutable = default(true); //start or stop the app dynamically
+      
            
       // If you change these values, the effects in the network are only visible 
       // after the permission of the scheduler.
@@ -39,20 +44,22 @@ simple DynamicPacketSource extends ActivePacketSource
       volatile int pendingPacketLength @unit(b) @mutable = default(packetLength);              
       volatile bool pendingEnabled @mutable = default(enabled);
                 
-      // If the production interval is changed, adjust the deadline in ScenarioManager accordingly
+      // If the production interval is changed, adjust the parameters in ScenarioManager accordingly
       double maxJitter @mutable @unit(ms)  = default(productionInterval * 0.05);
       double maxLatency @mutable @unit(ms) = default(productionInterval);
              
       int pcp = default(0);           
-      string objectiveType @enum("NO_OBJECTIVE",
-      								"LATENESS",
-      								"TARDINESS",
-      								"JITTER",
-      								"TARDINESS_AND_JITTER") = default("TARDINESS_AND_JITTER");     
-      double reliability = default(0.95);
-      //double weight = default(1.0); //
-      //int packetLoss = default(0);
-      //int policy = default(0); // packet delay budget
+      //string objectiveType @enum("NO_OBJECTIVE",
+      								//"LATENESS",
+      								//"TARDINESS",
+      								//"JITTER",
+      								//"TARDINESS_AND_JITTER") = default("TARDINESS_AND_JITTER");
+      								     
+      double reliability = default(1.00);
+      
+      //Map for optional parameters that a specific scheduler may require,
+      //e.g., {"phase" : 0ms, "policy": 0, "packetLoss": 0, "weight": 1.0, "objectiveType" : 4}
+      object customParams = default({});
       
       //Offsets relative to the production interval, e.g., 
       //for period=20ms, the offset array could look like this: 
@@ -62,7 +69,7 @@ simple DynamicPacketSource extends ActivePacketSource
       //		Packet3 is sent at 45ms,
       //		Packet4 is sent at 70ms etc.
       //then repeated cyclically
-      object productionOffsets @unit(s) = default([0ns]);
+      object productionOffsets @unit(s) = default([initialProductionOffset]);
       
       @class(DynamicPacketSource);
       @signal[parameter-change-event](type=cMessage);

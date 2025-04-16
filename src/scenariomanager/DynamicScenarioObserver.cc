@@ -49,9 +49,6 @@ void DynamicScenarioObserver::receiveSignal(cComponent *source, simsignal_t sign
         if (sourceModule) {
             cValueMap *element = sourceModule->getConfiguration();
             monitor->updateStreamConfigurations(element);
-            /*take(element);
-            drop(element);
-            delete element;*/
             monitor->scheduleTimer(source->getFullPath());
         }
     }

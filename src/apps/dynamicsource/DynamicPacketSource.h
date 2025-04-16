@@ -33,9 +33,9 @@ namespace d6g {
 
 class DynamicPacketSource: public ActivePacketSource {
 
-enum class StreamObjectives {
+/*enum class StreamObjectives {
       NO_OBJECTIVE = 0, LATENESS = 1, TARDINESS = 2, JITTER = 3, TARDINESS_AND_JITTER = 4
-};
+};*/
 
 private:
     /* Set new parameters quietly (without triggering effects)*/
@@ -54,12 +54,16 @@ private:
 
     std::vector<simtime_t> offsets;
     size_t nextProductionIndex = 0;
+    simtime_t firstOffsetInCycle;
 
-friend class ChangeMonitor;
+
 friend class ExternalGateScheduleConfigurator;
 
 private:
     void computeProductionOffsets(const std::vector<simtime_t>& simtimeVector);
+    //These methods are used by ExternalGateScheduleConfigurator modules
+    bool stopIfNotScheduled();
+    void setNewConfiguration(const std::vector<simtime_t>& simtimeVector);
 
 protected:
     virtual void initialize(int stage) override;
@@ -69,13 +73,9 @@ protected:
     virtual void scheduleProductionTimer(clocktime_t delay) override;
     virtual void scheduleProductionTimerAndProducePacket() override;
 
-    //These methods are used by ExternalGateScheduleConfigurator or ChangeMonitor modules
-    virtual bool stopIfNotScheduled();
-    virtual void setNewConfiguration(const std::vector<simtime_t>& simtimeVector);
-
 public:
     virtual cValueMap* getConfiguration() const;
-    int objective(const char* type) const;
+    //int objective(const char* type) const;
 
     ~DynamicPacketSource() override;
 };

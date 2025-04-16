@@ -34,8 +34,6 @@ class ObservedScenarioManager : public ScenarioManager
     virtual void initialize() override;
     virtual void handleMessage(cMessage *msg) override;
 
-    /*public:
-          ~ObservedScenarioManager() override; */
 };
 
 } // namespace d6g

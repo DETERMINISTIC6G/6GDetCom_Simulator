@@ -1,10 +1,10 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <script>
 
-	<!--stop stream2 -->
+	<!--stop stream2 -->	
 	<at t="20">
 		<set-param module="device2.app[0].source"
-			par="pendingEnabled" value="false" />			
+			par="pendingEnabled" value="false" />										
 	</at>
 
 	<!-- Change interval and packet length of stream3 -->
@@ -15,6 +15,8 @@
 			value="300ms" />	
 		<set-param module="wirelessdevice1.app[2].source"
 			par="pendingPacketLength" value="1200B" />
+		<!--   <set-param module="device2.app[0].source"
+			par="initialProductionOffset" value="1ms" /> -->
 	</at>
 
 

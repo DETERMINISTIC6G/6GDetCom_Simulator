@@ -17,7 +17,6 @@
 #define __DYNAMIC_SCENARIO_CHANGEMONITOR_H_
 
 #include <omnetpp.h>
-// #include <zmq.hpp>
 
 #include "../apps/dynamicsource/DynamicPacketSource.h"
 #include "inet/linklayer/configurator/gatescheduling/base/GateScheduleConfiguratorBase.h"
@@ -51,13 +50,10 @@ class ChangeMonitor : public inet::ClockUserModuleMixin<cSimpleModule>
         cValue packetInterval;
         cValue maxLatency;
         cValue maxJitter;
-        // std::string pathFragments;
         double reliability;
-        // int policy;
         cValue phase;
-        // int packetLoss;
-        int objectiveType;
-        // double weight;
+        //int objectiveType;
+        cValue customParams;
 
         friend std::ostream &operator<<(std::ostream &os, const Mapping &mapping)
         {
@@ -74,9 +70,8 @@ class ChangeMonitor : public inet::ClockUserModuleMixin<cSimpleModule>
 
     ClockEvent *timer = nullptr;
     cPar *schedulerCallDelayParameter = nullptr;
-    int flowIndex = 0;
 
-    // zmq::message_t testMsg;
+    int monitorAssignedStreamIndex = 0;
 
     std::vector<Mapping> streamConfigurations;
     std::map<std::string, cValueArray *> *distributions = nullptr;
@@ -90,7 +85,6 @@ class ChangeMonitor : public inet::ClockUserModuleMixin<cSimpleModule>
     cValueArray *convertToCValueArray(const std::vector<Mapping> &configMappings) const;
     cValueMap *convertMappingToCValue(const Mapping &mapping) const;
     void addEntryToStreamConfigurations(cValueMap *element, int i);
-    //void addEntriesToDistributionsFor(TsnTranslator *translator);
     void scheduleTimer(std::string source, cObject *details = nullptr);
 
   protected:
