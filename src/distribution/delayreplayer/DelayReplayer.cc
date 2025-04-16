@@ -101,7 +101,8 @@ cValue DelayReplayer::getRand()
     }
     else if (mode == TIME_BASED) {
         // Add timestampOffset to current simulation time
-        return getDelayFromTargetValue(simTime().dbl() + timestampOffset);
+        auto value = getDelayFromTargetValue(simTime().dbl() + timestampOffset);
+        return value;
     }
     else {
         throw cRuntimeError("No operation mode selected");
