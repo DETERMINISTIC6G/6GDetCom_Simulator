@@ -25,7 +25,7 @@ jobs:
           ref: '6211cd63ebe479b9b01f5ccecc632d5c2e1952af'
       - name: "Build Neddoc"
         run: |
-          source "$HOME/.bashrc"
+          source "$HOME/.profile"
           cd deterministic6g
           xvfb-run -a make neddoc
       - name: "Upload NEDdoc artifact"
