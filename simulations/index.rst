@@ -12,7 +12,9 @@ Currently, the following showcases are available:
 
    baseline/doc/index.rst
    cooperativemanufacturing/doc/index.rst
+   delayreplayer/doc/index.rst
    edgecloud/doc/index.rst
+   packetdelaycorrection/doc/index.rst
    timesync/doc/index.rst
 
 The first two showcases focus on the performance of IEEE802.1Qbv scheduling with PDs.

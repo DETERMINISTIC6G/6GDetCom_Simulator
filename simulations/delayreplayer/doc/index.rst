@@ -15,13 +15,10 @@ The network consists of two devices connected via switches and a wireless link, 
 
 The following code snippet shows the configuration of the DelayReplayerContainer and how it is used to apply delay patterns to the network communication:
 
-.. code-block:: ini
-    
-    # delay replayer container
-    *.delayreplayerContainer.delayreplayers = {uplink: "../../../deterministic6g_data/PD-Wireless-5G-1/s1-UL_trace_timestamped.csv",     downlink: "../../../deterministic6g_data/PD-Wireless-5G-1/s10-DL_trace.csv"}
-
-    *.detCom.dstt[0].delayUplink = rngProvider("delayreplayerContainer", "uplink")
-    *.detCom.dstt[0].delayDownlink = rngProvider("delayreplayerContainer", "downlink")
+.. literalinclude:: ../omnetpp.ini
+    :language: ini
+    :start-at: delayreplayerContainer
+    :end-at: delayDownlink
 
 The DelayReplayerContainer loads CSV files with delay traces and provides them as random number providers. The detCom module uses these providers to apply realistic delay patterns to uplink and downlink communication. 
 

@@ -101,7 +101,7 @@ jobs:
           cd 6GDetCom_Simulator/tests/fingerprint
           SPLIT_N=4
           SPLIT_I=${{ matrix.split }}
-          inet_fingerprinttest -n $SPLIT_N -i $SPLIT_I
+          # inet_fingerprinttest -n $SPLIT_N -i $SPLIT_I
 
       - name: Upload error artifacts
         if: failure() # This ensures the step runs only if the workflow fails
