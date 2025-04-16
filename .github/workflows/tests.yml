@@ -47,7 +47,7 @@ jobs:
       - name: Build PD
         if: steps.cache-data.outputs.cache-hit != 'true'
         run: |
-          whoami
+          source /root/.bashrc
           cd deterministic6g_data/PD-Wireless-5G-1
           pip install requests pyarrow
           export PYTHONPATH=$PYTHONPATH:..
