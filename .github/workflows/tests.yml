@@ -40,6 +40,7 @@ jobs:
         with:
           path: |
             deterministic6g_data/PD-Wireless-5G-1/**.xml
+            deterministic6g_data/PD-Wireless-5G-1/**.csv
             deterministic6g_data/ProcessingDelayDistribution2/**.xml
           key: ${{ runner.os }}-deterministic6g_data-${{ hashFiles('deterministic6g_data/PD-Wireless-5G-1/**') }}-${{ hashFiles('deterministic6g_data/ProcessingDelayDistribution2/**') }}
           save-always: true
@@ -101,3 +102,11 @@ jobs:
           SPLIT_N=4
           SPLIT_I=${{ matrix.split }}
           inet_fingerprinttest -n $SPLIT_N -i $SPLIT_I
+
+      - name: Upload error artifacts
+        if: failure() # This ensures the step runs only if the workflow fails
+        uses: actions/upload-artifact@v3
+        with:
+          name: error-files
+          path: |
+            deterministic6g/tests/fingerprint/
