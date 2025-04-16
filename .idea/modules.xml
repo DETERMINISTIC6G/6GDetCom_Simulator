@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/deterministic6g.iml" filepath="$PROJECT_DIR$/.idea/deterministic6g.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/6GDetCom_Simulator.iml" filepath="$PROJECT_DIR$/.idea/6GDetCom_Simulator.iml" />
     </modules>
   </component>
 </project>
