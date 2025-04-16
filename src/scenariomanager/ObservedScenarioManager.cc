@@ -31,7 +31,7 @@ void ObservedScenarioManager::handleMessage(cMessage *msg)
                 if (!strcmp(param, "initialProductionOffset")) {
                     delete msg;
                     throw cRuntimeError(
-                            "Changing \"%s\" parameter in the script is not permitted, except during initialization",
+                            "Changing \"%s\" parameter in the script is not permitted.",
                             param);
                 }
             };

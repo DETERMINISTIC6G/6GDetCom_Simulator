@@ -56,19 +56,15 @@ class ExternalGateScheduleConfigurator : public TSNschedGateScheduleConfigurator
     class Application : public Input::Application
     {
       public:
-        //int objectiveType;
         double reliability;
-        simtime_t phase = 0; // already running
+        simtime_t phase = 0;
         cValueMap *customParams = nullptr;
 
       public:
         ~Application() {
-
             if (customParams != nullptr)
                 delete customParams;
         }
-
-
     };
 
     class Output : public GateScheduleConfiguratorBase::Output

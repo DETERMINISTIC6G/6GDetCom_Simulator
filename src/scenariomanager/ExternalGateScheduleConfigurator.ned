@@ -36,11 +36,13 @@ import inet.linklayer.configurator.gatescheduling.contract.IGateScheduleConfigur
 // Command usage:
 // e.g.: "./path/scheduler -n %s -s %s -d %s -o %s"
 // Please make sure to set the SCHEDULER_ROOT environment variable!
+// All paths are relative to the SCHEDULER_ROOT variable and the folders must exist.
+// Observe the correct order.
 // Parameters:
-// -n %s: Specifies the network configuration (input-)file (networkFile). 
-// -s %s: Specifies the streams configuration (input-)file (streamsFile).
-// -d %s: Specifies changes of wireless link distributions (histogramsFile).
-// -o %s: Specifies the scheduler's output file (configurationFile).
+// 1. -n %s: Specifies the network configuration (input-)file (networkFile). 
+// 2. -s %s: Specifies the streams configuration (input-)file (streamsFile).
+// 3. -d %s: Specifies changes of wireless link distributions (histogramsFile).
+// 4. -o %s: Specifies the scheduler's output file (configurationFile).
 // (%s will be replaced with the filename)
 // </pre>
 simple ExternalGateScheduleConfigurator extends GateScheduleConfiguratorBase like IGateScheduleConfigurator
@@ -51,8 +53,7 @@ simple ExternalGateScheduleConfigurator extends GateScheduleConfiguratorBase lik
     gateCycleDuration @mutable = default(0s); 
             
     string command;
-    // All paths are relative to the SCHEDULER_ROOT variable and the folders must exist.
-    // Observe the correct order.
+    
     volatile string networkFile;
     volatile string streamsFile;
     volatile string histogramsFile;

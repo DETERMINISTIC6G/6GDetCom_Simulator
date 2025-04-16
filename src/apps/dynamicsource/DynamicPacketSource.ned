@@ -48,17 +48,11 @@ simple DynamicPacketSource extends ActivePacketSource
       double maxJitter @mutable @unit(ms)  = default(productionInterval * 0.05);
       double maxLatency @mutable @unit(ms) = default(productionInterval);
              
-      int pcp = default(0);           
-      //string objectiveType @enum("NO_OBJECTIVE",
-      								//"LATENESS",
-      								//"TARDINESS",
-      								//"JITTER",
-      								//"TARDINESS_AND_JITTER") = default("TARDINESS_AND_JITTER");
-      								     
+      int pcp = default(0);                 								     
       double reliability = default(1.00);
       
       //Map for optional parameters that a specific scheduler may require,
-      //e.g., {"phase" : 0ms, "policy": 0, "packetLoss": 0, "weight": 1.0, "objectiveType" : 4}
+      //e.g., {"policy": 0, "packetLoss": 0, "weight": 1.0, "objectiveType" : 4}
       object customParams = default({});
       
       //Offsets relative to the production interval, e.g., 

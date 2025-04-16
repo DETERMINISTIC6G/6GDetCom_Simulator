@@ -52,7 +52,6 @@ class ChangeMonitor : public inet::ClockUserModuleMixin<cSimpleModule>
         cValue maxJitter;
         double reliability;
         cValue phase;
-        //int objectiveType;
         cValue customParams;
 
         friend std::ostream &operator<<(std::ostream &os, const Mapping &mapping)
@@ -70,8 +69,6 @@ class ChangeMonitor : public inet::ClockUserModuleMixin<cSimpleModule>
 
     ClockEvent *timer = nullptr;
     cPar *schedulerCallDelayParameter = nullptr;
-
-    int monitorAssignedStreamIndex = 0;
 
     std::vector<Mapping> streamConfigurations;
     std::map<std::string, cValueArray *> *distributions = nullptr;

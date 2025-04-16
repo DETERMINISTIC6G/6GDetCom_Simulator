@@ -33,6 +33,7 @@ void DynamicPacketSource::initialize(int stage)
 
         cValueArray *productionOffsets = check_and_cast<cValueArray *>(par("productionOffsets").objectValue());
         initialProductionOffset = productionOffsets->get(0).doubleValueInUnit("s");
+        phase = productionOffsets->get(0).doubleValueInUnit("s");
         if (productionOffsets->size() > 1) {
             std::vector<simtime_t> tempVector;
             for (int i = 0; i < productionOffsets->size(); i++) {
@@ -41,9 +42,8 @@ void DynamicPacketSource::initialize(int stage)
             }
             computeProductionOffsets(tempVector);
         }
-
     }else if (stage == INITSTAGE_LAST) {
-        isFirstTimeRun = ! runningState->boolValue();
+        ;
     }
 }
 
@@ -82,16 +82,14 @@ void DynamicPacketSource::handleParameterChange(const char *name) {
                 hasSchedulerPermission = false;
                 scheduleProductionTimer(0);
             }
-            isFirstTimeRun = false;
         }
     }
     if (!strcmp(name, "initialProductionOffset")) {
-        initialProductionOffset = par("initialProductionOffset");
-
-        if (initialProductionOffset.dbl() != firstOffsetInCycle.dbl()) {
-            initialProductionOffset = firstOffsetInCycle.dbl();
-            //throw cRuntimeError("Parameter modification is not allowed: \"%s\"", name);
+        if (par("initialProductionOffset").doubleValue() != firstFrameOffsetCurrent.dbl()
+                || !ignoreChange) {
+            return;
         }
+        initialProductionOffset = par("initialProductionOffset");
         if (productionTimer->isScheduled()) { //Stop the production of packets from the old configuration
             cancelEvent(productionTimer);
         }
@@ -156,7 +154,7 @@ cValueMap* DynamicPacketSource::getConfiguration() const{
     map->set("stopReq", !pendingEnabledState);
 
     if (streamName != "") {
-        map->set("name", par("streamName").stdstringValue());//map->set("name", cValue(streamName));
+        map->set("name", par("streamName").stdstringValue());
     }
     map->set("pcp", par("pcp").intValue());
     map->set("application", cValue(appModule->getFullName()));
@@ -165,14 +163,12 @@ cValueMap* DynamicPacketSource::getConfiguration() const{
     map->set("reliability", par("reliability").doubleValue());
     map->set("packetLength", par("pendingPacketLength").getValue());
     map->set("packetInterval", par("pendingProductionInterval").getValue());
-    map->set("phase", isFirstTimeRun ?  cValue(initialProductionOffset.dbl(), "s") : cValue(0, "ns")); //par("initialProductionOffset").getValue()
+    map->set("phase", cValue(phase.dbl(), "s"));
     map->set("maxLatency", par("maxLatency").getValue());
     map->set("maxJitter", par("maxJitter").getValue());
-    //map->set("objectiveType", objective(par("objectiveType")));
 
     map->set("customParams", cValue(par("customParams").objectValue()));
 
-    std::cout << "stream name: " << streamName << endl;
     return map;
 }
 
@@ -199,7 +195,7 @@ void DynamicPacketSource::setNewConfiguration(const std::vector<simtime_t>& prod
         computeProductionOffsets(tempVector);
     }
     //start app
-    firstOffsetInCycle = productionTimesInHyperCycleVector[0];
+    firstFrameOffsetCurrent = productionTimesInHyperCycleVector[0];
     par("initialProductionOffset") = productionTimesInHyperCycleVector[0].dbl();
 }
 
@@ -222,21 +218,6 @@ bool DynamicPacketSource::stopIfNotScheduled() {
     }
     return false;
 }
-
-/*int DynamicPacketSource::objective(const char* type) const {
-        StreamObjectives value;
-        if (!strcmp(type, "LATENESS"))
-                value = StreamObjectives::LATENESS;
-            else if (!strcmp(type, "TARDINESS"))
-                value = StreamObjectives::TARDINESS;
-            else if (!strcmp(type, "JITTER"))
-                value = StreamObjectives::JITTER;
-            else if (!strcmp(type, "TARDINESS_AND_JITTER"))
-                value = StreamObjectives::TARDINESS_AND_JITTER;
-            else
-                value = StreamObjectives::NO_OBJECTIVE;
-        return static_cast<int>(value);
-    }*/
 
 DynamicPacketSource::~DynamicPacketSource() {
         cancelAndDeleteClockEvent(parameterChangeEvent);

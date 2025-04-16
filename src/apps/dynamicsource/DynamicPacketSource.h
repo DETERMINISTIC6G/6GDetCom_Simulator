@@ -33,18 +33,12 @@ namespace d6g {
 
 class DynamicPacketSource: public ActivePacketSource {
 
-/*enum class StreamObjectives {
-      NO_OBJECTIVE = 0, LATENESS = 1, TARDINESS = 2, JITTER = 3, TARDINESS_AND_JITTER = 4
-};*/
-
 private:
     /* Set new parameters quietly (without triggering effects)*/
     volatile bool ignoreChange = false;
     /* 'Pending' parameters are only adopted if the stream has been scheduled;
      * otherwise, stop the packet production */
     bool hasSchedulerPermission = false;
-    /*Configure initialProductionOffsets either initially or on first start (only allowed once)*/
-    bool isFirstTimeRun = true;
 
     bool pendingEnabledState;
     cPar *runningState = nullptr;
@@ -54,8 +48,8 @@ private:
 
     std::vector<simtime_t> offsets;
     size_t nextProductionIndex = 0;
-    simtime_t firstOffsetInCycle;
-
+    simtime_t firstFrameOffsetCurrent;
+    simtime_t phase;
 
 friend class ExternalGateScheduleConfigurator;
 
@@ -75,7 +69,6 @@ protected:
 
 public:
     virtual cValueMap* getConfiguration() const;
-    //int objective(const char* type) const;
 
     ~DynamicPacketSource() override;
 };
