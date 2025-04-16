@@ -22,7 +22,7 @@ jobs:
         with:
           repository: inet-framework/inet
           path: inet
-          ref: 'v4.5.2'
+          ref: '6211cd63ebe479b9b01f5ccecc632d5c2e1952af'
       - name: "Build Neddoc"
         run: |
           source "$HOME/.bashrc"
