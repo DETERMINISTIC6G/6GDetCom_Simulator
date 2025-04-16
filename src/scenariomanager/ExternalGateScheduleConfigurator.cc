@@ -631,7 +631,7 @@ void ExternalGateScheduleConfigurator::addFlows(Input &input) const
         startApplication->packetInterval = entry->get("packetInterval").doubleValueInUnit("s");
         startApplication->maxLatency = entry->get("maxLatency").doubleValueInUnit("s");
         startApplication->maxJitter = entry->get("maxJitter").doubleValueInUnit("s");
-        simtime_t phase = entry->get("phase").doubleValueInUnit("s");
+        auto phase = entry->get("phase").doubleValueInUnit("s");
         startApplication->phase = (phase <= 0.0) ? 0.0 : phase;
         startApplication->reliability = entry->get("reliability").doubleValue();
         startApplication->customParams = check_and_cast<cValueMap *>(entry->get("customParams").objectValue());
@@ -693,7 +693,6 @@ void ExternalGateScheduleConfigurator::parseString(std::string s,
 
 //############################ CONFIGURE ##########################################
 
-// TODO fix me... In PeriodicGate, 'offset' is rounded to approximately ~99ns potentially (!)
 void ExternalGateScheduleConfigurator::configureGateScheduling()
 {
     EV_DEBUG << "CONFIGURATOR: " << EV_FIELD(simTime()) << "configure scheduling" << EV_ENDL;
@@ -711,9 +710,9 @@ void ExternalGateScheduleConfigurator::configureGateScheduling()
             auto gate = dynamic_cast<PeriodicGate *>(queue->getSubmodule("transmissionGate", gateIndex));
             gate->par("initiallyOpen") = newSchedule->open;
 
-            cPar &offsetPar = gate->par("offset");
-            offsetPar.setValue(cValue(newSchedule->offset.inUnit(SIMTIME_NS), "ns")); // (!) here
-
+            //cPar &offsetPar = gate->par("offset");
+            //offsetPar.setValue(cValue(newSchedule->offset.inUnit(SIMTIME_NS), "ns"));
+            gate->par("offset") = newSchedule->offset.dbl();
             cPar &durationsPar = gate->par("durations");
             durationsPar.copyIfShared();
             durationsPar.setObjectValue(newSchedule->durations->dup());

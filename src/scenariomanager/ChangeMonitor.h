@@ -31,7 +31,7 @@ namespace d6g {
 
 class DynamicScenarioObserver;
 
-class ChangeMonitor : public inet::ClockUserModuleMixin<cSimpleModule>
+class ChangeMonitor : public cSimpleModule//inet::ClockUserModuleMixin<cSimpleModule>
 {
 
   friend class DynamicScenarioObserver;

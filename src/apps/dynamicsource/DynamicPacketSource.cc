@@ -34,6 +34,7 @@ void DynamicPacketSource::initialize(int stage)
         cValueArray *productionOffsets = check_and_cast<cValueArray *>(par("productionOffsets").objectValue());
         initialProductionOffset = productionOffsets->get(0).doubleValueInUnit("s");
         phase = productionOffsets->get(0).doubleValueInUnit("s");
+
         if (productionOffsets->size() > 1) {
             std::vector<simtime_t> tempVector;
             for (int i = 0; i < productionOffsets->size(); i++) {

@@ -245,8 +245,6 @@ void ChangeMonitor::updateStreamConfigurations(cValueMap *element)
         if (!(element->get("stopReq").boolValue())) {// enabled: add
             streamConfigurations.resize(streamConfigurations.size() + 1);
             addEntryToStreamConfigurations(element, streamConfigurations.size() - 1);
-            auto path = (source + "." + application + ".source");
-            DynamicPacketSource *sourceModule = check_and_cast<DynamicPacketSource *>(getModuleByPath(path.c_str()));
         }
     drop(element);
     delete element;
@@ -302,7 +300,8 @@ void ChangeMonitor::scheduleTimer(std::string source, cObject *details)
 {
     bubble(("Changes in " + source + " announced.").c_str());
     if (!timer->isScheduled()) {
-        scheduleClockEventAt(getClockTime() + schedulerCallDelayParameter->doubleValue(), timer);
+        //scheduleClockEventAt(getClockTime() + schedulerCallDelayParameter->doubleValue(), timer);
+        scheduleAt(simTime() + schedulerCallDelayParameter->doubleValue(), timer);
     }
 }
 
@@ -339,8 +338,15 @@ ChangeMonitor::~ChangeMonitor()
         }
         delete distributions;
     }
-    cancelAndDeleteClockEvent(timer);
-    delete observer;
+    if (timer != nullptr) {
+        if (timer->isScheduled())
+            cancelEvent(timer);
+        delete timer;
+    }
+        //cancelAndDeleteClockEvent(timer);
+
+    if (observer != nullptr)
+        delete observer;
 }
 
 } // namespace d6g
