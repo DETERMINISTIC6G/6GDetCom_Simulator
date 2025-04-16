@@ -85,7 +85,6 @@ jobs:
           source setenv
           export PATH=/usr/lib/ccache:$PATH
           export CCACHE_DIR=/__w/deterministic6g/deterministic6g/ccache
-          opp_featuretool disable SelfDoc
           make makefiles
           make MODE=release -j $(nproc)
           cd ../deterministic6g
