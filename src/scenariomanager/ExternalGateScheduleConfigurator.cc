@@ -37,9 +37,10 @@ void ExternalGateScheduleConfigurator::initialize(int stage)
 
         hashMapNodeId = new std::map<std::string, uint16_t>();
 
-        auto schedulerRootEnv = getenv("SCHEDULER_ROOT");
+        char const *schedulerRootEnv = getenv("SCHEDULER_ROOT");
         if (!schedulerRootEnv) {
-            throw cRuntimeError("SCHEDULER_ROOT environment variable not set");
+            EV_WARN << "SCHEDULER_ROOT environment variable not set. Using current directory." << endl;
+            schedulerRootEnv = ".";
         }
         schedulerRoot = schedulerRootEnv;
         // Check if path exists
