@@ -11,30 +11,54 @@ The following figure shows the design of the showcase scenario.
 
 .. image:: Delayreplayer_TsnTestNetwork.png
 
-The network consists of two devices connected via switches and a wireless link, as defined in the TsnTestNetwork. The DelayReplayerContainer module is included to provide delay patterns from CSV files. 
+The network consists of two devices connected via switches and a wireless link, as defined in the TsnTestNetwork.
+The DelayReplayerContainer module is included to provide delay patterns from CSV files.
 
-The following code snippet shows the configuration of the DelayReplayerContainer and how it is used to apply delay patterns to the network communication:
+Here is an example configuration file:
 
 .. literalinclude:: ../omnetpp.ini
     :language: ini
     :start-at: delayreplayerContainer
     :end-at: delayDownlink
 
-The DelayReplayerContainer loads CSV files with delay traces and provides them as random number providers. The detCom module uses these providers to apply realistic delay patterns to uplink and downlink communication. 
+As mentioned above, the DelayReplayer supports two modes.
+The first mode, called cycle mode, requires a configuration file with one delay value per line.
+In this mode, the delay values are picked in order, i.e., the first frame is delayed by the value given in the first line, the second frame is delayed by the value in the second line, and so on.
+An optional offset can be applied, this offset allows to start the cycle at a specific position in the file.
+
+In the second mode, called timestamped mode, a file with two comma-separated values per line is required.
+The first value corresponds to a delay value, as before, and the second value corresponds to a timestamp.
+In this case, if a frame arrives, the current simulation timestamp will be taken and the delay value of the closest smaller timestamp of the file will be taken.
+As before, an offset can be specified.
+In the example configuration above, a time of 5 ms would be added to the current simulation time before selecting the correct delay from the file.
+
 
 Results
 -------
 
-The simulation results show the impact of applying real-world delay traces to network communication. The histograms below display the distribution of packet delays in both uplink and downlink directions.
+The following figures show the comparison of a histogram from two given input histograms on the top
+compared to the produced end-to-end packet delay of the simulation on the bottom using the raw measurement data of the same dataset
+to configure the DelayReplayer.
+The left side uses the timestamped mode, the right side uses the cycle mode.
 
-+-----------+------------+
-| |uplink|  | |downlink| |
-+-----------+------------+
++-------------+---------------+
+| |uplink_in| | |downlink_in| |
+| |uplink|    | |downlink|    |
++-------------+---------------+
 
 .. |uplink| image:: uplink.png
    :width: 100%
 
 .. |downlink| image:: downlink.png
    :width: 100%
-   
-The uplink histogram shows a concentrated delay distribution centered around 0.65ms, while the downlink histogram displays a bimodal distribution with peaks at approximately 0.5ms and 0.7ms. These distributions reflect the characteristics of the delay traces provided by the DelayReplayerContainer, demonstrating how real-world network conditions can be simulated using recorded delay patterns.
+
+.. |uplink_in| image:: uplink_in.png
+   :width: 100%
+
+.. |downlink_in| image:: downlink_in.png
+   :width: 100%
+
+
+This shows that the approach follows the delay traces and for a long-running simulation produces the same delay histograms.
+As expected, input and output histograms form a similar distribution, but as the simulation only covers a small timeframe of the whole dataset,
+they are not exactly the same.
