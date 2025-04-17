@@ -14,9 +14,11 @@
 //
 
 #include "ChangeMonitor.h"
+
 #include <numeric> // lcm
-#include "DynamicScenarioObserver.h"
 #include <unordered_set>
+
+#include "DynamicScenarioObserver.h"
 
 namespace d6g {
 
@@ -90,7 +92,7 @@ void ChangeMonitor::subscribeForDynamicChanges()
  */
 void ChangeMonitor::prepareChangesForProcessing(int initialized)
 {
-    intval_t  hyperperiod = 1;
+    intval_t hyperperiod = 1;
     std::vector<long> intervals;
     for (const auto &mapping : streamConfigurations) {
         intervals.push_back(std::round(mapping.packetInterval.doubleValueInUnit("ns")));
@@ -109,47 +111,45 @@ void ChangeMonitor::configureInitStreamsAndDistributions()
     streamConfigurations.clear();
     std::unordered_set<std::string> uniqueStreamNames;
     cSimulation *sim = getSimulation();
-        int sourceNumber = 0;
-        for (int i = 0; i < sim->getLastComponentId(); ++i) {
-            cModule *mod = sim->getModule(i);
-            if (mod && !strcmp(mod->getModuleType()->getName(), "DynamicPacketSource"))
-            {// app source
-                DynamicPacketSource *sourceModule = dynamic_cast<DynamicPacketSource *>(mod);
-                cValueMap *element = sourceModule->getConfiguration();
-                if (!element->containsKey("name") ||
-                        uniqueStreamNames.count(element->get("name").stdstringValue()) > 0) {
-                    auto notUniqueName = element->containsKey("name") ? element->get("name").stringValue() : "";
-                    drop(element);
-                    delete element;
-                    throw cRuntimeError("The stream name \"%s\" is not unique.", notUniqueName);
-                }
-                uniqueStreamNames.insert(element->get("name").stdstringValue());
-                if ((element->get("stopReq").boolValue())) {// not enabled
-                    drop(element);
-                    delete element;
-                    continue;
-                }
-                streamConfigurations.resize(sourceNumber + 1);
-                addEntryToStreamConfigurations(element, sourceNumber);
-                sourceNumber++;
+    int sourceNumber = 0;
+    for (int i = 0; i < sim->getLastComponentId(); ++i) {
+        cModule *mod = sim->getModule(i);
+        if (mod && !strcmp(mod->getModuleType()->getName(), "DynamicPacketSource")) { // app source
+            DynamicPacketSource *sourceModule = dynamic_cast<DynamicPacketSource *>(mod);
+            cValueMap *element = sourceModule->getConfiguration();
+            if (!element->containsKey("name") || uniqueStreamNames.count(element->get("name").stdstringValue()) > 0) {
+                auto notUniqueName = element->containsKey("name") ? element->get("name").stringValue() : "";
+                drop(element);
                 delete element;
+                throw cRuntimeError("The stream name \"%s\" is not unique.", notUniqueName);
             }
-            else if(mod && !strcmp(mod->getModuleType()->getName(), "TsnTranslator") && mod->par("isDstt"))
-            { // DSTT translator
-                TsnTranslator *sourceModule = dynamic_cast<TsnTranslator *>(mod);
-                // initially both: Uplink and Downlink
-                auto delayParam = {"Uplink", "Downlink"};
-                   for (std::string param : delayParam) {
-                      auto dynExpr = sourceModule->getDistributionExpression(("delay" + param).c_str());
-                      auto element = observer->createHistogram(*dynExpr);
-                      take(element);
-                      auto key = std::string(sourceModule->getParentModule()->getName()) + "." +
-                                   std::string(sourceModule->getFullName()) + "_" + param;
-                      updateDistributions(key, element);
-                      delete dynExpr;
-                    } // endfor
-            } // translator
-        } // endfor
+            uniqueStreamNames.insert(element->get("name").stdstringValue());
+            if ((element->get("stopReq").boolValue())) { // not enabled
+                drop(element);
+                delete element;
+                continue;
+            }
+            streamConfigurations.resize(sourceNumber + 1);
+            addEntryToStreamConfigurations(element, sourceNumber);
+            sourceNumber++;
+            delete element;
+        }
+        else if (mod && !strcmp(mod->getModuleType()->getName(), "TsnTranslator") && mod->par("isDstt"))
+        { // DSTT translator
+            TsnTranslator *sourceModule = dynamic_cast<TsnTranslator *>(mod);
+            // initially both: Uplink and Downlink
+            auto delayParam = {"Uplink", "Downlink"};
+            for (std::string param : delayParam) {
+                auto dynExpr = sourceModule->getDistributionExpression(("delay" + param).c_str());
+                auto element = observer->createHistogram(*dynExpr);
+                take(element);
+                auto key = std::string(sourceModule->getParentModule()->getName()) + "." +
+                           std::string(sourceModule->getFullName()) + "_" + param;
+                updateDistributions(key, element);
+                delete dynExpr;
+            } // endfor
+        } // translator
+    } // endfor
     for (const auto &mapping : streamConfigurations) {
         std::cout << mapping << std::endl;
     }
@@ -161,8 +161,8 @@ void ChangeMonitor::addEntryToStreamConfigurations(cValueMap *element, int i)
 
     mapping.name = element->get("name").stringValue();
     mapping.pcp = element->get("pcp").intValue();
-    mapping.gateIndex = element->containsKey("gateIndex") ? element->get("gateIndex").intValue()
-                                                : classify(mapping.pcp);
+    mapping.gateIndex =
+        element->containsKey("gateIndex") ? element->get("gateIndex").intValue() : classify(mapping.pcp);
     mapping.application = element->get("application").stringValue();
     mapping.source = element->get("source").stringValue();
     mapping.destination = element->get("destination").stringValue();
@@ -231,7 +231,7 @@ void ChangeMonitor::updateStreamConfigurations(cValueMap *element)
         });
     if (it != streamConfigurations.end()) { // found
         int i = std::distance(streamConfigurations.begin(), it);
-        if (!(element->get("stopReq").boolValue())) { //enabled: replace
+        if (!(element->get("stopReq").boolValue())) { // enabled: replace
             addEntryToStreamConfigurations(element, i);
         }
         else { // not enabled: remove
@@ -241,15 +241,14 @@ void ChangeMonitor::updateStreamConfigurations(cValueMap *element)
             streamConfigurations.shrink_to_fit();
         }
     }
-    else // not found
-        if (!(element->get("stopReq").boolValue())) {// enabled: add
+    else                                              // not found
+        if (!(element->get("stopReq").boolValue())) { // enabled: add
             streamConfigurations.resize(streamConfigurations.size() + 1);
             addEntryToStreamConfigurations(element, streamConfigurations.size() - 1);
         }
     drop(element);
     delete element;
 }
-
 
 void ChangeMonitor::updateDistributions(std::string key, cValueArray *element)
 {
@@ -295,12 +294,11 @@ void ChangeMonitor::addApplicationsWithStopReqToOutput(std::vector<cModule *> &s
     streamStopRequested.clear();
 }
 
-
 void ChangeMonitor::scheduleTimer(std::string source, cObject *details)
 {
     bubble(("Changes in " + source + " announced.").c_str());
     if (!timer->isScheduled()) {
-        //scheduleClockEventAt(getClockTime() + schedulerCallDelayParameter->doubleValue(), timer);
+        // scheduleClockEventAt(getClockTime() + schedulerCallDelayParameter->doubleValue(), timer);
         scheduleAt(simTime() + schedulerCallDelayParameter->doubleValue(), timer);
     }
 }
@@ -327,7 +325,6 @@ void ChangeMonitor::computeConvolutionAndUpdateDistributions(cModule *source, cM
     delete histogramDetails;
 }
 
-
 ChangeMonitor::~ChangeMonitor()
 {
     if (distributions != nullptr) {
@@ -343,7 +340,7 @@ ChangeMonitor::~ChangeMonitor()
             cancelEvent(timer);
         delete timer;
     }
-        //cancelAndDeleteClockEvent(timer);
+    // cancelAndDeleteClockEvent(timer);
 
     if (observer != nullptr)
         delete observer;

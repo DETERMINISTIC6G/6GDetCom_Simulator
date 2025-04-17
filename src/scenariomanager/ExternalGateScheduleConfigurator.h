@@ -16,15 +16,14 @@
 #ifndef __DYNAMIC_SCENARIO_EXTERNALGATESCHEDULECONFIGURATOR_H_
 #define __DYNAMIC_SCENARIO_EXTERNALGATESCHEDULECONFIGURATOR_H_
 
-#include <filesystem>
 #include <omnetpp.h>
 
+#include <filesystem>
 #include <sstream>
 
 #include "ChangeMonitor.h"
 #include "inet/linklayer/configurator/gatescheduling/common/TSNschedGateScheduleConfigurator.h"
 #include "inet/queueing/gate/PeriodicGate.h"
-
 
 using namespace omnetpp;
 using namespace inet;
@@ -61,7 +60,8 @@ class ExternalGateScheduleConfigurator : public TSNschedGateScheduleConfigurator
         cValueMap *customParams = nullptr;
 
       public:
-        ~Application() {
+        ~Application()
+        {
             if (customParams != nullptr)
                 delete customParams;
         }
@@ -77,10 +77,7 @@ class ExternalGateScheduleConfigurator : public TSNschedGateScheduleConfigurator
         bool hasSchedule() { return gateSchedules.size(); }
 
       public:
-        ~Output()
-        {
-            ;
-        }
+        ~Output() { ; }
     };
 
     template <typename... Args> std::string format(const std::string &fmt, Args... args) const
@@ -90,8 +87,6 @@ class ExternalGateScheduleConfigurator : public TSNschedGateScheduleConfigurator
         snprintf(buf.get(), size, fmt.c_str(), args...);
         return std::string(buf.get(), buf.get() + size - 1);
     }
-
-
 
   private:
     std::map<std::string, uint16_t> *hashMapNodeId;
@@ -109,7 +104,6 @@ class ExternalGateScheduleConfigurator : public TSNschedGateScheduleConfigurator
     mutable simtime_t commitTime = 0;
     mutable simtime_t gateCycleDuration = 0;
     std::filesystem::path schedulerRoot;
-
 
   protected:
     /*extend GateScheduleConfiguratorBase*/
@@ -145,7 +139,7 @@ class ExternalGateScheduleConfigurator : public TSNschedGateScheduleConfigurator
     void writeNetworkToFile(const Input &input) const;
 
     bool addEntryToPDBMap(cValueArray *pdb_map, cModule *source, cModule *target) const;
-    void parseString(std::string s, std::string &leftString, std::string &rightString, char sep)  const;
+    void parseString(std::string s, std::string &leftString, std::string &rightString, char sep) const;
     /*Create separate JSON files for Streams and Network and Distributions */
     cValueMap *convertInputToJsonStreams(const Input &input) const;
     cValueMap *convertInputToJsonNetwork(const Input &input) const;

@@ -41,8 +41,8 @@ void DynamicScenarioObserver::receiveSignal(cComponent *source, simsignal_t sign
            << endl;
     }
     if (signalID == parameterChangeSignal) {
-        EV << "MONITOR: received msg " << msg->getName() << " from " << source->getFullPath() << " at "
-                  << simTime() << "s" << endl;
+        EV << "MONITOR: received msg " << msg->getName() << " from " << source->getFullPath() << " at " << simTime()
+           << "s" << endl;
         DynamicPacketSource *sourceModule = dynamic_cast<DynamicPacketSource *>(source);
         if (sourceModule) {
             cValueMap *element = sourceModule->getConfiguration();
@@ -51,8 +51,8 @@ void DynamicScenarioObserver::receiveSignal(cComponent *source, simsignal_t sign
         }
     }
     if (signalID == distributionChangeSignal) {
-        EV << "MONITOR: received msg " << msg->getName() << " from " << source->getFullPath() << " at "
-                  << simTime() << "s" << endl;
+        EV << "MONITOR: received msg " << msg->getName() << " from " << source->getFullPath() << " at " << simTime()
+           << "s" << endl;
         TsnTranslator *sourceModule = dynamic_cast<TsnTranslator *>(source);
         if (sourceModule) {
             std::string paramName = check_and_cast<cMsgPar *>(details)->stringValue();
@@ -74,7 +74,7 @@ cValueArray *DynamicScenarioObserver::createHistogram(cDynamicExpression &dynExp
     Histogram *h = nullptr;
 
     if (dynExpr.isAConstant()) {
-        double constDelay = dynExpr.evaluate(monitor).doubleValueInUnit("ms"); //this
+        double constDelay = dynExpr.evaluate(monitor).doubleValueInUnit("ms"); // this
 
         if (constDelay == 0) {
             return jsonBins;
@@ -111,7 +111,8 @@ cValueArray *DynamicScenarioObserver::createHistogram(cDynamicExpression &dynExp
     return jsonBins;
 }
 
-void DynamicScenarioObserver::computeFromSamples(intval_t numberOfSamples, const cDynamicExpression &dynExpr, cValueArray &jsonBins)
+void DynamicScenarioObserver::computeFromSamples(intval_t numberOfSamples, const cDynamicExpression &dynExpr,
+                                                 cValueArray &jsonBins)
 {
     double num_bins = round(log2(numberOfSamples) + 1); // Sturges-formula
     std::vector<double> samples(numberOfSamples);
@@ -129,14 +130,11 @@ void DynamicScenarioObserver::computeFromSamples(intval_t numberOfSamples, const
     std::vector<int> frequencies;
     frequencies.resize(num_bins + 1, 0);
     for (double value : samples) {
-        int bin_index = std::min(
-                static_cast<int>((value - min_val) / bin_width),
-                static_cast<int>(num_bins - 1));
+        int bin_index = std::min(static_cast<int>((value - min_val) / bin_width), static_cast<int>(num_bins - 1));
         frequencies[bin_index]++;
     }
     Histogram *h = new Histogram();
-    cXMLElement *histogramEntity = h->createHistogramEntity(bin_edges,
-            frequencies, num_bins);
+    cXMLElement *histogramEntity = h->createHistogramEntity(bin_edges, frequencies, num_bins);
     h->parseHistogramConfig(histogramEntity);
     h->convertHistogramToJSONBins(&jsonBins);
     delete histogramEntity;

@@ -149,7 +149,6 @@ void ExternalGateScheduleConfigurator::printJson(std::ostream &stream, const cVa
         stream << value.str();
 }
 
-
 ExternalGateScheduleConfigurator::Output *
 ExternalGateScheduleConfigurator::computeGateScheduling(const Input &input) const
 {
@@ -174,8 +173,7 @@ void ExternalGateScheduleConfigurator::invokeScheduler() const
     if (std::system(commandFromINI.c_str()) != 0) {
         auto eventTime = simTime().dbl() - monitor->par("schedulerCallDelay").doubleValueInUnit("s");
         std::string errorMsg =
-                format("No schedule for the event at %.2fs has been calculated.",
-                eventTime > 0 ? eventTime : 0);
+            format("No schedule for the event at %.2fs has been calculated.", eventTime > 0 ? eventTime : 0);
         throw cRuntimeError("%s", errorMsg.c_str());
     }
     chdir(currentDir);
@@ -372,8 +370,7 @@ ExternalGateScheduleConfigurator::convertJsonToOutput(const Input &input, const 
     // META DATA
     auto jsonMETA = check_and_cast<cValueMap *>(json->get("META").objectValue());
     int scheduled = jsonMETA->containsKey("scheduled") ? jsonMETA->get("scheduled").intValue() : 0;
-    if ((monitor->par("stopWhenNotSchedulable").boolValue()
-          && input.flows.size() != scheduled) || !scheduled) {
+    if ((monitor->par("stopWhenNotSchedulable").boolValue() && input.flows.size() != scheduled) || !scheduled) {
         throw cRuntimeError("The simulation was halted due to the incomplete scheduling of flows.");
     }
     commitTime = SimTime(jsonMETA->get("commit_time").intValue(), SIMTIME_NS);
@@ -442,8 +439,7 @@ ExternalGateScheduleConfigurator::convertJsonToOutput(const Input &input, const 
     return output;
 }
 
-
-//##################################### GET ########################################################
+// ##################################### GET ########################################################
 
 std::string ExternalGateScheduleConfigurator::getExpandedNodeName(cModule *module) const
 {
@@ -461,7 +457,7 @@ bool ExternalGateScheduleConfigurator::isDetComLink(cModule *source, cModule *ta
 {
     detComLinkType = DetComLinkType::NO_DETCOM_LINK;
     if (strcmp(source->getModuleType()->getName(), "TsnTranslator") ||
-            strcmp(target->getModuleType()->getName(), "TsnTranslator"))
+        strcmp(target->getModuleType()->getName(), "TsnTranslator"))
         return false;
     if (!source->par("isDstt") && !target->par("isDstt"))
         return false;
@@ -476,7 +472,6 @@ bool ExternalGateScheduleConfigurator::isDetComLink(cModule *source, cModule *ta
     detComLinkType = DetComLinkType::NWTT_DSTT;
     return true;
 }
-
 
 short ExternalGateScheduleConfigurator::getDeviceType(cModule *module) const
 {
@@ -499,7 +494,6 @@ short ExternalGateScheduleConfigurator::getDeviceType(cModule *module) const
     return (short)type;
 }
 
-
 std::string ExternalGateScheduleConfigurator::getDetComLinkDescription(DetComLinkType type) const
 { // for DetCom links
     switch (type) {
@@ -516,7 +510,6 @@ std::string ExternalGateScheduleConfigurator::getDetComLinkDescription(DetComLin
     }
 }
 
-
 ExternalGateScheduleConfigurator::Input::Port *
 ExternalGateScheduleConfigurator::getConfigurablePort( // LINK : "[source,target]" as string
     const Input &input, std::string &linkName) const
@@ -525,7 +518,7 @@ ExternalGateScheduleConfigurator::getConfigurablePort( // LINK : "[source,target
     std::string source, target;
     parseString(linkName, source, target, ',');
 
-    auto sourceNode = findConfigurableNetworkNode(input,  source);
+    auto sourceNode = findConfigurableNetworkNode(input, source);
     auto targetNode = findConfigurableNetworkNode(input, target);
 
     auto jt = std::find_if(sourceNode->ports.begin(), sourceNode->ports.end(), [&](Input::Port *port) {
@@ -541,15 +534,14 @@ ExternalGateScheduleConfigurator::Input::NetworkNode *
 ExternalGateScheduleConfigurator::findConfigurableNetworkNode(const Input &input, std::string source) const
 {
     auto it = std::find_if(input.networkNodes.begin(), input.networkNodes.end(),
-                              [&](Input::NetworkNode *switch_) { return getExpandedNodeName(switch_->module) == source; });
+                           [&](Input::NetworkNode *switch_) { return getExpandedNodeName(switch_->module) == source; });
     if (it == input.networkNodes.end())
-       throw cRuntimeError("Cannot find TSN device: %s", source.c_str());
+        throw cRuntimeError("Cannot find TSN device: %s", source.c_str());
     auto sourceNode = *it;
     return sourceNode;
 }
 
-
-//############################## ADD ########################################
+// ############################## ADD ########################################
 
 bool ExternalGateScheduleConfigurator::addEntryToPDBMap(cValueArray *pdb_map, cModule *source, cModule *target) const
 {
@@ -567,25 +559,25 @@ bool ExternalGateScheduleConfigurator::addEntryToPDBMap(cValueArray *pdb_map, cM
 
         std::string key;
         switch (linkType) {
-            case DetComLinkType::DSTT_NWTT: {
-                key = nameNetworkNode + getDetComLinkDescription(linkType);
-                break;
-            }
-            case DetComLinkType::NWTT_DSTT: {
-                key = nameNextNetworkNode + getDetComLinkDescription(linkType);
-                break;
-            }
-            case DetComLinkType::DSTT_DSTT: {
-                std::string egress = (nameNextNetworkNode.find('.') != std::string::npos)
-                                         ? nameNextNetworkNode.substr(nameNextNetworkNode.find('.') + 1)
-                                         : nameNextNetworkNode;
-                key = nameNetworkNode + "-" + egress;
-                monitor->computeConvolutionAndUpdateDistributions(source, target);
-                break;
-            }
-            case DetComLinkType::NO_DETCOM_LINK: {
-                ;
-            }
+        case DetComLinkType::DSTT_NWTT: {
+            key = nameNetworkNode + getDetComLinkDescription(linkType);
+            break;
+        }
+        case DetComLinkType::NWTT_DSTT: {
+            key = nameNextNetworkNode + getDetComLinkDescription(linkType);
+            break;
+        }
+        case DetComLinkType::DSTT_DSTT: {
+            std::string egress = (nameNextNetworkNode.find('.') != std::string::npos)
+                                     ? nameNextNetworkNode.substr(nameNextNetworkNode.find('.') + 1)
+                                     : nameNextNetworkNode;
+            key = nameNetworkNode + "-" + egress;
+            monitor->computeConvolutionAndUpdateDistributions(source, target);
+            break;
+        }
+        case DetComLinkType::NO_DETCOM_LINK: {
+            ;
+        }
         }
         auto distributions = monitor->getDistributions();
         if (distributions->find(key) != distributions->end()) {
@@ -600,7 +592,6 @@ bool ExternalGateScheduleConfigurator::addEntryToPDBMap(cValueArray *pdb_map, cM
 
     return false;
 }
-
 
 void ExternalGateScheduleConfigurator::addFlows(Input &input) const
 {
@@ -658,16 +649,12 @@ void ExternalGateScheduleConfigurator::addFlows(Input &input) const
                 if (nameNode == name) {
                     if (m != pathFragments->size() - 1) {
                         auto startNode = networkNode;
-                        auto endNodeName =
-                                pathFragments->get(m + 1).stdstringValue();
-                        auto outputPort = *std::find_if(
-                                startNode->ports.begin(),
-                                startNode->ports.end(),
-                                [&](const auto &port) {
-                                    auto nameNode = getExpandedNodeName(
-                                            port->endNode->module);
-                                    return nameNode == endNodeName;
-                                });
+                        auto endNodeName = pathFragments->get(m + 1).stdstringValue();
+                        auto outputPort =
+                            *std::find_if(startNode->ports.begin(), startNode->ports.end(), [&](const auto &port) {
+                                auto nameNode = getExpandedNodeName(port->endNode->module);
+                                return nameNode == endNodeName;
+                            });
                         path->outputPorts.push_back(outputPort);
                         path->inputPorts.push_back(outputPort->otherPort);
                     }
@@ -682,16 +669,15 @@ void ExternalGateScheduleConfigurator::addFlows(Input &input) const
     } // endfor configuration
 }
 
-
-void ExternalGateScheduleConfigurator::parseString(std::string s,
-        std::string &leftString, std::string &rightString, char sep) const {
+void ExternalGateScheduleConfigurator::parseString(std::string s, std::string &leftString, std::string &rightString,
+                                                   char sep) const
+{
     std::stringstream ss(s);
     std::getline(ss, leftString, sep);
     std::getline(ss, rightString);
 }
 
-
-//############################ CONFIGURE ##########################################
+// ############################ CONFIGURE ##########################################
 
 void ExternalGateScheduleConfigurator::configureGateScheduling()
 {
@@ -710,17 +696,15 @@ void ExternalGateScheduleConfigurator::configureGateScheduling()
             auto gate = dynamic_cast<PeriodicGate *>(queue->getSubmodule("transmissionGate", gateIndex));
             gate->par("initiallyOpen") = newSchedule->open;
 
-            //cPar &offsetPar = gate->par("offset");
-            //offsetPar.setValue(cValue(newSchedule->offset.inUnit(SIMTIME_NS), "ns"));
+            // cPar &offsetPar = gate->par("offset");
+            // offsetPar.setValue(cValue(newSchedule->offset.inUnit(SIMTIME_NS), "ns"));
             gate->par("offset") = newSchedule->offset.dbl();
             cPar &durationsPar = gate->par("durations");
             durationsPar.copyIfShared();
             durationsPar.setObjectValue(newSchedule->durations->dup());
         } // endfor
     } // endfor
-
 }
-
 
 void ExternalGateScheduleConfigurator::configureApplicationOffsets()
 {
@@ -737,15 +721,14 @@ void ExternalGateScheduleConfigurator::configureApplicationOffsets()
     for (auto &application : output->appsInputAndWithStopReq) {
         auto appModule = check_and_cast<DynamicPacketSource *>(application);
         if (appModule->stopIfNotScheduled()) {
-            EV_DEBUG << "stopped at" << EV_FIELD(simTime()) << EV_FIELD(appModule->streamName ) << EV_ENDL;
+            EV_DEBUG << "stopped at" << EV_FIELD(simTime()) << EV_FIELD(appModule->streamName) << EV_ENDL;
             cValueMap *element = appModule->getConfiguration();
             monitor->updateStreamConfigurations(element);
         } // endif
     } // endfor
 }
 
-
-//############################## CLEAR ###############################################
+// ############################## CLEAR ###############################################
 
 void ExternalGateScheduleConfigurator::clearConfiguration()
 {
@@ -759,13 +742,13 @@ void ExternalGateScheduleConfigurator::clearConfiguration()
     if (gateSchedulingOutput != nullptr) {
         auto scheduleMap = gateSchedulingOutput->gateSchedules;
         for (auto it = scheduleMap.begin(); it != scheduleMap.end(); ++it) {
-            std::vector<Output::Schedule*> &schedules = it->second;
+            std::vector<Output::Schedule *> &schedules = it->second;
             for (Output::Schedule *schedule : schedules) {
-                Schedule *oldSchedule = (Schedule*) schedule;
+                Schedule *oldSchedule = (Schedule *)schedule;
                 oldSchedule->~Schedule();
             } // endfor
         } // endfor
-        delete (Output*)gateSchedulingOutput;
+        delete (Output *)gateSchedulingOutput;
     }
     gateSchedulingOutput = nullptr;
 }

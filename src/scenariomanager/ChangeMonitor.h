@@ -19,10 +19,9 @@
 #include <omnetpp.h>
 
 #include "../apps/dynamicsource/DynamicPacketSource.h"
-#include "inet/linklayer/configurator/gatescheduling/base/GateScheduleConfiguratorBase.h"
-
 #include "inet/common/clock/ClockUserModuleMixin.h"
 #include "inet/common/scenario/ScenarioTimer_m.h"
+#include "inet/linklayer/configurator/gatescheduling/base/GateScheduleConfiguratorBase.h"
 
 using namespace omnetpp;
 using namespace inet;
@@ -31,10 +30,10 @@ namespace d6g {
 
 class DynamicScenarioObserver;
 
-class ChangeMonitor : public cSimpleModule//inet::ClockUserModuleMixin<cSimpleModule>
+class ChangeMonitor : public cSimpleModule // inet::ClockUserModuleMixin<cSimpleModule>
 {
 
-  friend class DynamicScenarioObserver;
+    friend class DynamicScenarioObserver;
 
   protected:
     class Mapping
@@ -91,7 +90,6 @@ class ChangeMonitor : public cSimpleModule//inet::ClockUserModuleMixin<cSimpleMo
     void subscribeForDynamicChanges();
     int classify(int pcp);
 
-
   public:
     void updateStreamConfigurations(cValueMap *element);
     void updateDistributions(std::string key, cValueArray *element);
@@ -101,7 +99,8 @@ class ChangeMonitor : public cSimpleModule//inet::ClockUserModuleMixin<cSimpleMo
     std::map<std::string, cValueArray *> *getDistributions() const;
     cValueArray *getStreamConfigurations() const;
 
-    inline bool isFixedPriority() {
+    inline bool isFixedPriority()
+    {
         int numTrafficClasses = par("globallyNumTrafficClasses").intValue();
         return numTrafficClasses > 0;
     };

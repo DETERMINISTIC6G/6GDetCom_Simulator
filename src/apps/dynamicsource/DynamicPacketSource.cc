@@ -46,26 +46,30 @@ void DynamicPacketSource::incrementProductionOffset()
     nextProductionIndex = (nextProductionIndex + 1) % offsets.size();
 }
 
-void DynamicPacketSource::handleMessage(cMessage *msg) {
+void DynamicPacketSource::handleMessage(cMessage *msg)
+{
     if (msg == productionTimer) {
         if (consumer == nullptr || consumer->canPushSomePacket(outputGate->getPathEndGate())) {
             if (offsets.size() > 1) {
                 auto currentProductionOffset = offsets[nextProductionIndex];
                 incrementProductionOffset();
                 scheduleProductionTimer(productionIntervalParameter->doubleValue() + currentProductionOffset.dbl());
-            } else {
+            }
+            else {
                 scheduleProductionTimer(productionIntervalParameter->doubleValue());
             }
             producePacket();
         }
-    } else if (msg == parameterChangeEvent) {
+    }
+    else if (msg == parameterChangeEvent) {
         emit(DynamicScenarioObserver::parameterChangeSignal, msg);
-    } else
+    }
+    else
         throw cRuntimeError("Unknown message type.");
 }
 
-
-void DynamicPacketSource::handleParameterChange(const char *name) {
+void DynamicPacketSource::handleParameterChange(const char *name)
+{
     if (!strcmp(name, "pendingEnabled")) {
         pendingEnabledState = par("pendingEnabled").boolValue();
         hasSchedulerPermission = false;
@@ -75,8 +79,8 @@ void DynamicPacketSource::handleParameterChange(const char *name) {
         if (!runningState->boolValue() && productionTimer->isScheduled()) {
             hasSchedulerPermission = false;
             cancelEvent(productionTimer);
-        } else if (runningState->boolValue()
-                && !productionTimer->isScheduled()) {
+        }
+        else if (runningState->boolValue() && !productionTimer->isScheduled()) {
             if (!ignoreChange) {
                 hasSchedulerPermission = false;
                 scheduleProductionTimer(0);
@@ -89,7 +93,7 @@ void DynamicPacketSource::handleParameterChange(const char *name) {
             throw cRuntimeError("The productionOffsets parameter must contain at least one value.");
         }
 
-        if (productionTimer->isScheduled()) { //Stop the production of packets from the old configuration
+        if (productionTimer->isScheduled()) { // Stop the production of packets from the old configuration
             cancelEvent(productionTimer);
         }
         computeProductionOffsets(productionOffsets);
@@ -97,10 +101,9 @@ void DynamicPacketSource::handleParameterChange(const char *name) {
             scheduleProductionTimer(ClockTime(productionOffsets->get(0).doubleValueInUnit("ns"), SIMTIME_NS));
             incrementProductionOffset();
         }
-    } //endif TO_REMOVE
+    } // endif TO_REMOVE
 
-    if (!strcmp(name, "pendingProductionInterval")
-            || !strcmp(name, "pendingPacketLength")) {
+    if (!strcmp(name, "pendingProductionInterval") || !strcmp(name, "pendingPacketLength")) {
         hasSchedulerPermission = false;
     }
     if (!strcmp(name, "productionInterval") || !strcmp(name, "packetLength")) {
@@ -116,26 +119,28 @@ void DynamicPacketSource::handleParameterChange(const char *name) {
     /* Send the signal only once if multiple parameters change simultaneously.
      * Do not send a signal if the configurator module requests the app to stop/start
      * or it already configures the new production offsets. */
-    if (strcmp(name, "productionOffsets")
-            && !parameterChangeEvent->isScheduled() && !ignoreChange)
+    if (strcmp(name, "productionOffsets") && !parameterChangeEvent->isScheduled() && !ignoreChange)
         scheduleClockEventAt(getClockTime(), parameterChangeEvent);
 }
 
-
-void DynamicPacketSource::scheduleProductionTimer(clocktime_t delay){
-    if (!runningState->boolValue()) return;
+void DynamicPacketSource::scheduleProductionTimer(clocktime_t delay)
+{
+    if (!runningState->boolValue())
+        return;
     if (scheduleForAbsoluteTime) {
         productionTimer->setSchedulingPriority(10);
         scheduleClockEventAt(getClockTime() + delay, productionTimer);
     }
-    else{
+    else {
         productionTimer->setSchedulingPriority(10);
         scheduleClockEventAfter(delay, productionTimer);
     }
 }
 
-void DynamicPacketSource::scheduleProductionTimerAndProducePacket() {
-    if (!runningState->boolValue()) return;
+void DynamicPacketSource::scheduleProductionTimerAndProducePacket()
+{
+    if (!runningState->boolValue())
+        return;
     auto productionOffsets = check_and_cast<cValueArray *>(par("productionOffsets").objectValue());
     auto initialOffset = ClockTime(productionOffsets->get(0).doubleValueInUnit("ns"), SIMTIME_NS);
     nextProductionIndex = 0;
@@ -143,7 +148,8 @@ void DynamicPacketSource::scheduleProductionTimerAndProducePacket() {
         scheduleProductionTimer(initialOffset);
         initialProductionOffsetScheduled = true;
         incrementProductionOffset();
-    } else if (consumer == nullptr || consumer->canPushSomePacket(outputGate->getPathEndGate())) {
+    }
+    else if (consumer == nullptr || consumer->canPushSomePacket(outputGate->getPathEndGate())) {
         // TODO: Check
         auto nextSchedule = productionIntervalParameter->doubleValue();
         incrementProductionOffset();
@@ -156,7 +162,8 @@ void DynamicPacketSource::scheduleProductionTimerAndProducePacket() {
     }
 }
 
-cValueMap* DynamicPacketSource::getConfiguration() const{
+cValueMap *DynamicPacketSource::getConfiguration() const
+{
     cModule *appModule = this->getParentModule();
     cModule *deviceModule = appModule->getParentModule();
 
@@ -183,7 +190,8 @@ cValueMap* DynamicPacketSource::getConfiguration() const{
     return map;
 }
 
-void DynamicPacketSource::setNewConfiguration(const std::vector<simtime_t>& productionTimesInHyperCycleVector) {
+void DynamicPacketSource::setNewConfiguration(const std::vector<simtime_t> &productionTimesInHyperCycleVector)
+{
     hasSchedulerPermission = true;
 
     ignoreChange = true;
@@ -195,30 +203,33 @@ void DynamicPacketSource::setNewConfiguration(const std::vector<simtime_t>& prod
     nextProductionIndex = 0;
     // length is always at least 1. otherwise, use the already existing TO_REMOVE.
     size_t vectorSize = productionTimesInHyperCycleVector.size();
-        auto *tempArray = new cValueArray();
-        // relative to the hyperperiod (= vec.size()*period)
-        for (int i = 0; i < vectorSize; i++) {
-            double offset_i = productionTimesInHyperCycleVector[i].inUnit(SIMTIME_NS) - i * productionIntervalParameter->doubleValueInUnit("ns");
-            tempArray->add(cValue(offset_i, "ns"));
-        }//endfor
+    auto *tempArray = new cValueArray();
+    // relative to the hyperperiod (= vec.size()*period)
+    for (int i = 0; i < vectorSize; i++) {
+        double offset_i = productionTimesInHyperCycleVector[i].inUnit(SIMTIME_NS) -
+                          i * productionIntervalParameter->doubleValueInUnit("ns");
+        tempArray->add(cValue(offset_i, "ns"));
+    } // endfor
 
-        par("productionOffsets").setObjectValue(tempArray);
+    par("productionOffsets").setObjectValue(tempArray);
 }
 
-void DynamicPacketSource::computeProductionOffsets(const cValueArray* values) {
+void DynamicPacketSource::computeProductionOffsets(const cValueArray *values)
+{
     offsets.clear();
     nextProductionIndex = 0;
     // Iterate over values array
     for (int i = 0; i < values->size(); i++) {
-        const auto& currentValue = values->get(i);
-        const auto& prevValue = values->get((i-1 + values->size()) % values->size());
+        const auto &currentValue = values->get(i);
+        const auto &prevValue = values->get((i - 1 + values->size()) % values->size());
         double diff = currentValue.doubleValueInUnit("ns") - prevValue.doubleValueInUnit("ns");
         // Remove rounding errors of offsets
         offsets.emplace_back(diff, SIMTIME_NS, true);
     }
 }
 
-bool DynamicPacketSource::stopIfNotScheduled() {
+bool DynamicPacketSource::stopIfNotScheduled()
+{
     if (!(hasSchedulerPermission && runningState->boolValue())) {
         ignoreChange = true;
         par("enabled").setBoolValue(false);
@@ -229,7 +240,5 @@ bool DynamicPacketSource::stopIfNotScheduled() {
     return false;
 }
 
-DynamicPacketSource::~DynamicPacketSource() {
-        cancelAndDeleteClockEvent(parameterChangeEvent);
-    }
-} //namespace
+DynamicPacketSource::~DynamicPacketSource() { cancelAndDeleteClockEvent(parameterChangeEvent); }
+} // namespace d6g

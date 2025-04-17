@@ -17,6 +17,7 @@
 #define SCENARIOMANAGER_DYNAMICSCENARIOOBSERVER_H_
 
 #include <omnetpp.h>
+
 #include "inet/common/clock/ClockUserModuleMixin.h"
 
 using namespace omnetpp;
@@ -45,7 +46,6 @@ class DynamicScenarioObserver : public cListener
 
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
     cValueArray *createHistogram(cDynamicExpression &dynExpr, cObject *details = nullptr);
-
 };
 
 } /* namespace d6g */
