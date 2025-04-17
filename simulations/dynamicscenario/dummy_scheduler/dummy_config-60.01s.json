@@ -1,0 +1,301 @@
+{
+    "EXACT": {
+        "stream1#0": {
+            "[bridge1,detComOne.nwtt]": 8146,
+            "[detComOne.dstt[1],wirelessdevice2]": 22441104,
+            "[detComOne.nwtt,detComOne.dstt[1]]": 16292,
+            "[device3,bridge1]": 0
+        },
+        "stream4#0": {
+            "[bridge1,bridge2]": 28850966,
+            "[bridge2,device2]": 28859112,
+            "[detComOne.dstt[0],detComOne.nwtt]": 8146,
+            "[detComOne.nwtt,bridge1]": 28842820,
+            "[wirelessdevice1,detComOne.dstt[0]]": 0
+        },
+        "stream5#0": {
+            "[bridge1,detComOne.nwtt]": 10016292,
+            "[bridge2,bridge1]": 10008146,
+            "[detComOne.dstt[0],wirelessdevice1]": 34422488,
+            "[detComOne.nwtt,detComOne.dstt[0]]": 10024438,
+            "[device1,bridge2]": 10000000
+        }
+    },
+    "GCL": {
+        "[bridge1,bridge2]": {
+            "Q4": {
+                "durations": [
+                    29991904,
+                    8096
+                ],
+                "initial": 0,
+                "offset": 1140938
+            }
+        },
+        "[bridge1,detComOne.nwtt]": {
+            "Q4": {
+                "durations": [
+                    19983758,
+                    8096,
+                    10000050,
+                    8096
+                ],
+                "initial": 0,
+                "offset": 19975612
+            }
+        },
+        "[bridge2,bridge1]": {
+            "Q4": {
+                "durations": [
+                    29991904,
+                    8096
+                ],
+                "initial": 0,
+                "offset": 19983758
+            }
+        },
+        "[bridge2,device2]": {
+            "Q4": {
+                "durations": [
+                    29991904,
+                    8096
+                ],
+                "initial": 0,
+                "offset": 1132792
+            }
+        },
+        "[detComOne.dstt[0],detComOne.nwtt]": {
+            "Q4": {
+                "durations": [
+                    29991904,
+                    8096
+                ],
+                "initial": 0,
+                "offset": 29983758
+            }
+        },
+        "[detComOne.dstt[0],wirelessdevice1]": {
+            "Q4": {
+                "durations": [
+                    29991904,
+                    8096
+                ],
+                "initial": 0,
+                "offset": -4430584
+            }
+        },
+        "[detComOne.dstt[1],wirelessdevice2]": {
+            "Q4": {
+                "durations": [
+                    29991904,
+                    8096
+                ],
+                "initial": 0,
+                "offset": 7550800
+            }
+        },
+        "[detComOne.nwtt,bridge1]": {
+            "Q4": {
+                "durations": [
+                    29991904,
+                    8096
+                ],
+                "initial": 0,
+                "offset": 1149084
+            }
+        },
+        "[detComOne.nwtt,detComOne.dstt[0]]": {
+            "Q4": {
+                "durations": [
+                    29991904,
+                    8096
+                ],
+                "initial": 0,
+                "offset": 19967466
+            }
+        },
+        "[detComOne.nwtt,detComOne.dstt[1]]": {
+            "Q4": {
+                "durations": [
+                    29991904,
+                    8096
+                ],
+                "initial": 0,
+                "offset": 29975612
+            }
+        },
+        "[device1,bridge2]": {
+            "Q4": {
+                "durations": [
+                    29991904,
+                    8096
+                ],
+                "initial": 0,
+                "offset": 19991904
+            }
+        },
+        "[device3,bridge1]": {
+            "Q4": {
+                "durations": [
+                    29991904,
+                    8096
+                ],
+                "initial": 0,
+                "offset": 29991904
+            }
+        },
+        "[wirelessdevice1,detComOne.dstt[0]]": {
+            "Q4": {
+                "durations": [
+                    29991904,
+                    8096
+                ],
+                "initial": 0,
+                "offset": 29991904
+            }
+        }
+    },
+    "LISTENERS": {
+        "stream1#0": [
+            22449154,
+            22449250
+        ],
+        "stream4#0": [
+            28867162,
+            28867258
+        ],
+        "stream5#0": [
+            34430538,
+            34430634
+        ]
+    },
+    "META": {
+        "commit_time": 60060000000,
+        "computing_time": 50000000,
+        "generated_by": "benchmarks/heuristic.cc",
+        "hypercycle": 30000000,
+        "makespan": 34430634,
+        "scheduled": 3
+    },
+    "PSFP": {
+        "bridge1": [
+            {
+                "close": 8146,
+                "frames": [
+                    "stream1#0"
+                ],
+                "open": 8050
+            },
+            {
+                "close": 10016292,
+                "frames": [
+                    "stream5#0"
+                ],
+                "open": 10016196
+            },
+            {
+                "close": 28850966,
+                "frames": [
+                    "stream4#0"
+                ],
+                "open": 28850870
+            }
+        ],
+        "bridge2": [
+            {
+                "close": 10008146,
+                "frames": [
+                    "stream5#0"
+                ],
+                "open": 10008050
+            },
+            {
+                "close": 28859112,
+                "frames": [
+                    "stream4#0"
+                ],
+                "open": 28859016
+            }
+        ],
+        "detComOne.dstt[0]": [
+            {
+                "close": 34422488,
+                "frames": [
+                    "stream5#0"
+                ],
+                "open": 14990314
+            },
+            {
+                "close": 8146,
+                "frames": [
+                    "stream4#0"
+                ],
+                "open": 8050
+            }
+        ],
+        "detComOne.dstt[1]": [
+            {
+                "close": 22441104,
+                "frames": [
+                    "stream1#0"
+                ],
+                "open": 3008292
+            }
+        ],
+        "detComOne.nwtt": [
+            {
+                "close": 16292,
+                "frames": [
+                    "stream1#0"
+                ],
+                "open": 16196
+            },
+            {
+                "close": 10024438,
+                "frames": [
+                    "stream5#0"
+                ],
+                "open": 10024342
+            },
+            {
+                "close": 28842820,
+                "frames": [
+                    "stream4#0"
+                ],
+                "open": 5204693
+            }
+        ],
+        "device2": [
+            {
+                "close": 28867258,
+                "frames": [
+                    "stream4#0"
+                ],
+                "open": 28867162
+            }
+        ],
+        "wirelessdevice1": [
+            {
+                "close": 34430634,
+                "frames": [
+                    "stream5#0"
+                ],
+                "open": 34430538
+            }
+        ],
+        "wirelessdevice2": [
+            {
+                "close": 22449250,
+                "frames": [
+                    "stream1#0"
+                ],
+                "open": 22449154
+            }
+        ]
+    },
+    "TALKERS": {
+        "stream1#0": 0,
+        "stream4#0": 0,
+        "stream5#0": 10000000
+    }
+}
