@@ -8,8 +8,10 @@
 
 package d6g.devices.tsntranslator;
 
+import d6g.timestamping.TimeChunkEnforcer;
 import inet.protocolelement.contract.IProtocolLayer;
 import inet.protocolelement.processing.IProcessingDelayLayer;
+
 
 //
 // This module is a copy from the BridgingLayer module of the INET Framework
@@ -24,6 +26,7 @@ module TTBridgingLayer like IProtocolLayer
         *.macTableModule = default(absPath(this.macTableModule));
         *.interfaceTableModule = default(this.interfaceTableModule);
         @display("i=block/layer");
+        directionReverser.reverser.typename = "TTPacketDirectionReverser";
     gates:
         input upperLayerIn;
         output upperLayerOut;
@@ -36,6 +39,7 @@ module TTBridgingLayer like IProtocolLayer
         directionReverser: <default("DirectionReverserLayer")> like IProtocolLayer {
             @display("p=300,300");
         }
+
         streamIdentifier: <default("")> like IProtocolLayer {
             @display("p=300,450");
         }
@@ -45,17 +49,23 @@ module TTBridgingLayer like IProtocolLayer
         streamFilter: <default("")> like IProtocolLayer {
             @display("p=300,750");
         }
-        streamCoder: <default("")> like IProtocolLayer {
+        pdc: <default("")> like IProcessingDelayLayer {
             @display("p=300,900");
         }
-        interfaceRelay: <default("InterfaceRelayLayer")> like IProtocolLayer {
+        streamCoder: <default("")> like IProtocolLayer {
             @display("p=300,1050");
         }
-        vlanPolicy: <default("")> like IProtocolLayer {
+        interfaceRelay: <default("InterfaceRelayLayer")> like IProtocolLayer {
             @display("p=300,1200");
         }
-        delayLayer: <default("")> like IProcessingDelayLayer {
+        vlanPolicy: <default("")> like IProtocolLayer {
             @display("p=300,1350");
+        }
+        timestampingLayer: <default("DetComTimestampingLayer")> like IProtocolLayer {
+            @display("p=300,1500");
+        }
+        delayLayer: <default("")> like IProcessingDelayLayer {
+            @display("p=300,1650");
         }
     connections:
         upperLayerIn --> processingDelayLayer.upperLayerIn;
@@ -63,17 +73,21 @@ module TTBridgingLayer like IProtocolLayer
         directionReverser.lowerLayerOut --> streamIdentifier.upperLayerIn;
         streamIdentifier.lowerLayerOut --> streamRelay.upperLayerIn;
         streamRelay.lowerLayerOut --> streamFilter.upperLayerIn;
-        streamFilter.lowerLayerOut --> streamCoder.upperLayerIn;
+        streamFilter.lowerLayerOut --> pdc.upperLayerIn;
+        pdc.lowerLayerOut --> streamCoder.upperLayerIn;
         streamCoder.lowerLayerOut --> interfaceRelay.upperLayerIn;
         interfaceRelay.lowerLayerOut --> vlanPolicy.upperLayerIn;
-        vlanPolicy.lowerLayerOut --> delayLayer.upperLayerIn;
+        vlanPolicy.lowerLayerOut --> timestampingLayer.upperLayerIn;
+        timestampingLayer.lowerLayerOut --> delayLayer.upperLayerIn;
         delayLayer.lowerLayerOut --> lowerLayerOut;
 
         lowerLayerIn --> delayLayer.lowerLayerIn;
-        delayLayer.upperLayerOut --> vlanPolicy.lowerLayerIn;
+        delayLayer.upperLayerOut --> timestampingLayer.lowerLayerIn;
+        timestampingLayer.upperLayerOut --> vlanPolicy.lowerLayerIn;
         vlanPolicy.upperLayerOut --> interfaceRelay.lowerLayerIn;
         interfaceRelay.upperLayerOut --> streamCoder.lowerLayerIn;
-        streamCoder.upperLayerOut --> streamFilter.lowerLayerIn;
+        streamCoder.upperLayerOut --> pdc.lowerLayerIn;
+        pdc.upperLayerOut --> streamFilter.lowerLayerIn;
         streamFilter.upperLayerOut --> streamRelay.lowerLayerIn;
         streamRelay.upperLayerOut --> streamIdentifier.lowerLayerIn;
         streamIdentifier.upperLayerOut --> directionReverser.lowerLayerIn;

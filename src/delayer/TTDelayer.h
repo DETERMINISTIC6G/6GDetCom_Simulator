@@ -10,6 +10,8 @@
 #define __DETERMINISTIC6G_DETAILEDDELAYER_H_
 
 #include <omnetpp.h>
+
+#include "../utils/InterfaceFilterMixin.h"
 #include "inet/queueing/base/PacketDelayerBase.h"
 
 using namespace omnetpp;
@@ -18,11 +20,9 @@ using namespace inet::queueing;
 
 namespace d6g {
 
-class TTDelayer : public PacketDelayerBase {
+class TTDelayer : public InterfaceFilterMixin<PacketDelayerBase> {
 private:
     cPar *delayParameter = nullptr;
-    std::set<int> indInterfaces;
-    std::set<int> reqInterfaces;
 
 protected:
     void initialize(int stage) override;
@@ -38,10 +38,7 @@ protected:
 
     void setDelay(cPar *delay);
 
-    void addInterfacesToSet(std::set<int> &set, const char *interfaceList);
-
     void handleParameterChange(const char *parname) override;
-
 };
 
 } //namespace

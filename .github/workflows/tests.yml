@@ -10,7 +10,7 @@ permissions:
   contents: read
 
 env:
-  INET_VERSION: v4.5.2
+  INET_VERSION: 6211cd63ebe479b9b01f5ccecc632d5c2e1952af
 
 jobs:
   fingerprint_test:
@@ -21,12 +21,12 @@ jobs:
         split: [ 0, 1, 2, 3 ]
       fail-fast: false
     container:
-      image: ghcr.io/omnetpp/omnetpp:u22.04-6.0.1
+      image: ghcr.io/omnetpp/omnetpp:u24.04-6.1.0
     steps:
       - name: Checkout Deterministic6G repository
         uses: actions/checkout@main
         with:
-          path: deterministic6g
+          path: 6GDetCom_Simulator
 
       - name: Checkout deterministic6g_data repository
         uses: actions/checkout@main
@@ -40,13 +40,16 @@ jobs:
         with:
           path: |
             deterministic6g_data/PD-Wireless-5G-1/**.xml
+            deterministic6g_data/PD-Wireless-5G-1/**.csv
             deterministic6g_data/ProcessingDelayDistribution2/**.xml
           key: ${{ runner.os }}-deterministic6g_data-${{ hashFiles('deterministic6g_data/PD-Wireless-5G-1/**') }}-${{ hashFiles('deterministic6g_data/ProcessingDelayDistribution2/**') }}
           save-always: true
 
       - name: Build PD
         if: steps.cache-data.outputs.cache-hit != 'true'
+        shell: bash
         run: |
+          source "/root/omnetpp/setenv"
           cd deterministic6g_data/PD-Wireless-5G-1
           pip install requests pyarrow
           export PYTHONPATH=$PYTHONPATH:..
@@ -61,12 +64,12 @@ jobs:
           path: inet
           ref: ${{ env.INET_VERSION }}
 
-      - run: mkdir -p /__w/deterministic6g/deterministic6g/ccache
+      - run: mkdir -p /__w/deterministic6g/6GDetCom_Simulator/ccache
 
       - name: "Cache ccache"
         uses: actions/cache@v4
         with:
-          path: /__w/deterministic6g/deterministic6g/ccache
+          path: /__w/deterministic6g/6GDetCom_Simulator/ccache
           key: native-ccache-${{ github.run_id }}
           # See: https://github.com/actions/cache/blob/main/tips-and-workarounds.md#update-a-cache
           restore-keys: native-ccache
@@ -82,11 +85,11 @@ jobs:
           cd inet
           source setenv
           export PATH=/usr/lib/ccache:$PATH
-          export CCACHE_DIR=/__w/deterministic6g/deterministic6g/ccache
-          opp_featuretool disable SelfDoc
+          export CCACHE_DIR=/__w/deterministic6g/6GDetCom_Simulator/ccache
+          opp_featuretool disable VoipStream DiffServExamples GeneralShowcases Z3GateSchedulingConfigurator TSNShowcases
           make makefiles
           make MODE=release -j $(nproc)
-          cd ../deterministic6g
+          cd ../6GDetCom_Simulator
           make makefiles
           make
 
@@ -95,7 +98,14 @@ jobs:
         run: |
           source "/root/omnetpp/setenv"
           source inet/setenv
-          cd deterministic6g/tests/fingerprint
+          cd 6GDetCom_Simulator/tests/fingerprint
           SPLIT_N=4
           SPLIT_I=${{ matrix.split }}
           inet_fingerprinttest -n $SPLIT_N -i $SPLIT_I
+
+      - name: Upload error artifacts
+        if: failure() # This ensures the step runs only if the workflow fails
+        uses: actions/upload-artifact@v4
+        with:
+          name: error-files
+          path: 6GDetCom_Simulator/tests/fingerprint/

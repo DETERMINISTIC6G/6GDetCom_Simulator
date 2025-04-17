@@ -24,6 +24,8 @@ protected:
     void initialize(int stage) override;
 
     cModule *getDstt(cXMLElement *delayEntity) const;
+
+
 };
 
 } /* namespace d6g */

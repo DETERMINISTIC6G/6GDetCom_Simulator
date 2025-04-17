@@ -12,29 +12,6 @@
           </build-configuration>
         </build-configurations>
       </build-target>
-      <build-target name="make -j $(nproc) MODE=release all">
-        <build-configurations>
-          <build-configuration>
-            <make-targets>
-              <make-target>make</make-target>
-              <make-target>-j</make-target>
-              <make-target>$(nproc)</make-target>
-              <make-target>MODE=release</make-target>
-              <make-target>all</make-target>
-            </make-targets>
-          </build-configuration>
-        </build-configurations>
-      </build-target>
-      <build-target name="make clean">
-        <build-configurations>
-          <build-configuration>
-            <make-targets>
-              <make-target>make</make-target>
-              <make-target>clean</make-target>
-            </make-targets>
-          </build-configuration>
-        </build-configurations>
-      </build-target>
     </user-build-targets>
   </component>
 </project>

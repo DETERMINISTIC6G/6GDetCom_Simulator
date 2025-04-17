@@ -4,6 +4,8 @@ simulations/frames
 *.sif
 src/deterministic6g
 src/deterministic6g_dbg
+src/6GDetCom_Simulator
+src/6GDetCom_Simulator_dbg
 *.vci
 *.vec
 *.sca
@@ -14,6 +16,8 @@ src/Makefile
 .settings/
 public/**
 !public/index.html
+*_m.h
+*_m.cc
 
 doc/src/_build
 doc/doxy

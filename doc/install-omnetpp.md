@@ -7,7 +7,7 @@ can be found in the official (OMNeT++ Installation Guide)[https://doc.omnetpp.or
 
 ## Installing OMNeT++
 
-We are using OMNeT++ 6.0.1, although other versions of OMNeT++ might also work.
+We are using OMNeT++ 6.1, although other versions of OMNeT++ might also work.
 
 Install required packages using the package manager:
 
@@ -26,15 +26,15 @@ $ source ~/venv-omnetpp/bin/activate
 (venv-omnetpp) $ pip install numpy pandas matplotlib scipy seaborn posix-ipc
 ```
 
-Download `omnetpp-6.0.1-linux-x86_64.tgz` from (OMNeT++ web page)[https://omnetpp.org/].
+Download `omnetpp-6.1-linux-x86_64.tgz` from (OMNeT++ web page)[https://omnetpp.org/].
 
 Extract archive to a folder of your choice. In the following, we install OMNeT++ directly to the home directory `~/` of
-the user and refer to the OMNeT++ folder as `~/omnetpp-6.0.1`:
+the user and refer to the OMNeT++ folder as `~/omnetpp-6.1`:
 
 ```
 $ cd ~/
 $ tar xzf omnetpp-6.0-linux-x86_64.tgz
-$ cd ~/omnetpp-6.0.1
+$ cd ~/omnetpp-6.1
 ```
 
 Edit `configure.user`:
@@ -64,7 +64,7 @@ start OMNeT++ from within this environment:
 #!/usr/bin/bash
 
 source ~/venv-omnetpp/bin/activate
-cd ~/omnetpp-6.0.1
+cd ~/omnetpp-6.1
 source setenv
 ./bin/omnetpp
 ```
