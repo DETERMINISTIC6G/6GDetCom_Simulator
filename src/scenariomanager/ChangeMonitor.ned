@@ -27,7 +27,7 @@ import inet.linklayer.configurator.gatescheduling.base.GateScheduleConfiguratorB
 // it maps the PCP value to the gateIndex globally.
 simple ChangeMonitor
 {
-    parameters:       
+    parameters:
         string gateScheduleConfigurator = default("gateScheduleConfigurator");
         // wait for the specified time before performing a call to the scheduler
         volatile double schedulerCallDelay @unit(s) = default(0s);
@@ -52,6 +52,6 @@ simple ChangeMonitor
         // Otherwise, only the streams present in the scheduler's output will be allowed in the network.                          
         bool stopWhenNotSchedulable;
          //number of samples for the creation of a histogram, if uplink/downlink is an expression or a convolution
-        int numberOfSamples = default(1000000); 
+        int numberOfSamples = default(1000000);
         @class(ChangeMonitor);
 }

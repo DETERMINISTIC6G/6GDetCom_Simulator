@@ -3,15 +3,15 @@
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Lesser General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program.  If not, see http://www.gnu.org/licenses/.
-// 
+//
 
 #include "DynamicPacketSource.h"
 
@@ -32,20 +32,18 @@ void DynamicPacketSource::initialize(int stage)
         streamName = par("streamName").stdstringValue();
 
         cValueArray *productionOffsets = check_and_cast<cValueArray *>(par("productionOffsets").objectValue());
-        initialProductionOffset = productionOffsets->get(0).doubleValueInUnit("s");
         phase = productionOffsets->get(0).doubleValueInUnit("s");
 
-        if (productionOffsets->size() > 1) {
-            std::vector<simtime_t> tempVector;
-            for (int i = 0; i < productionOffsets->size(); i++) {
-                 const cValue &value = (*productionOffsets)[i];
-                 tempVector.push_back(SimTime(value.doubleValueInUnit("s")));
-            }
-            computeProductionOffsets(tempVector);
+        if (productionOffsets->size() == 0) {
+            throw cRuntimeError("The productionOffsets parameter must contain at least one value.");
         }
-    }else if (stage == INITSTAGE_LAST) {
-        ;
+        computeProductionOffsets(productionOffsets);
     }
+}
+
+void DynamicPacketSource::incrementProductionOffset()
+{
+    nextProductionIndex = (nextProductionIndex + 1) % offsets.size();
 }
 
 void DynamicPacketSource::handleMessage(cMessage *msg) {
@@ -53,7 +51,7 @@ void DynamicPacketSource::handleMessage(cMessage *msg) {
         if (consumer == nullptr || consumer->canPushSomePacket(outputGate->getPathEndGate())) {
             if (offsets.size() > 1) {
                 auto currentProductionOffset = offsets[nextProductionIndex];
-                nextProductionIndex = (nextProductionIndex + 1) % offsets.size();
+                incrementProductionOffset();
                 scheduleProductionTimer(productionIntervalParameter->doubleValue() + currentProductionOffset.dbl());
             } else {
                 scheduleProductionTimer(productionIntervalParameter->doubleValue());
@@ -85,19 +83,21 @@ void DynamicPacketSource::handleParameterChange(const char *name) {
             }
         }
     }
-    if (!strcmp(name, "initialProductionOffset")) {
-        if (par("initialProductionOffset").doubleValue() != firstFrameOffsetCurrent.dbl()
-                || !ignoreChange) {
-            return;
+    if (!strcmp(name, "productionOffsets")) {
+        auto *productionOffsets = check_and_cast<cValueArray *>(par("productionOffsets").objectValue());
+        if (productionOffsets->size() == 0) {
+            throw cRuntimeError("The productionOffsets parameter must contain at least one value.");
         }
-        initialProductionOffset = par("initialProductionOffset");
+
         if (productionTimer->isScheduled()) { //Stop the production of packets from the old configuration
             cancelEvent(productionTimer);
         }
+        computeProductionOffsets(productionOffsets);
         if (hasSchedulerPermission) {
-            scheduleProductionTimer(initialProductionOffset);
+            scheduleProductionTimer(ClockTime(productionOffsets->get(0).doubleValueInUnit("ns"), SIMTIME_NS));
+            incrementProductionOffset();
         }
-    } //endif initialProductionOffset
+    } //endif TO_REMOVE
 
     if (!strcmp(name, "pendingProductionInterval")
             || !strcmp(name, "pendingPacketLength")) {
@@ -116,7 +116,7 @@ void DynamicPacketSource::handleParameterChange(const char *name) {
     /* Send the signal only once if multiple parameters change simultaneously.
      * Do not send a signal if the configurator module requests the app to stop/start
      * or it already configures the new production offsets. */
-    if (strcmp(name, "initialProductionOffset")
+    if (strcmp(name, "productionOffsets")
             && !parameterChangeEvent->isScheduled() && !ignoreChange)
         scheduleClockEventAt(getClockTime(), parameterChangeEvent);
 }
@@ -136,12 +136,22 @@ void DynamicPacketSource::scheduleProductionTimer(clocktime_t delay){
 
 void DynamicPacketSource::scheduleProductionTimerAndProducePacket() {
     if (!runningState->boolValue()) return;
-
-    if (!initialProductionOffsetScheduled && initialProductionOffset >= CLOCKTIME_ZERO) {
-        scheduleProductionTimer(initialProductionOffset);
+    auto productionOffsets = check_and_cast<cValueArray *>(par("productionOffsets").objectValue());
+    auto initialOffset = ClockTime(productionOffsets->get(0).doubleValueInUnit("ns"), SIMTIME_NS);
+    nextProductionIndex = 0;
+    if (!initialProductionOffsetScheduled && initialOffset >= CLOCKTIME_ZERO) {
+        scheduleProductionTimer(initialOffset);
         initialProductionOffsetScheduled = true;
-    }else if (consumer == nullptr || consumer->canPushSomePacket(outputGate->getPathEndGate())) {
-        scheduleProductionTimer(productionIntervalParameter->doubleValue());
+        incrementProductionOffset();
+    } else if (consumer == nullptr || consumer->canPushSomePacket(outputGate->getPathEndGate())) {
+        // TODO: Check
+        auto nextSchedule = productionIntervalParameter->doubleValue();
+        incrementProductionOffset();
+        if (offsets.size() > 1) {
+            nextSchedule += offsets[nextProductionIndex].dbl();
+        }
+        incrementProductionOffset();
+        scheduleProductionTimer(nextSchedule);
         producePacket();
     }
 }
@@ -182,30 +192,29 @@ void DynamicPacketSource::setNewConfiguration(const std::vector<simtime_t>& prod
     par("packetLength").setValue(par("pendingPacketLength").getValue());
     ignoreChange = false;
 
-    offsets.clear();
     nextProductionIndex = 0;
-    // length is always at least 1. otherwise, use the already existing InitialProductionOffset.
+    // length is always at least 1. otherwise, use the already existing TO_REMOVE.
     size_t vectorSize = productionTimesInHyperCycleVector.size();
-    if (vectorSize > 1) {
-        std::vector<simtime_t> tempVector(vectorSize);
+        auto *tempArray = new cValueArray();
         // relative to the hyperperiod (= vec.size()*period)
         for (int i = 0; i < vectorSize; i++) {
-            auto offset_i = productionTimesInHyperCycleVector[i] - i*productionIntervalParameter->doubleValue();
-            tempVector[i] = offset_i;
+            double offset_i = productionTimesInHyperCycleVector[i].inUnit(SIMTIME_NS) - i * productionIntervalParameter->doubleValueInUnit("ns");
+            tempArray->add(cValue(offset_i, "ns"));
         }//endfor
-        computeProductionOffsets(tempVector);
-    }
-    //start app
-    firstFrameOffsetCurrent = productionTimesInHyperCycleVector[0];
-    par("initialProductionOffset") = productionTimesInHyperCycleVector[0].dbl();
+
+        par("productionOffsets").setObjectValue(tempArray);
 }
 
-void DynamicPacketSource::computeProductionOffsets(const std::vector<simtime_t>& productionOffsets) {
-    nextProductionIndex++;
-    size_t vectorSize = productionOffsets.size();
-    for (int i = 0; i < vectorSize; i++) {
-         auto offset_prev = productionOffsets[(i-1 + vectorSize) % vectorSize].dbl();
-         offsets.push_back(productionOffsets[i] - offset_prev);
+void DynamicPacketSource::computeProductionOffsets(const cValueArray* values) {
+    offsets.clear();
+    nextProductionIndex = 0;
+    // Iterate over values array
+    for (int i = 0; i < values->size(); i++) {
+        const auto& currentValue = values->get(i);
+        const auto& prevValue = values->get((i-1 + values->size()) % values->size());
+        double diff = currentValue.doubleValueInUnit("ns") - prevValue.doubleValueInUnit("ns");
+        // Remove rounding errors of offsets
+        offsets.emplace_back(diff, SIMTIME_NS, true);
     }
 }
 
