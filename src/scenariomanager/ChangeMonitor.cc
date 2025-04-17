@@ -161,8 +161,7 @@ void ChangeMonitor::addEntryToStreamConfigurations(cValueMap *element, int i)
 
     mapping.name = element->get("name").stringValue();
     mapping.pcp = element->get("pcp").intValue();
-    mapping.gateIndex =
-        element->containsKey("gateIndex") ? element->get("gateIndex").intValue() : classify(mapping.pcp);
+    mapping.gateIndex = classify(mapping.pcp);
     mapping.application = element->get("application").stringValue();
     mapping.source = element->get("source").stringValue();
     mapping.destination = element->get("destination").stringValue();
