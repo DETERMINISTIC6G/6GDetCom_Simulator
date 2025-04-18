@@ -63,7 +63,7 @@ simple DynamicPacketSource extends ActivePacketSource
       //		Packet3 is sent at 45ms,
       //		Packet4 is sent at 70ms etc.
       //then repeated cyclically
-      object productionOffsets @mutable @unit(s)  = default([initialProductionOffset]);
+      object productionOffsets @mutable @unit(s)  = default([0ns]);
       
       @class(DynamicPacketSource);
       @signal[parameter-change-event](type=cMessage);

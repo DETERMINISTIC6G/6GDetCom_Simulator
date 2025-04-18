@@ -69,6 +69,8 @@ void DynamicPacketSource::handleMessage(cMessage *msg)
 
 void DynamicPacketSource::handleParameterChange(const char *name)
 {
+    if (!strcmp(name, "initialProductionOffset")) return;
+
     if (!strcmp(name, "pendingEnabled")) {
         pendingEnabledState = par("pendingEnabled").boolValue();
         hasSchedulerPermission = false;
@@ -91,15 +93,17 @@ void DynamicPacketSource::handleParameterChange(const char *name)
         if (productionOffsets->size() == 0) {
             throw cRuntimeError("The productionOffsets parameter must contain at least one value.");
         }
+        if (ignoreChange) {
+            computeProductionOffsets(productionOffsets);
+            if (productionTimer->isScheduled()) { // Stop the production of packets from the old configuration
+                cancelEvent(productionTimer);
+            }
+            if (hasSchedulerPermission) {
+                scheduleProductionTimer(ClockTime(productionOffsets->get(0).doubleValueInUnit("ns"), SIMTIME_NS));
+                incrementProductionOffset();
+            }
+        }
 
-        if (productionTimer->isScheduled()) { // Stop the production of packets from the old configuration
-            cancelEvent(productionTimer);
-        }
-        computeProductionOffsets(productionOffsets);
-        if (hasSchedulerPermission) {
-            scheduleProductionTimer(ClockTime(productionOffsets->get(0).doubleValueInUnit("ns"), SIMTIME_NS));
-            incrementProductionOffset();
-        }
     } // endif
 
     if (!strcmp(name, "pendingProductionInterval") || !strcmp(name, "pendingPacketLength")) {
@@ -113,12 +117,12 @@ void DynamicPacketSource::handleParameterChange(const char *name)
         }
     }
     if (!strcmp(name, "maxLatency") || !strcmp(name, "maxJitter"))
-        return;
+        hasSchedulerPermission = false;
 
     /* Send the signal only once if multiple parameters change simultaneously.
      * Do not send a signal if the configurator module requests the app to stop/start
      * or it already configures the new production offsets. */
-    if (strcmp(name, "productionOffsets") && !parameterChangeEvent->isScheduled() && !ignoreChange)
+    if (!parameterChangeEvent->isScheduled() && !ignoreChange)
         scheduleClockEventAt(getClockTime(), parameterChangeEvent);
 }
 
@@ -208,8 +212,9 @@ void DynamicPacketSource::setNewConfiguration(const std::vector<simtime_t> &prod
                           i * productionIntervalParameter->doubleValueInUnit("ns");
         tempArray->add(cValue(offset_i, "ns"));
     } // endfor
-
+    ignoreChange = true;
     par("productionOffsets").setObjectValue(tempArray);
+    ignoreChange = false;
 }
 
 void DynamicPacketSource::computeProductionOffsets(const cValueArray *values)
