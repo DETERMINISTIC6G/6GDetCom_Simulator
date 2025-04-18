@@ -19,7 +19,7 @@
 #include <omnetpp/cmodule.h>
 #include <omnetpp/ccomponent.h>
 
-#include "../../scenariomanager/DynamicScenarioObserver.h"
+#include "../../dynamicscenario/DynamicScenarioObserver.h"
 
 namespace d6g {
 using namespace omnetpp;

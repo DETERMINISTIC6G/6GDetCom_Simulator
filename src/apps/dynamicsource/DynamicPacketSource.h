@@ -19,8 +19,8 @@
 #include <omnetpp.h>
 
 #include "../../devices/tsntranslator/TsnTranslator.h"
-#include "../../scenariomanager/DynamicScenarioObserver.h"
-#include "../../scenariomanager/ExternalGateScheduleConfigurator.h"
+#include "../../dynamicscenario/ExternalGateScheduleConfigurator.h"
+#include "../../dynamicscenario/DynamicScenarioObserver.h"
 #include "inet/applications/udpapp/UdpSocketIo.h"
 #include "inet/common/clock/ClockUserModuleMixin.h"
 #include "inet/queueing/source/ActivePacketSource.h"
@@ -49,14 +49,12 @@ class DynamicPacketSource : public ActivePacketSource
 
     std::vector<simtime_t> offsets;
     size_t nextProductionIndex = 0;
-    simtime_t firstFrameOffsetCurrent;
-    simtime_t phase;
 
     friend class ExternalGateScheduleConfigurator;
 
   private:
     void computeProductionOffsets(const cValueArray *values);
-    // These methods are used by ExternalGateScheduleConfigurator modules
+    // These methods are used by ExternalGateScheduleConfigurator module
     bool stopIfNotScheduled();
     void setNewConfiguration(const std::vector<simtime_t> &simtimeVector);
 

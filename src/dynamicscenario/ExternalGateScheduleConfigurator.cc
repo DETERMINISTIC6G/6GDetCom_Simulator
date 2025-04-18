@@ -13,7 +13,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#include "ExternalGateScheduleConfigurator.h"
+#include "../dynamicscenario/ExternalGateScheduleConfigurator.h"
 
 #include <fstream>
 #include <numeric>
@@ -109,7 +109,20 @@ void ExternalGateScheduleConfigurator::printJson(std::ostream &stream, const cVa
                     if (i != 0)
                         stream << ",\n";
                     stream << indent << "  ";
-                    printJson(stream, array->get(i), level + 1);
+                    auto original_i = array->get(i);
+                    cValue new_i(original_i);
+                    if (original_i.isNumeric()) {
+                       if (original_i.getUnit()) {
+                          auto valueRaw = std::to_string(original_i.doubleValueRaw());
+                          new_i.set(valueRaw + std::string(original_i.getUnit()));
+                       }
+                       else {
+                           new_i = std::isinf(original_i.doubleValue())
+                                      ? (original_i.doubleValue() > 0 ? cValue(1e308) : cValue(-1e308))
+                                      : original_i;
+                                            }
+                                        }
+                    printJson(stream, new_i, level + 1);
                 }
                 stream << "\n" << indent << "]";
             }
@@ -265,8 +278,6 @@ cValueMap *ExternalGateScheduleConfigurator::convertInputToJsonStreams(const Inp
         jsonFlow->set("hard_constraint_time_latency", dynApplication->maxLatency.inUnit(SIMTIME_NS));
         jsonFlow->set("hard_constraint_time_jitter", dynApplication->maxJitter.inUnit(SIMTIME_NS));
         jsonFlow->set("hard_constraint_time_unit", "ns");
-        jsonFlow->set("phase", dynApplication->phase.inUnit(SIMTIME_NS));
-        jsonFlow->set("phase_unit", "ns");
         jsonFlow->set("custom_parameters", dynApplication->customParams);
         jsonFlow->set("target_device", cValue(flow->endDevice->module->getFullName()));
         // packet delay budget
@@ -371,6 +382,7 @@ ExternalGateScheduleConfigurator::convertJsonToOutput(const Input &input, const 
     auto jsonMETA = check_and_cast<cValueMap *>(json->get("META").objectValue());
     int scheduled = jsonMETA->containsKey("scheduled") ? jsonMETA->get("scheduled").intValue() : 0;
     if ((monitor->par("stopWhenNotSchedulable").boolValue() && input.flows.size() != scheduled) || !scheduled) {
+        delete json;
         throw cRuntimeError("The simulation was halted due to the incomplete scheduling of flows.");
     }
     commitTime = SimTime(jsonMETA->get("commit_time").intValue(), SIMTIME_NS);
@@ -421,9 +433,6 @@ ExternalGateScheduleConfigurator::convertJsonToOutput(const Input &input, const 
         auto flow = *flowIt;
         auto application = flow->startApplication;
         auto startTime = SimTime(field.second.intValue(), SIMTIME_NS);
-        if (output->applicationStartTimes.find(application) == output->applicationStartTimes.end()) {
-            output->applicationStartTimes[application] = startTime;
-        } // endif
         output->applicationStartTimesArray[application].push_back(startTime);
     } // endfor applications
     for (auto &offsetsPair : output->applicationStartTimesArray) {
@@ -622,8 +631,6 @@ void ExternalGateScheduleConfigurator::addFlows(Input &input) const
         startApplication->packetInterval = entry->get("packetInterval").doubleValueInUnit("s");
         startApplication->maxLatency = entry->get("maxLatency").doubleValueInUnit("s");
         startApplication->maxJitter = entry->get("maxJitter").doubleValueInUnit("s");
-        auto phase = entry->get("phase").doubleValueInUnit("s");
-        startApplication->phase = (phase <= 0.0) ? 0.0 : phase;
         startApplication->reliability = entry->get("reliability").doubleValue();
         startApplication->customParams = check_and_cast<cValueMap *>(entry->get("customParams").objectValue());
         input.applications.push_back(startApplication);
@@ -635,7 +642,7 @@ void ExternalGateScheduleConfigurator::addFlows(Input &input) const
         flow->gateIndex = entry->get("gateIndex").intValue();
         flow->startApplication = startApplication;
         flow->endDevice = endDevice;
-        // ADD Route
+        // ADD Route to flow
         cValueArray *pathFragments = new cValueArray();
         for (auto node : computeShortestNodePath(sourceNode, destinationNode)) {
             auto nameNode = getExpandedNodeName(node->module);
@@ -694,14 +701,13 @@ void ExternalGateScheduleConfigurator::configureGateScheduling()
             Schedule *newSchedule = (Schedule *)schedule;
             int gateIndex = newSchedule->gateIndex;
             auto gate = dynamic_cast<PeriodicGate *>(queue->getSubmodule("transmissionGate", gateIndex));
+            if (gate) {
             gate->par("initiallyOpen") = newSchedule->open;
-
-            // cPar &offsetPar = gate->par("offset");
-            // offsetPar.setValue(cValue(newSchedule->offset.inUnit(SIMTIME_NS), "ns"));
             gate->par("offset") = newSchedule->offset.dbl();
             cPar &durationsPar = gate->par("durations");
             durationsPar.copyIfShared();
             durationsPar.setObjectValue(newSchedule->durations->dup());
+            }
         } // endfor
     } // endfor
 }
@@ -710,17 +716,18 @@ void ExternalGateScheduleConfigurator::configureApplicationOffsets()
 {
     auto output = (Output *)gateSchedulingOutput;
 
-    for (auto &it : output->applicationStartTimes) {
-        auto startOffset = it.second;
+    for (auto &it : output->applicationStartTimesArray) {
         auto applicationModule = it.first->module;
-        auto sourceModule = check_and_cast<DynamicPacketSource *>(applicationModule->getSubmodule("source"));
-        const auto &offsets = output->applicationStartTimesArray[it.first];
-        EV_DEBUG << "starting at" << EV_FIELD(simTime()) << EV_FIELD(sourceModule->streamName) << EV_ENDL;
-        sourceModule->setNewConfiguration(offsets);
+        auto sourceModule = dynamic_cast<DynamicPacketSource *>(applicationModule->getSubmodule("source"));
+        if (sourceModule) {
+            const auto &offsets = output->applicationStartTimesArray[it.first];
+            EV_DEBUG << "starting at" << EV_FIELD(simTime()) << EV_FIELD(sourceModule->streamName) << EV_ENDL;
+            sourceModule->setNewConfiguration(offsets);
+        }
     }
     for (auto &application : output->appsInputAndWithStopReq) {
-        auto appModule = check_and_cast<DynamicPacketSource *>(application);
-        if (appModule->stopIfNotScheduled()) {
+        auto appModule = dynamic_cast<DynamicPacketSource *>(application);
+        if (appModule && appModule->stopIfNotScheduled()) {
             EV_DEBUG << "stopped at" << EV_FIELD(simTime()) << EV_FIELD(appModule->streamName) << EV_ENDL;
             cValueMap *element = appModule->getConfiguration();
             monitor->updateStreamConfigurations(element);

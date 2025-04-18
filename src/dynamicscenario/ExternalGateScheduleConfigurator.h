@@ -21,7 +21,7 @@
 #include <filesystem>
 #include <sstream>
 
-#include "ChangeMonitor.h"
+#include "../dynamicscenario/ChangeMonitor.h"
 #include "inet/linklayer/configurator/gatescheduling/common/TSNschedGateScheduleConfigurator.h"
 #include "inet/queueing/gate/PeriodicGate.h"
 
@@ -139,7 +139,7 @@ class ExternalGateScheduleConfigurator : public TSNschedGateScheduleConfigurator
     void writeNetworkToFile(const Input &input) const;
 
     bool addEntryToPDBMap(cValueArray *pdb_map, cModule *source, cModule *target) const;
-    void parseString(std::string s, std::string &leftString, std::string &rightString, char sep) const;
+    void inline parseString(std::string s, std::string &leftString, std::string &rightString, char sep) const;
     /*Create separate JSON files for Streams and Network and Distributions */
     cValueMap *convertInputToJsonStreams(const Input &input) const;
     cValueMap *convertInputToJsonNetwork(const Input &input) const;

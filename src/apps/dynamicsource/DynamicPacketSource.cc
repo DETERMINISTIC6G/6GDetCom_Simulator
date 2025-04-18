@@ -32,7 +32,6 @@ void DynamicPacketSource::initialize(int stage)
         streamName = par("streamName").stdstringValue();
 
         cValueArray *productionOffsets = check_and_cast<cValueArray *>(par("productionOffsets").objectValue());
-        phase = productionOffsets->get(0).doubleValueInUnit("s");
 
         if (productionOffsets->size() == 0) {
             throw cRuntimeError("The productionOffsets parameter must contain at least one value.");
@@ -101,7 +100,7 @@ void DynamicPacketSource::handleParameterChange(const char *name)
             scheduleProductionTimer(ClockTime(productionOffsets->get(0).doubleValueInUnit("ns"), SIMTIME_NS));
             incrementProductionOffset();
         }
-    } // endif TO_REMOVE
+    } // endif
 
     if (!strcmp(name, "pendingProductionInterval") || !strcmp(name, "pendingPacketLength")) {
         hasSchedulerPermission = false;
@@ -181,7 +180,6 @@ cValueMap *DynamicPacketSource::getConfiguration() const
     map->set("reliability", par("reliability").doubleValue());
     map->set("packetLength", par("pendingPacketLength").getValue());
     map->set("packetInterval", par("pendingProductionInterval").getValue());
-    map->set("phase", cValue(phase.dbl(), "s"));
     map->set("maxLatency", par("maxLatency").getValue());
     map->set("maxJitter", par("maxJitter").getValue());
 

@@ -19,8 +19,8 @@ package d6g.simulations.dynamicscenario;
 import d6g.devices.DetCom;
 import d6g.distribution.histogram.HistogramContainer;
 import d6g.networks.DetComNetworkBase;
-import d6g.scenariomanager.ChangeMonitor;
-import d6g.scenariomanager.ObservedScenarioManager;
+import d6g.dynamicscenario.ChangeMonitor;
+import d6g.dynamicscenario.ObservedScenarioManager;
 import inet.linklayer.configurator.gatescheduling.contract.IGateScheduleConfigurator;
 import inet.node.ethernet.EthernetLink;
 import inet.node.tsn.TsnDevice;
@@ -30,7 +30,7 @@ import inet.node.tsn.TsnSwitch;
 network BaselineNetwork extends DetComNetworkBase
 {
     parameters:
-        *.gateScheduleConfigurator.typename = "ExternalGateScheduleConfigurator";//> like IGateScheduleConfigurator; 
+        gateScheduleConfigurator.typename = default("ExternalGateScheduleConfigurator"); 
 
         @display("bgb=2529,1984");
     submodules:

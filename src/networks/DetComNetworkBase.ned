@@ -30,5 +30,5 @@ network DetComNetworkBase extends TsnNetworkBase
 		**.hasIncomingStreams = default(true); // Specifying that all nodes in the network have incoming streams.
 		
 		
-		**.eth[*].macLayer.queue.numTrafficClasses = default(5); // Specifying the number of traffic classes at the MAC layer for all Ethernet interfaces.
+		**.eth[*].macLayer.queue.numTrafficClasses = default(2); // Specifying the number of traffic classes at the MAC layer for all Ethernet interfaces.
 }

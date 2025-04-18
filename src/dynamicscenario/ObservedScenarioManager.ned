@@ -13,7 +13,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package d6g.scenariomanager;
+package d6g.dynamicscenario;
 
 import inet.common.scenario.ScenarioManager;
 

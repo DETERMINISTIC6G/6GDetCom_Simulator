@@ -13,12 +13,12 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#include "ChangeMonitor.h"
+#include "../dynamicscenario/ChangeMonitor.h"
 
 #include <numeric> // lcm
 #include <unordered_set>
 
-#include "DynamicScenarioObserver.h"
+#include "../dynamicscenario/DynamicScenarioObserver.h"
 
 namespace d6g {
 
@@ -170,7 +170,6 @@ void ChangeMonitor::addEntryToStreamConfigurations(cValueMap *element, int i)
     mapping.maxLatency = element->get("maxLatency");
     mapping.maxJitter = element->get("maxJitter");
     mapping.reliability = element->get("reliability").doubleValue();
-    mapping.phase = element->get("phase");
     mapping.customParams = element->get("customParams");
 }
 
@@ -211,7 +210,6 @@ cValueMap *ChangeMonitor::convertMappingToCValue(const Mapping &mapping) const
     map->set("maxLatency", mapping.maxLatency);
     map->set("maxJitter", mapping.maxJitter);
     map->set("reliability", mapping.reliability);
-    map->set("phase", mapping.phase);
     map->set("customParams", mapping.customParams);
 
     return map;
@@ -297,7 +295,6 @@ void ChangeMonitor::scheduleTimer(std::string source, cObject *details)
 {
     bubble(("Changes in " + source + " announced.").c_str());
     if (!timer->isScheduled()) {
-        // scheduleClockEventAt(getClockTime() + schedulerCallDelayParameter->doubleValue(), timer);
         scheduleAt(simTime() + schedulerCallDelayParameter->doubleValue(), timer);
     }
 }
@@ -339,8 +336,6 @@ ChangeMonitor::~ChangeMonitor()
             cancelEvent(timer);
         delete timer;
     }
-    // cancelAndDeleteClockEvent(timer);
-
     if (observer != nullptr)
         delete observer;
 }
