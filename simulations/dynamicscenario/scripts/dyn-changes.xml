@@ -15,10 +15,7 @@
 			value="300ms" />	
 		<set-param module="wirelessdevice1.app[2].source"
 			par="pendingPacketLength" value="1200B" />
-		<!--   <set-param module="device2.app[0].source"
-			par="initialProductionOffset" value="1ms" /> -->
 	</at>
-
 
 	<!-- downlink delay of dstt1 improves -->
 	<set-param t="50" module="detComOne.dstt[1]"                       

@@ -34,7 +34,7 @@ import ned.IdealChannel;
 network Dynamicscenario extends DetComNetworkBase
 {
     parameters:
-        *.gateScheduleConfigurator.typename = "ExternalGateScheduleConfigurator";//> like IGateScheduleConfigurator; 
+        *.gateScheduleConfigurator.typename = "ExternalGateScheduleConfigurator";
 		
         @display("bgb=2035,1324");
     submodules:

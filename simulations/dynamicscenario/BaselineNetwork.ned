@@ -30,7 +30,8 @@ import inet.node.tsn.TsnSwitch;
 network BaselineNetwork extends DetComNetworkBase
 {
     parameters:
-        gateScheduleConfigurator.typename = default("ExternalGateScheduleConfigurator"); 
+        gateScheduleConfigurator.typename = default("ExternalGateScheduleConfigurator");
+        bool enableMonitor = default(true); 
 
         @display("bgb=2529,1984");
     submodules:
@@ -67,7 +68,7 @@ network BaselineNetwork extends DetComNetworkBase
             @display("p=2242,1174");
         }
 
-        monitor: ChangeMonitor {
+        monitor: ChangeMonitor if enableMonitor {
             @display("p=2242,1615");
         }
        
