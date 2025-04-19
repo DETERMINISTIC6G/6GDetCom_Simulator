@@ -28,6 +28,7 @@ import inet.linklayer.configurator.gatescheduling.base.GateScheduleConfiguratorB
 simple ChangeMonitor
 {
     parameters:
+        //automatic gate scheduling
         string gateScheduleConfigurator = default("gateScheduleConfigurator");
         // wait for the specified time before performing a call to the scheduler
         volatile double schedulerCallDelay @unit(s) = default(0s);
