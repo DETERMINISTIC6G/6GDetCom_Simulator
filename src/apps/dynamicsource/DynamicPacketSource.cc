@@ -102,8 +102,8 @@ void DynamicPacketSource::handleParameterChange(const char *name)
                 scheduleProductionTimer(ClockTime(productionOffsets->get(0).doubleValueInUnit("ns"), SIMTIME_NS));
                 incrementProductionOffset();
             }
-        }
-
+        }else
+            hasSchedulerPermission = false;
     } // endif
 
     if (!strcmp(name, "pendingProductionInterval") || !strcmp(name, "pendingPacketLength")) {

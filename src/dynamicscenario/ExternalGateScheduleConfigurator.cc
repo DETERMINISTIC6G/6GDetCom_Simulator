@@ -781,7 +781,8 @@ ExternalGateScheduleConfigurator::~ExternalGateScheduleConfigurator()
     if (configuration != nullptr)
         delete configuration;
 
-    delete hashMapNodeId;
+    //if (hashMapNodeId != nullptr)
+        //delete hashMapNodeId;
 
     if (configurationComputedEvent != nullptr) {
         if (configurationComputedEvent->isScheduled())
