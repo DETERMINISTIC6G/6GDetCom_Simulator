@@ -43,8 +43,8 @@ simple ExternalGateScheduleConfigurator extends GateScheduleConfiguratorBase lik
     //hyperperiod is automatically calculated
     gateCycleDuration @mutable = default(0s); 
  
- 	// Scheduler invocation command with parameters           
-    string command;   
+ 	// Scheduler invocation command with parameters
+ 	string command;
     // Specifies the network configuration (input-)file
     volatile string networkFile;
     // Specifies the streams configuration (input-)file
