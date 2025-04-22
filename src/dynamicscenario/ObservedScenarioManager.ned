@@ -5,7 +5,7 @@
 //
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-package d6g.scenariomanager;
+package d6g.dynamicscenario;
 
 import inet.common.scenario.ScenarioManager;
 

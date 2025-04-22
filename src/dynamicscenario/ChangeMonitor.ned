@@ -5,7 +5,7 @@
 //
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-package d6g.scenariomanager;
+package d6g.dynamicscenario;
 
 import inet.linklayer.configurator.gatescheduling.base.GateScheduleConfiguratorBase;
 
@@ -20,14 +20,15 @@ import inet.linklayer.configurator.gatescheduling.base.GateScheduleConfiguratorB
 simple ChangeMonitor
 {
     parameters:
+        //automatic gate scheduling
         string gateScheduleConfigurator = default("gateScheduleConfigurator");
         // wait for the specified time before performing a call to the scheduler
         volatile double schedulerCallDelay @unit(s) = default(0s);
                
         // If globallyNumTrafficClasses = 0 : mapping priority to traffic class is the responsibility of the scheduler. 
-        // The number of configurable queues in the TsnSwitch and TsnDevice modules may vary accordingly.
-        // Otherwise (globallyNumTrafficClasses > 0), assign the gateIndex to the pcp value.
-      	int globallyNumTrafficClasses = default(8);
+        // In case the number of configurable queues in the TsnSwitch and TsnDevice modules may vary accordingly.
+        // Otherwise (0 < globallyNumTrafficClasses <= 8), assign the gateIndex to the pcp value.
+      	int globallyNumTrafficClasses = default(2);
                
         // IEEE Standard for Local and Metropolitan Area Networks, Bridges and Bridged Networks
         // Table 8-5—Recommended priority to traffic class mappings

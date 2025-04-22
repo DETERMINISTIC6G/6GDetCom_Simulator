@@ -1,46 +1,43 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <script>
 
-    <!--stop stream2 -->
-    <at t="20">
-        <set-param module="device2.app[0].source"
-                   par="pendingEnabled" value="false"/>
-    </at>
+	<!--stop stream2 -->	
+	<at t="20">
+		<set-param module="device2.app[0].source"
+			par="pendingEnabled" value="false" />										
+	</at>
 
-    <!-- Change interval and packet length of stream3 -->
-    <at t="40">
-        <set-param module="wirelessdevice1.app[2].source"
-                   par="pendingProductionInterval" value="300ms"/>
-        <set-param module="wirelessdevice1.app[2].source" par="maxLatency"
-                   value="300ms"/>
-        <set-param module="wirelessdevice1.app[2].source"
-                   par="pendingPacketLength" value="1200B"/>
-        <!--   <set-param module="device2.app[0].source"
-            par="initialProductionOffset" value="1ms" /> -->
-    </at>
+	<!-- Change interval and packet length of stream3 -->
+	<at t="40">
+		<set-param module="wirelessdevice1.app[2].source"
+			par="pendingProductionInterval" value="300ms" />
+		<set-param module="wirelessdevice1.app[2].source" par="maxLatency"
+			value="300ms" />	
+		<set-param module="wirelessdevice1.app[2].source"
+			par="pendingPacketLength" value="1200B" />
+	</at>
 
-
-    <!-- downlink delay of dstt1 improves -->
-    <set-param t="50" module="detComOne.dstt[1]"
-               par="delayDownlink"
-               expr="rngProvider(&quot;histogramContainer&quot;,&quot;Downlink_improve&quot;)"/>
-
+	<!-- downlink delay of dstt1 improves -->
+	<set-param t="50" module="detComOne.dstt[1]"                       
+            par="delayDownlink" 
+            expr="rngProvider(&quot;histogramContainer&quot;,&quot;Downlink_improve&quot;)"/>      
+            
     <!-- uplink delay of dstt0 degrades -->
-    <set-param t="50" module="detComOne.dstt[0]"
-               par="delayUplink"
-               expr="rngProvider(&quot;histogramContainer&quot;,&quot;Uplink_worse&quot;)"/>         <!-- getting worse -->
+    <set-param t="50" module="detComOne.dstt[0]" 
+            par="delayUplink" 
+            expr="rngProvider(&quot;histogramContainer&quot;,&quot;Uplink_worse&quot;)"/>         <!-- getting worse -->
 
     <!-- start stream1 and stop stream3 -->
     <at t="60">
         <set-param module="device3.app[0].source"
-                   par="pendingEnabled" value="true"/>
+            par="pendingEnabled" value="true" />
         <set-param module="wirelessdevice1.app[2].source"
-                   par="enabled" value="false"/>
+            par="enabled" value="false" />
     </at>
 
     <!-- downlink delay of dstt0 improves -->
-    <set-param t="80" module="detComOne.dstt[0]"
-               par="delayDownlink"
-               expr="rngProvider(&quot;histogramContainer&quot;,&quot;Downlink&quot;)"/> <!-- end -->
-
+    <set-param t="80" module="detComOne.dstt[0]" 
+            par="delayDownlink" 
+            expr="rngProvider(&quot;histogramContainer&quot;,&quot;Downlink&quot;)"/> 
+		
 </script>

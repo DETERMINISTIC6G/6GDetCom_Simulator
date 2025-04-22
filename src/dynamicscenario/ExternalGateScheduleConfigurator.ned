@@ -5,7 +5,7 @@
 //
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-package d6g.scenariomanager;
+package d6g.dynamicscenario;
 
 import inet.linklayer.configurator.gatescheduling.base.GateScheduleConfiguratorBase;
 import inet.linklayer.configurator.gatescheduling.contract.IGateScheduleConfigurator;
@@ -26,16 +26,15 @@ import inet.linklayer.configurator.gatescheduling.contract.IGateScheduleConfigur
 //
 // <pre>
 // Command usage:
-// e.g.: "./path/scheduler -n %s -s %s -d %s -o %s"
+// e.g.: "./path/scheduler -n %s -s %s -d %s -o %s" 
+// (%s will be replaced with the filename)
 // Please make sure to set the SCHEDULER_ROOT environment variable!
 // All paths are relative to the SCHEDULER_ROOT variable and the folders must exist.
-// Observe the correct order.
-// Parameters:
-// 1. -n %s: Specifies the network configuration (input-)file (networkFile). 
-// 2. -s %s: Specifies the streams configuration (input-)file (streamsFile).
-// 3. -d %s: Specifies changes of wireless link distributions (histogramsFile).
-// 4. -o %s: Specifies the scheduler's output file (configurationFile).
-// (%s will be replaced with the filename)
+// Always observe the correct order. Parameters e.g.:
+// 1. networkFile 
+// 2. streamsFile
+// 3. histogramsFile
+// 4. configurationFile
 // </pre>
 simple ExternalGateScheduleConfigurator extends GateScheduleConfiguratorBase like IGateScheduleConfigurator
 {
@@ -43,12 +42,16 @@ simple ExternalGateScheduleConfigurator extends GateScheduleConfiguratorBase lik
     //the globally used gate scheduling period in each PeriodicGate modules
     //hyperperiod is automatically calculated
     gateCycleDuration @mutable = default(0s); 
-            
-    string command;
-    
+ 
+ 	// Scheduler invocation command with parameters           
+    string command;   
+    // Specifies the network configuration (input-)file
     volatile string networkFile;
+    // Specifies the streams configuration (input-)file
     volatile string streamsFile;
+    // Specifies changes of wireless link distributions (input-)file
     volatile string histogramsFile;
+    // Specifies the scheduler's output file
     volatile string configurationFile;
        
     @class(ExternalGateScheduleConfigurator);

@@ -22,7 +22,7 @@ namespace d6g {
 
 class DynamicScenarioObserver;
 
-class ChangeMonitor : public cSimpleModule // inet::ClockUserModuleMixin<cSimpleModule>
+class ChangeMonitor : public cSimpleModule
 {
 
     friend class DynamicScenarioObserver;
@@ -42,7 +42,6 @@ class ChangeMonitor : public cSimpleModule // inet::ClockUserModuleMixin<cSimple
         cValue maxLatency;
         cValue maxJitter;
         double reliability;
-        cValue phase;
         cValue customParams;
 
         friend std::ostream &operator<<(std::ostream &os, const Mapping &mapping)

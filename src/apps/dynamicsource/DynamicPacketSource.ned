@@ -19,28 +19,33 @@ import inet.queueing.source.ActivePacketSource;
 simple DynamicPacketSource extends ActivePacketSource
 {
     parameters:
-        
+      // Unique stream identifier 
       string streamName = default("");
-      
-      initialProductionOffset = 0ns;  
+            
       // If you change these values, the effects are immediately visible in the network  
       productionInterval  @mutable;
       packetLength @mutable;
-      volatile bool enabled @mutable = default(true); //start or stop the app dynamically
-      
-           
+      //start or stop the app immediately
+      volatile bool enabled @mutable = default(true); 
+                 
       // If you change these values, the effects in the network are only visible 
       // after the permission of the scheduler.
       // New 'Pending' parameters are only applied explicitly after receiving a new configuration
+      
       volatile double pendingProductionInterval @unit(s) @mutable = default(productionInterval);
-      volatile int pendingPacketLength @unit(b) @mutable = default(packetLength);              
+      volatile int pendingPacketLength @unit(b) @mutable = default(packetLength);
+      // Request to start or stop the app           
       volatile bool pendingEnabled @mutable = default(enabled);
-                
-      // If the production interval is changed, adjust the parameters in ScenarioManager accordingly
+        
+                       
+      // Defines the maximum allowed variation in packet delay
       double maxJitter @mutable @unit(ms)  = default(productionInterval * 0.05);
+      // Defines the maximum acceptable end-to-end latency
       double maxLatency @mutable @unit(ms) = default(productionInterval);
-             
-      int pcp = default(0);                 								     
+      
+      // Defines the priority level of the associated traffic class      
+      int pcp = default(0);
+      // Defines the reliability requirement of the app                								     
       double reliability = default(1.00);
       
       //Map for optional parameters that a specific scheduler may require,
@@ -55,7 +60,10 @@ simple DynamicPacketSource extends ActivePacketSource
       //		Packet3 is sent at 45ms,
       //		Packet4 is sent at 70ms etc.
       //then repeated cyclically
-      object productionOffsets @mutable @unit(s)  = default([initialProductionOffset]);
+      object productionOffsets @mutable @unit(s)  = default([0ns]);
+      
+      // Is not used, see 'productionOffsets' instead
+      initialProductionOffset = 0ns; 
       
       @class(DynamicPacketSource);
       @signal[parameter-change-event](type=cMessage);
