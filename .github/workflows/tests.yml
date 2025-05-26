@@ -10,7 +10,7 @@ permissions:
   contents: read
 
 env:
-  INET_VERSION: 6211cd63ebe479b9b01f5ccecc632d5c2e1952af
+  INET_VERSION: ab360b8a58018eb485b5e07682faa6fef9ee80f3
 
 jobs:
   fingerprint_test:
