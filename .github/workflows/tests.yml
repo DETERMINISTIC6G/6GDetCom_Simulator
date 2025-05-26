@@ -60,7 +60,7 @@ jobs:
       - name: Checkout INET repository
         uses: actions/checkout@main
         with:
-          repository: inet-framework/inet
+          repository: DETERMINISTIC6G/inet-gptp
           path: inet
           ref: ${{ env.INET_VERSION }}
 
