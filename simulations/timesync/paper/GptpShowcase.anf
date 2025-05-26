@@ -3,6 +3,8 @@
     <inputs>
         <input pattern="results/BMCA_Delay-#0.sca"/>
         <input pattern="results/BMCA_Delay-#0.vec"/>
+        <input pattern="results/HotStandby1_Delay_DetComDrift-#0.sca"/>
+        <input pattern="results/HotStandby1_Delay_DetComDrift-#0.vec"/>
         <input pattern="results/HotStandby1_Delay-#0.sca"/>
         <input pattern="results/HotStandby1_Delay-#0.vec"/>
         <input pattern="results/HotStandby2_Delay-#0.sca"/>
@@ -11,12 +13,10 @@
         <input pattern="results/BMCA_Repeat-*.vec"/>
         <input pattern="results/HotStandby1_Repeat-*.sca"/>
         <input pattern="results/HotStandby1_Repeat-*.vec"/>
-        <input pattern="results/HotStandby2_Repeat-*.sca"/>
-        <input pattern="results/HotStandby2_Repeat-*.vec"/>
     </inputs>
     <charts>
-        <folder id="920903405" name="BMCA  w/ wireless delay">
-            <chart createdWith="" icon="icons/full/obj/linechart.png" id="1861760717" name="Total Drift (all)" resultTypes="" template="linechart_native" type="LINE">
+        <folder id="771205548" name="BMCA  w/ wireless delay">
+            <chart createdWith="" icon="icons/full/obj/linechart.png" id="146104600" name="Total Drift (all)" resultTypes="" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils, ideplot, vectorops as ops
 
@@ -598,7 +598,7 @@ utils.export_data_if_needed(df, props)
                 <property name="xaxis_max" value=""/>
                 <property name="image_export_width" value="9"/>
             </chart>
-            <chart createdWith="" icon="icons/full/obj/linechart.png" id="7863177" name="Total Drift (only end stations)" resultTypes="" template="linechart_native" type="LINE">
+            <chart createdWith="" icon="icons/full/obj/linechart.png" id="919893115" name="Total Drift (only end stations)" resultTypes="" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils, ideplot, vectorops as ops
 
@@ -1180,7 +1180,7 @@ utils.export_data_if_needed(df, props)
                 <property name="xaxis_max" value=""/>
                 <property name="image_export_width" value="9"/>
             </chart>
-            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="807987391" name="Diff to Ref (only end stations)" resultTypes="vector" template="linechart_native" type="LINE">
+            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="1993939270" name="Diff to Ref (only end stations)" resultTypes="vector" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 
@@ -1910,7 +1910,7 @@ utils.export_data_if_needed(df, props)
                 <property name="Plot.Antialias" value="true"/>
                 <property name="include_fields" value="false"/>
             </chart>
-            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="122343902" name="Diff to Ref (all)" resultTypes="vector" template="linechart_native" type="LINE">
+            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="2073153548" name="Diff to Ref (all)" resultTypes="vector" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 
@@ -2640,7 +2640,7 @@ utils.export_data_if_needed(df, props)
                 <property name="Plot.Antialias" value="true"/>
                 <property name="include_fields" value="false"/>
             </chart>
-            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="645713901" name="DetCom clocks" resultTypes="vector" template="linechart_native" type="LINE">
+            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="583588303" name="DetCom clocks" resultTypes="vector" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 
@@ -3370,7 +3370,7 @@ utils.export_data_if_needed(df, props)
                 <property name="Plot.Antialias" value="true"/>
                 <property name="include_fields" value="false"/>
             </chart>
-            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="1103033825" name="Det ComDiff to Ref" resultTypes="vector" template="linechart_native" type="LINE">
+            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="148541910" name="Det ComDiff to Ref" resultTypes="vector" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 
@@ -4099,7 +4099,7 @@ utils.export_data_if_needed(df, props)
                 <property name="Plot.Antialias" value="true"/>
                 <property name="include_fields" value="false"/>
             </chart>
-            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="1360853865" name="BTCA" resultTypes="vector" template="linechart_native" type="LINE">
+            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="124160080" name="BTCA" resultTypes="vector" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils, ideplot
 import pandas as pd
@@ -4830,12 +4830,19 @@ utils.export_data_if_needed(df, props)
                 <property name="Plot.Antialias" value="true"/>
                 <property name="include_fields" value="false"/>
             </chart>
-            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="1587554872" name="BTCA (only TSN)" resultTypes="vector" template="linechart_native" type="LINE">
+            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="990097086" name="BTCA (only TSN)" resultTypes="vector" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils, ideplot
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
+
+from matplotlib import rc
+plt.rcParams.update({
+    "text.usetex": True,
+    "font.family": "Times New Roman",
+    "font.size": 10
+})
 
 # get chart properties
 props = chart.get_properties()
@@ -4864,6 +4871,8 @@ utils.add_legend_labels(df, props)
 utils.sort_rows_by_legend(df, props)
 utils.plot_vectors(df, props, sort=False)
 
+utils.postconfigure_plot(props)
+
 def get_prop(k):
         return props[k] if k in props else None
 
@@ -4871,28 +4880,36 @@ if utils._parse_optional_bool(get_prop("export_image")):
     plt.axvspan(10, 50, facecolor='0.5', alpha=0.3)
     plt.axvspan(70, 110, facecolor='0.5', alpha=0.3)
     plt.axvspan(130, 170, facecolor='0.5', alpha=0.3)
-    plt.title("")
 
+    plt.title("")
     arr = mpatches.FancyArrowPatch((8, -140), (52, -140),
                                arrowstyle='<->,head_width=.15', mutation_scale=20)
     plt.gca().add_patch(arr)
-    plt.gca().annotate("failure case 1", (.5, 1), xycoords=arr, ha='center', va='bottom')
+    plt.gca().annotate("failure 1", (.5, 1), xycoords=arr, ha='center', va='bottom')
 
     arr = mpatches.FancyArrowPatch((68, -140), (112, -140),
                                arrowstyle='<->,head_width=.15', mutation_scale=20)
     plt.gca().add_patch(arr)
-    plt.gca().annotate("failure case 2", (.5, 1), xycoords=arr, ha='center', va='bottom')
+    plt.gca().annotate("failure 2", (.5, 1), xycoords=arr, ha='center', va='bottom')
 
     arr = mpatches.FancyArrowPatch((128, -140), (172, -140),
                                arrowstyle='<->,head_width=.15', mutation_scale=20)
     plt.gca().add_patch(arr)
-    plt.gca().annotate("failure case 3", (.5, 1), xycoords=arr, ha='center', va='bottom')
-
-utils.postconfigure_plot(props)
+    plt.gca().annotate("failure 3", (.5, 1), xycoords=arr, ha='center', va='bottom')
 
 utils.export_image_if_needed(props)
 utils.export_data_if_needed(df, props)
-]]></script>
+
+if utils._parse_optional_bool(get_prop("export_image")):
+    # Get handles and labels from your main plot
+    handles, labels = plt.gca().get_legend_handles_labels()
+
+    # Create a new figure for the legend
+    fig_legend = plt.figure()
+    plt.tight_layout()
+    fig_legend.legend(handles, labels, loc='center', ncol=len(labels), frameon=False)
+    fig_legend.savefig("legend.pdf", bbox_inches='tight', dpi=300)
+    ]]></script>
                 <dialogPage id="INPUT" label="Input"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -5541,14 +5558,14 @@ utils.export_data_if_needed(df, props)
                 <property name="ordering_regex_list" value="NW-TT&#10;Station*&#10;Switch*"/>
                 <property name="Plot.Caching" value="true"/>
                 <property name="legend_manual" value="false"/>
-                <property name="yaxis_title" value="Clock offset to simulation time [ns]"/>
+                <property name="yaxis_title" value="Clock offset to sim. time [ns]"/>
                 <property name="legend_replacements" value="/TimeSyncNetwork.//&#10;/.detComClock/ (6G)/&#10;/.clock//&#10;/detCom.//&#10;/nwtt/NW-TT/&#10;/tsnDeviceA/Station 1/&#10;/tsnDeviceB/Station 2/&#10;/tsnDeviceC/Station 3/&#10;/tsnSwitch/Switch /&#10;/A1/A/&#10;/B1/B/"/>
                 <property name="Legend.Border" value="false"/>
-                <property name="Plot.Title.Font" value="Arial-regular-10"/>
+                <property name="Plot.Title.Font" value="Times New Roman-regular-10"/>
                 <property name="cycle_seed" value="0"/>
-                <property name="Axis.Title.Font" value="Arial-regular-8"/>
+                <property name="Axis.Title.Font" value="Times New Roman-regular-8"/>
                 <property name="xaxis_log" value="false"/>
-                <property name="Axis.Label.Font" value="Arial-regular-8"/>
+                <property name="Axis.Label.Font" value="Times New Roman-regular-8"/>
                 <property name="plot.properties" value=""/>
                 <property name="xaxis_title" value="Simulation time [s]"/>
                 <property name="grid_density" value="Major"/>
@@ -5558,9 +5575,9 @@ utils.export_data_if_needed(df, props)
                 <property name="markersize" value="5"/>
                 <property name="drawstyle" value="auto"/>
                 <property name="marker" value="none"/>
-                <property name="legend_show" value="true"/>
-                <property name="xaxis_max" value=""/>
-                <property name="image_export_width" value="6"/>
+                <property name="legend_show" value="false"/>
+                <property name="xaxis_max" value="180"/>
+                <property name="image_export_width" value="3.48"/>
                 <property name="omit_empty_vectors" value="false"/>
                 <property name="vector_end_time" value=""/>
                 <property name="linecolor" value=""/>
@@ -5570,12 +5587,12 @@ utils.export_data_if_needed(df, props)
                 <property name="vector_operations" value="apply: lineartrend(-1)&#10;apply: multiply_by(1000000000)"/>
                 <property name="sorting" value="true"/>
                 <property name="yaxis_log" value="false"/>
-                <property name="image_export_height" value="4"/>
+                <property name="image_export_height" value="2.32"/>
                 <property name="legend_placement" value="upper right"/>
                 <property name="data_export_filename" value=""/>
                 <property name="Plot.BackgroundColor" value="white"/>
                 <property name="yaxis_min" value="-150"/>
-                <property name="Legend.Font" value="Arial-regular-8"/>
+                <property name="Legend.Font" value="Times New Roman-regular-8"/>
                 <property name="image_export_filename" value=""/>
                 <property name="linewidth" value="1.5"/>
                 <property name="legend_format" value=""/>
@@ -5587,7 +5604,7 @@ utils.export_data_if_needed(df, props)
                 <property name="Plot.Antialias" value="true"/>
                 <property name="include_fields" value="false"/>
             </chart>
-            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="1777030399" name="BTCA (only TSN) (cropped)" resultTypes="vector" template="linechart_native" type="LINE">
+            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="1231802870" name="BTCA (only TSN) (cropped)" resultTypes="vector" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils, ideplot
 import pandas as pd
@@ -6319,8 +6336,8 @@ utils.export_data_if_needed(df, props)
                 <property name="include_fields" value="false"/>
             </chart>
         </folder>
-        <folder id="1327101903" name="HotStandby 1">
-            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="155229814" name="Domain 0" resultTypes="vector" template="linechart_native" type="LINE">
+        <folder id="666758801" name="HotStandby 1">
+            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="788701443" name="Domain 0" resultTypes="vector" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 
@@ -7050,7 +7067,7 @@ utils.export_data_if_needed(df, props)
                 <property name="Plot.Antialias" value="true"/>
                 <property name="include_fields" value="false"/>
             </chart>
-            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="2027268605" name="Domain 1" resultTypes="vector" template="linechart_native" type="LINE">
+            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="1901694666" name="Domain 1" resultTypes="vector" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 
@@ -7780,7 +7797,7 @@ utils.export_data_if_needed(df, props)
                 <property name="Plot.Antialias" value="true"/>
                 <property name="include_fields" value="false"/>
             </chart>
-            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="1186180358" name="Active Clock" resultTypes="vector" template="linechart_native" type="LINE">
+            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="636117953" name="Active Clock" resultTypes="vector" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 
@@ -8510,7 +8527,7 @@ utils.export_data_if_needed(df, props)
                 <property name="Plot.Antialias" value="true"/>
                 <property name="include_fields" value="false"/>
             </chart>
-            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="199121052" name="DetCom clocks" resultTypes="vector" template="linechart_native" type="LINE">
+            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="745376711" name="DetCom clocks" resultTypes="vector" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 
@@ -9240,7 +9257,7 @@ utils.export_data_if_needed(df, props)
                 <property name="Plot.Antialias" value="true"/>
                 <property name="include_fields" value="false"/>
             </chart>
-            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="1997108170" name="DetCom clocks diff to ref" resultTypes="vector" template="linechart_native" type="LINE">
+            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="536731162" name="DetCom clocks diff to ref" resultTypes="vector" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 
@@ -9970,12 +9987,19 @@ utils.export_data_if_needed(df, props)
                 <property name="Plot.Antialias" value="true"/>
                 <property name="include_fields" value="false"/>
             </chart>
-            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="1920711539" name="Hot Standby" resultTypes="vector" template="linechart_native" type="LINE">
+            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="177126594" name="Hot Standby (DetComDrift)" resultTypes="vector" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils, ideplot
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
+
+from matplotlib import rc
+plt.rcParams.update({
+    "text.usetex": True,
+    "font.family": "Times New Roman",
+    "font.size": 8
+})
 
 # get chart properties
 props = chart.get_properties()
@@ -10004,10 +10028,15 @@ utils.add_legend_labels(df, props)
 utils.sort_rows_by_legend(df, props)
 utils.plot_vectors(df, props, sort=False)
 
+utils.postconfigure_plot(props)
+
 def get_prop(k):
         return props[k] if k in props else None
 
 if utils._parse_optional_bool(get_prop("export_image")):
+    plt.ticklabel_format(useMathText=True)  # uses mathtext, avoids unicode minus
+    plt.gca().get_xaxis().get_major_formatter().set_useOffset(False)  # optional
+    
     plt.axvspan(10, 50, facecolor='0.5', alpha=0.3)
     plt.axvspan(70, 110, facecolor='0.5', alpha=0.3)
     plt.axvspan(130, 170, facecolor='0.5', alpha=0.3)
@@ -10016,23 +10045,25 @@ if utils._parse_optional_bool(get_prop("export_image")):
     arr = mpatches.FancyArrowPatch((8, -950), (52, -950),
                                arrowstyle='<->,head_width=.15', mutation_scale=20)
     plt.gca().add_patch(arr)
-    plt.gca().annotate("failure case 1", (.5, 1), xycoords=arr, ha='center', va='bottom')
+    plt.gca().annotate("failure 1", (.5, 1), xycoords=arr, ha='center', va='bottom')
 
     arr = mpatches.FancyArrowPatch((68, -950), (112, -950),
                                arrowstyle='<->,head_width=.15', mutation_scale=20)
     plt.gca().add_patch(arr)
-    plt.gca().annotate("failure case 2", (.5, 1), xycoords=arr, ha='center', va='bottom')
+    plt.gca().annotate("failure 2", (.5, 1), xycoords=arr, ha='center', va='bottom')
 
     arr = mpatches.FancyArrowPatch((128, -950), (172, -950),
                                arrowstyle='<->,head_width=.15', mutation_scale=20)
     plt.gca().add_patch(arr)
-    plt.gca().annotate("failure case 3", (.5, 1), xycoords=arr, ha='center', va='bottom')
+    plt.gca().annotate("failure 3", (.5, 1), xycoords=arr, ha='center', va='bottom')
     
-    plt.gca().lines[1].set_linestyle('--')
-    plt.gca().lines[3].set_linestyle('--')
+    plt.gca().lines[0].set_linestyle('solid')
+    plt.gca().lines[1].set_linestyle('dashed')
+    plt.gca().lines[2].set_linestyle('dotted')
+    plt.gca().lines[3].set_linestyle('dashdot')
     
-
-utils.postconfigure_plot(props)
+    plt.gca().legend(loc="upper left")
+    
 
 utils.export_image_if_needed(props)
 utils.export_data_if_needed(df, props)
@@ -10693,7 +10724,7 @@ utils.export_data_if_needed(df, props)
                 <property name="Axis.Title.Font" value="Arial-regular-8"/>
                 <property name="xaxis_log" value="false"/>
                 <property name="Axis.Label.Font" value="Arial-regular-8"/>
-                <property name="plot.properties" value="Line.Style/1 : solid&#10;Line.Style/2 : solid&#10;Line.Style/3 : solid&#10;Line.Style/4 : dashed&#10;Line.Style/5 : dashed&#10;Line.Style/6 : dashed"/>
+                <property name="plot.properties" value=""/>
                 <property name="xaxis_title" value="Simulation time [s]"/>
                 <property name="grid_density" value="Major"/>
                 <property name="xaxis_min" value="5"/>
@@ -10703,8 +10734,8 @@ utils.export_data_if_needed(df, props)
                 <property name="drawstyle" value="auto"/>
                 <property name="marker" value="none"/>
                 <property name="legend_show" value="true"/>
-                <property name="xaxis_max" value=""/>
-                <property name="image_export_width" value="6"/>
+                <property name="xaxis_max" value="180"/>
+                <property name="image_export_width" value="3.48"/>
                 <property name="omit_empty_vectors" value="false"/>
                 <property name="vector_end_time" value=""/>
                 <property name="linecolor" value=""/>
@@ -10714,7 +10745,7 @@ utils.export_data_if_needed(df, props)
                 <property name="vector_operations" value="apply: lineartrend(-1)&#10;apply: multiply_by(1000000000)"/>
                 <property name="sorting" value="true"/>
                 <property name="yaxis_log" value="false"/>
-                <property name="image_export_height" value="4"/>
+                <property name="image_export_height" value="2.32"/>
                 <property name="legend_placement" value="upper left"/>
                 <property name="data_export_filename" value=""/>
                 <property name="Plot.BackgroundColor" value="white"/>
@@ -10723,7 +10754,7 @@ utils.export_data_if_needed(df, props)
                 <property name="image_export_filename" value=""/>
                 <property name="linewidth" value="1.5"/>
                 <property name="legend_format" value=""/>
-                <property name="filter" value="type =~ vector AND runattr:experiment =~ HotStandby1_Delay AND runattr:replication =~ &quot;#0&quot; AND name =~ timeChanged:vector AND (&#10;    (module =~ &quot;TimeSyncNetwork.detCom.dstt[0].detComClock&quot;) OR&#10;    (module =~ &quot;TimeSyncNetwork.detCom.nwtt.detComClock&quot;) OR&#10;    (module =~ &quot;TimeSyncNetwork.tsnDeviceA.clock&quot;) OR&#10;    (module =~ &quot;TimeSyncNetwork.tsnDeviceB.clock&quot;)&#10;)"/>
+                <property name="filter" value="type =~ vector AND runattr:experiment =~ HotStandby1_Delay_DetComDrift AND runattr:replication =~ &quot;#0&quot; AND name =~ timeChanged:vector AND (&#10;    (module =~ &quot;TimeSyncNetwork.detCom.dstt[0].detComClock&quot;) OR&#10;    (module =~ &quot;TimeSyncNetwork.detCom.nwtt.detComClock&quot;) OR&#10;    (module =~ &quot;TimeSyncNetwork.tsnDeviceA.clock&quot;) OR&#10;    (module =~ &quot;TimeSyncNetwork.tsnDeviceB.clock&quot;)&#10;)"/>
                 <property name="X.Label.Wrap" value="true"/>
                 <property name="secondary_ordering_regex_list" value=""/>
                 <property name="simplify" value="false"/>
@@ -10731,12 +10762,19 @@ utils.export_data_if_needed(df, props)
                 <property name="Plot.Antialias" value="true"/>
                 <property name="include_fields" value="false"/>
             </chart>
-            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="157803936" name="HS 1 (only TSN)" resultTypes="vector" template="linechart_native" type="LINE">
+            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="1051450757" name="HS 1 (only TSN)" resultTypes="vector" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils, ideplot
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
+
+from matplotlib import rc
+plt.rcParams.update({
+    "text.usetex": True,
+    "font.family": "Times New Roman",
+    "font.size": 10
+})
 
 # get chart properties
 props = chart.get_properties()
@@ -10779,21 +10817,31 @@ if utils._parse_optional_bool(get_prop("export_image")):
     arr = mpatches.FancyArrowPatch((8, -140), (52, -140),
                                arrowstyle='<->,head_width=.15', mutation_scale=20)
     plt.gca().add_patch(arr)
-    plt.gca().annotate("failure case 1", (.5, 1), xycoords=arr, ha='center', va='bottom')
+    plt.gca().annotate("failure 1", (.5, 1), xycoords=arr, ha='center', va='bottom')
 
     arr = mpatches.FancyArrowPatch((68, -140), (112, -140),
                                arrowstyle='<->,head_width=.15', mutation_scale=20)
     plt.gca().add_patch(arr)
-    plt.gca().annotate("failure case 2", (.5, 1), xycoords=arr, ha='center', va='bottom')
+    plt.gca().annotate("failure 2", (.5, 1), xycoords=arr, ha='center', va='bottom')
 
     arr = mpatches.FancyArrowPatch((128, -140), (172, -140),
                                arrowstyle='<->,head_width=.15', mutation_scale=20)
     plt.gca().add_patch(arr)
-    plt.gca().annotate("failure case 3", (.5, 1), xycoords=arr, ha='center', va='bottom')
+    plt.gca().annotate("failure 3", (.5, 1), xycoords=arr, ha='center', va='bottom')
 
 utils.export_image_if_needed(props)
 utils.export_data_if_needed(df, props)
-]]></script>
+
+if utils._parse_optional_bool(get_prop("export_image")):
+    # Get handles and labels from your main plot
+    handles, labels = plt.gca().get_legend_handles_labels()
+
+    # Create a new figure for the legend
+    fig_legend = plt.figure()
+    plt.tight_layout()
+    fig_legend.legend(handles, labels, loc='center', ncol=len(labels), frameon=False)
+    fig_legend.savefig("legend.pdf", bbox_inches='tight', dpi=300)
+    ]]></script>
                 <dialogPage id="INPUT" label="Input"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -11442,7 +11490,7 @@ utils.export_data_if_needed(df, props)
                 <property name="ordering_regex_list" value="NW-TT&#10;Station*&#10;Switch*"/>
                 <property name="Plot.Caching" value="true"/>
                 <property name="legend_manual" value="false"/>
-                <property name="yaxis_title" value="Clock offset to simulation time [ns]"/>
+                <property name="yaxis_title" value="Clock offset to sim. time [ns]"/>
                 <property name="legend_replacements" value="/TimeSyncNetwork.//&#10;/.detComClock/ (6G)/&#10;/.clock//&#10;/detCom.//&#10;/nwtt/NW-TT/&#10;/tsnDeviceA/Station 1/&#10;/tsnDeviceB/Station 2/&#10;/tsnDeviceC/Station 3/&#10;/tsnSwitch/Switch /&#10;/A1/A/&#10;/B1/B/"/>
                 <property name="Legend.Border" value="false"/>
                 <property name="Plot.Title.Font" value="Arial-regular-10"/>
@@ -11459,9 +11507,9 @@ utils.export_data_if_needed(df, props)
                 <property name="markersize" value="5"/>
                 <property name="drawstyle" value="auto"/>
                 <property name="marker" value="none"/>
-                <property name="legend_show" value="true"/>
-                <property name="xaxis_max" value=""/>
-                <property name="image_export_width" value="6"/>
+                <property name="legend_show" value="false"/>
+                <property name="xaxis_max" value="180"/>
+                <property name="image_export_width" value="3.48"/>
                 <property name="omit_empty_vectors" value="false"/>
                 <property name="vector_end_time" value=""/>
                 <property name="linecolor" value=""/>
@@ -11471,7 +11519,7 @@ utils.export_data_if_needed(df, props)
                 <property name="vector_operations" value="apply: lineartrend(-1)&#10;apply: multiply_by(1000000000)"/>
                 <property name="sorting" value="true"/>
                 <property name="yaxis_log" value="false"/>
-                <property name="image_export_height" value="4"/>
+                <property name="image_export_height" value="2.32"/>
                 <property name="legend_placement" value="upper right"/>
                 <property name="data_export_filename" value=""/>
                 <property name="Plot.BackgroundColor" value="white"/>
@@ -11488,7 +11536,7 @@ utils.export_data_if_needed(df, props)
                 <property name="Plot.Antialias" value="true"/>
                 <property name="include_fields" value="false"/>
             </chart>
-            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="399716757" name="HS 1 (only TSN) cropped" resultTypes="vector" template="linechart_native" type="LINE">
+            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="2079340818" name="HS 1 (only TSN) cropped" resultTypes="vector" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils, ideplot
 import pandas as pd
@@ -12219,7 +12267,7 @@ utils.export_data_if_needed(df, props)
                 <property name="Plot.Antialias" value="true"/>
                 <property name="include_fields" value="false"/>
             </chart>
-            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="1514997598" name="HS 1 (only TSN) cropped in2" resultTypes="vector" template="linechart_native" type="LINE">
+            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="844527296" name="HS 1 (only TSN) cropped in2" resultTypes="vector" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils, ideplot
 import pandas as pd
@@ -12951,8 +12999,8 @@ utils.export_data_if_needed(df, props)
                 <property name="include_fields" value="false"/>
             </chart>
         </folder>
-        <folder id="403405672" name="HotStandby 2">
-            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="911334691" name="Domain 0" resultTypes="vector" template="linechart_native" type="LINE">
+        <folder id="876553265" name="HotStandby 2">
+            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="1334992196" name="Domain 0" resultTypes="vector" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 
@@ -13682,7 +13730,7 @@ utils.export_data_if_needed(df, props)
                 <property name="Plot.Antialias" value="true"/>
                 <property name="include_fields" value="false"/>
             </chart>
-            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="2041980701" name="HotStandby Domain 1" resultTypes="vector" template="linechart_native" type="LINE">
+            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="1561315917" name="HotStandby Domain 1" resultTypes="vector" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 
@@ -14412,7 +14460,7 @@ utils.export_data_if_needed(df, props)
                 <property name="Plot.Antialias" value="true"/>
                 <property name="include_fields" value="false"/>
             </chart>
-            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="1946720232" name="HotStandby Domain 2" resultTypes="vector" template="linechart_native" type="LINE">
+            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="985828912" name="HotStandby Domain 2" resultTypes="vector" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 
@@ -15142,7 +15190,7 @@ utils.export_data_if_needed(df, props)
                 <property name="Plot.Antialias" value="true"/>
                 <property name="include_fields" value="false"/>
             </chart>
-            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="351790487" name="Active Clock" resultTypes="vector" template="linechart_native" type="LINE">
+            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="28962863" name="Active Clock" resultTypes="vector" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 
@@ -15872,7 +15920,7 @@ utils.export_data_if_needed(df, props)
                 <property name="Plot.Antialias" value="true"/>
                 <property name="include_fields" value="false"/>
             </chart>
-            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="1744516178" name="DetCom clocks" resultTypes="vector" template="linechart_native" type="LINE">
+            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="79977175" name="DetCom clocks" resultTypes="vector" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 
@@ -16602,7 +16650,7 @@ utils.export_data_if_needed(df, props)
                 <property name="Plot.Antialias" value="true"/>
                 <property name="include_fields" value="false"/>
             </chart>
-            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="633499866" name="DetCom clocks diff to ref" resultTypes="vector" template="linechart_native" type="LINE">
+            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="1560455027" name="DetCom clocks diff to ref" resultTypes="vector" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 
@@ -17332,12 +17380,19 @@ utils.export_data_if_needed(df, props)
                 <property name="Plot.Antialias" value="true"/>
                 <property name="include_fields" value="false"/>
             </chart>
-            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="156532777" name="HS 2 (only TSN)" resultTypes="vector" template="linechart_native" type="LINE">
+            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="1585414891" name="HS 2 (only TSN)" resultTypes="vector" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils, ideplot
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
+
+from matplotlib import rc
+plt.rcParams.update({
+    "text.usetex": True,
+    "font.family": "Times New Roman",
+    "font.size": 10
+})
 
 # get chart properties
 props = chart.get_properties()
@@ -17380,23 +17435,31 @@ if utils._parse_optional_bool(get_prop("export_image")):
     arr = mpatches.FancyArrowPatch((8, -140), (52, -140),
                                arrowstyle='<->,head_width=.15', mutation_scale=20)
     plt.gca().add_patch(arr)
-    plt.gca().annotate("failure case 1", (.5, 1), xycoords=arr, ha='center', va='bottom')
+    plt.gca().annotate("failure 1", (.5, 1), xycoords=arr, ha='center', va='bottom')
 
     arr = mpatches.FancyArrowPatch((68, -140), (112, -140),
                                arrowstyle='<->,head_width=.15', mutation_scale=20)
     plt.gca().add_patch(arr)
-    plt.gca().annotate("failure case 2", (.5, 1), xycoords=arr, ha='center', va='bottom')
+    plt.gca().annotate("failure 2", (.5, 1), xycoords=arr, ha='center', va='bottom')
 
     arr = mpatches.FancyArrowPatch((128, -140), (172, -140),
                                arrowstyle='<->,head_width=.15', mutation_scale=20)
     plt.gca().add_patch(arr)
-    plt.gca().annotate("failure case 3", (.5, 1), xycoords=arr, ha='center', va='bottom')
-
-
+    plt.gca().annotate("failure 3", (.5, 1), xycoords=arr, ha='center', va='bottom')
 
 utils.export_image_if_needed(props)
 utils.export_data_if_needed(df, props)
-]]></script>
+
+if utils._parse_optional_bool(get_prop("export_image")):
+    # Get handles and labels from your main plot
+    handles, labels = plt.gca().get_legend_handles_labels()
+
+    # Create a new figure for the legend
+    fig_legend = plt.figure()
+    plt.tight_layout()
+    fig_legend.legend(handles, labels, loc='center', ncol=len(labels), frameon=False)
+    fig_legend.savefig("legend.pdf", bbox_inches='tight', dpi=300)
+    ]]></script>
                 <dialogPage id="INPUT" label="Input"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -18045,7 +18108,7 @@ utils.export_data_if_needed(df, props)
                 <property name="ordering_regex_list" value="NW-TT&#10;Station*&#10;Switch*"/>
                 <property name="Plot.Caching" value="true"/>
                 <property name="legend_manual" value="false"/>
-                <property name="yaxis_title" value="Clock offset to simulation time [ns]"/>
+                <property name="yaxis_title" value="Clock offset to sim. time [ns]"/>
                 <property name="legend_replacements" value="/TimeSyncNetwork.//&#10;/.detComClock/ (6G)/&#10;/.clock//&#10;/detCom.//&#10;/nwtt/NW-TT/&#10;/tsnDeviceA/Station 1/&#10;/tsnDeviceB/Station 2/&#10;/tsnDeviceC/Station 3/&#10;/tsnSwitch/Switch /&#10;/A1/A/&#10;/B1/B/"/>
                 <property name="Legend.Border" value="false"/>
                 <property name="Plot.Title.Font" value="Arial-regular-10"/>
@@ -18062,9 +18125,9 @@ utils.export_data_if_needed(df, props)
                 <property name="markersize" value="5"/>
                 <property name="drawstyle" value="auto"/>
                 <property name="marker" value="none"/>
-                <property name="legend_show" value="true"/>
-                <property name="xaxis_max" value=""/>
-                <property name="image_export_width" value="6"/>
+                <property name="legend_show" value="false"/>
+                <property name="xaxis_max" value="180"/>
+                <property name="image_export_width" value="3.48"/>
                 <property name="omit_empty_vectors" value="false"/>
                 <property name="vector_end_time" value=""/>
                 <property name="linecolor" value=""/>
@@ -18074,7 +18137,7 @@ utils.export_data_if_needed(df, props)
                 <property name="vector_operations" value="apply: lineartrend(-1)&#10;apply: multiply_by(1000000000)"/>
                 <property name="sorting" value="true"/>
                 <property name="yaxis_log" value="false"/>
-                <property name="image_export_height" value="4"/>
+                <property name="image_export_height" value="2.32"/>
                 <property name="legend_placement" value="upper right"/>
                 <property name="data_export_filename" value=""/>
                 <property name="Plot.BackgroundColor" value="white"/>
@@ -18091,7 +18154,7 @@ utils.export_data_if_needed(df, props)
                 <property name="Plot.Antialias" value="true"/>
                 <property name="include_fields" value="false"/>
             </chart>
-            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="572663075" name="HS 2 (only TSN) cropped" resultTypes="vector" template="linechart_native" type="LINE">
+            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="837575446" name="HS 2 (only TSN) cropped" resultTypes="vector" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils, ideplot
 import pandas as pd
@@ -18822,7 +18885,7 @@ utils.export_data_if_needed(df, props)
                 <property name="Plot.Antialias" value="true"/>
                 <property name="include_fields" value="false"/>
             </chart>
-            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="182477243" name="HS 2 (only TSN) cropped int3" resultTypes="vector" template="linechart_native" type="LINE">
+            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="1905027767" name="HS 2 (only TSN) cropped int3" resultTypes="vector" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils, ideplot
 import pandas as pd
@@ -19554,8 +19617,8 @@ utils.export_data_if_needed(df, props)
                 <property name="include_fields" value="false"/>
             </chart>
         </folder>
-        <folder id="793441039" name="Repeat">
-            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="1750641363" name="BTCA (only TSN)" resultTypes="vector" template="linechart_native" type="LINE">
+        <folder id="871053478" name="Repeat">
+            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="645183381" name="BTCA (only TSN)" resultTypes="vector" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils, ideplot
 import pandas as pd
@@ -20286,7 +20349,7 @@ utils.export_data_if_needed(df, props)
                 <property name="Plot.Antialias" value="true"/>
                 <property name="include_fields" value="false"/>
             </chart>
-            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="164309824" name="BTCA (all)" resultTypes="vector" template="linechart_native" type="LINE">
+            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="1251817295" name="BTCA (all)" resultTypes="vector" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 
@@ -21016,7 +21079,7 @@ utils.export_data_if_needed(df, props)
                 <property name="Plot.Antialias" value="true"/>
                 <property name="include_fields" value="false"/>
             </chart>
-            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="1912299697" name="BTCA (all) int2" resultTypes="vector" template="linechart_native" type="LINE">
+            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="1597383527" name="BTCA (all) int2" resultTypes="vector" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 
@@ -21746,7 +21809,7 @@ utils.export_data_if_needed(df, props)
                 <property name="Plot.Antialias" value="true"/>
                 <property name="include_fields" value="false"/>
             </chart>
-            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="997415690" name="BTCA (all) int3" resultTypes="vector" template="linechart_native" type="LINE">
+            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="951767116" name="BTCA (all) int3" resultTypes="vector" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 
@@ -22476,7 +22539,7 @@ utils.export_data_if_needed(df, props)
                 <property name="Plot.Antialias" value="true"/>
                 <property name="include_fields" value="false"/>
             </chart>
-            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="633608980" name="HS 1 (all)" resultTypes="vector" template="linechart_native" type="LINE">
+            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="142856045" name="HS 1 (all)" resultTypes="vector" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 
@@ -23206,7 +23269,7 @@ utils.export_data_if_needed(df, props)
                 <property name="Plot.Antialias" value="true"/>
                 <property name="include_fields" value="false"/>
             </chart>
-            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="1130155505" name="HS 1 (all) int2" resultTypes="vector" template="linechart_native" type="LINE">
+            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="845413190" name="HS 1 (all) int2" resultTypes="vector" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 
@@ -23936,7 +23999,7 @@ utils.export_data_if_needed(df, props)
                 <property name="Plot.Antialias" value="true"/>
                 <property name="include_fields" value="false"/>
             </chart>
-            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="1944065506" name="HS 1 (all) int3" resultTypes="vector" template="linechart_native" type="LINE">
+            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="924036994" name="HS 1 (all) int3" resultTypes="vector" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 
@@ -24666,7 +24729,7 @@ utils.export_data_if_needed(df, props)
                 <property name="Plot.Antialias" value="true"/>
                 <property name="include_fields" value="false"/>
             </chart>
-            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="849432756" name="HS 2 (all)" resultTypes="vector" template="linechart_native" type="LINE">
+            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="1409144148" name="HS 2 (all)" resultTypes="vector" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 
@@ -25396,7 +25459,7 @@ utils.export_data_if_needed(df, props)
                 <property name="Plot.Antialias" value="true"/>
                 <property name="include_fields" value="false"/>
             </chart>
-            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="723530691" name="HS 2 (all) int2" resultTypes="vector" template="linechart_native" type="LINE">
+            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="1732638823" name="HS 2 (all) int2" resultTypes="vector" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 
@@ -26126,7 +26189,7 @@ utils.export_data_if_needed(df, props)
                 <property name="Plot.Antialias" value="true"/>
                 <property name="include_fields" value="false"/>
             </chart>
-            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="1703334123" name="HS 2 (all) int3" resultTypes="vector" template="linechart_native" type="LINE">
+            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="13433468" name="HS 2 (all) int3" resultTypes="vector" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 
@@ -26856,7 +26919,7 @@ utils.export_data_if_needed(df, props)
                 <property name="Plot.Antialias" value="true"/>
                 <property name="include_fields" value="false"/>
             </chart>
-            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="1131160468" name="cdf" resultTypes="vector" template="linechart_mpl" type="MATPLOTLIB">
+            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="1573271133" name="cdf" resultTypes="vector" template="linechart_mpl" type="MATPLOTLIB">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 import matplotlib.pyplot as plt
@@ -27616,7 +27679,7 @@ utils.export_data_if_needed(df, props)
                 <property name="matplotlibrc" value=""/>
                 <property name="include_fields" value="false"/>
             </chart>
-            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="1836969798" name="ccdf" resultTypes="vector" template="linechart_mpl" type="MATPLOTLIB">
+            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="1416695702" name="ccdf" resultTypes="vector" template="linechart_mpl" type="MATPLOTLIB">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 import matplotlib.pyplot as plt
@@ -27628,6 +27691,13 @@ from natsort import natsorted, ns
 # get chart properties
 props = chart.get_properties()
 utils.preconfigure_plot(props)
+
+from matplotlib import rc
+plt.rcParams.update({
+    "text.usetex": True,
+    "font.family": "Times New Roman",
+    "font.size": 8
+})
 
 # collect parameters for query
 filter_expression = props["filter"]
@@ -28351,7 +28421,7 @@ utils.export_data_if_needed(df, props)
                 <property name="cycle_seed" value="0"/>
                 <property name="sorting" value="true"/>
                 <property name="yaxis_log" value="false"/>
-                <property name="image_export_height" value="4"/>
+                <property name="image_export_height" value="1.856"/>
                 <property name="xaxis_log" value="false"/>
                 <property name="legend_placement" value="upper right"/>
                 <property name="data_export_filename" value=""/>
@@ -28376,12 +28446,12 @@ utils.export_data_if_needed(df, props)
                 <property name="simplify" value="false"/>
                 <property name="yaxis_max" value=""/>
                 <property name="xaxis_max" value="100"/>
-                <property name="image_export_width" value="6"/>
+                <property name="image_export_width" value="2.784"/>
                 <property name="omit_empty_vectors" value="false"/>
                 <property name="matplotlibrc" value=""/>
                 <property name="include_fields" value="false"/>
             </chart>
-            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="1392052006" name="out of sync time" resultTypes="vector" template="linechart_mpl" type="MATPLOTLIB">
+            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="513113320" name="out of sync time" resultTypes="vector" template="linechart_mpl" type="MATPLOTLIB">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 import matplotlib.pyplot as plt
@@ -29158,7 +29228,7 @@ utils.export_data_if_needed(df, props)
                 <property name="matplotlibrc" value=""/>
                 <property name="include_fields" value="false"/>
             </chart>
-            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="357587609" name="out of sync time ccdf" resultTypes="vector" template="linechart_mpl" type="MATPLOTLIB">
+            <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/linechart.png" id="290547130" name="out of sync time ccdf" resultTypes="vector" template="linechart_mpl" type="MATPLOTLIB">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 import matplotlib.pyplot as plt
@@ -29170,6 +29240,13 @@ from natsort import natsorted
 # get chart properties
 props = chart.get_properties()
 utils.preconfigure_plot(props)
+
+from matplotlib import rc
+plt.rcParams.update({
+    "text.usetex": True,
+    "font.family": "Times New Roman",
+    "font.size": 8
+})
 
 # collect parameters for query
 filter_expression = props["filter"]
@@ -29907,7 +29984,7 @@ utils.export_data_if_needed(df, props)
                 <property name="cycle_seed" value="0"/>
                 <property name="sorting" value="true"/>
                 <property name="yaxis_log" value="false"/>
-                <property name="image_export_height" value="4"/>
+                <property name="image_export_height" value="1.856"/>
                 <property name="xaxis_log" value="false"/>
                 <property name="legend_placement" value="lower center"/>
                 <property name="data_export_filename" value=""/>
@@ -29932,7 +30009,7 @@ utils.export_data_if_needed(df, props)
                 <property name="simplify" value="false"/>
                 <property name="yaxis_max" value=""/>
                 <property name="xaxis_max" value="200"/>
-                <property name="image_export_width" value="6"/>
+                <property name="image_export_width" value="2.784"/>
                 <property name="omit_empty_vectors" value="false"/>
                 <property name="matplotlibrc" value=""/>
                 <property name="include_fields" value="false"/>
