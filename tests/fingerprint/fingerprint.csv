@@ -21,7 +21,10 @@
 ../../simulations/edgecloud,        ../../src/6GDetCom_Simulator -f omnetpp.ini -c Fifo_fiveG -n ..:../../src:../../../inet/src -l ../../../inet/src/INET,             60s,         cbee-b4cf/tplx, PASS,
 ../../simulations/edgecloud,        ../../src/6GDetCom_Simulator -f omnetpp.ini -c Deadline_fiveG -n ..:../../src:../../../inet/src -l ../../../inet/src/INET,             60s,         840c-9995/tplx, PASS,
 ../../simulations/packetdelaycorrection,        ../../src/6GDetCom_Simulator -f omnetpp.ini -c Uplink -n ..:../../src:../../../inet/src -l ../../../inet/src/INET,             60s,         3708-571b/tplx, PASS,
-# ../../simulations/timesync,        ../../src/6GDetCom_Simulator -f omnetpp.ini -c OneMasterClock -n ..:../../src:../../../inet/src -l ../../../inet/src/INET,             60s,         5749-146c/tplx, PASS,
+../../simulations/timesync,        ../../src/6GDetCom_Simulator -f omnetpp.ini -c HotStandby1_Delay -n ..:../../src:../../../inet/src -l ../../../inet/src/INET,             180s,         5116-6850/tplx, PASS,
+../../simulations/timesync,        ../../src/6GDetCom_Simulator -f omnetpp.ini -c HotStandby1_Delay_DetComDrift -n ..:../../src:../../../inet/src -l ../../../inet/src/INET,             180s,         24ec-55a0/tplx, PASS,
+../../simulations/timesync,        ../../src/6GDetCom_Simulator -f omnetpp.ini -c HotStandby2_Delay -n ..:../../src:../../../inet/src -l ../../../inet/src/INET,             180s,         d801-a5dc/tplx, PASS,
+../../simulations/timesync,        ../../src/6GDetCom_Simulator -f omnetpp.ini -c BMCA_Delay -n ..:../../src:../../../inet/src -l ../../../inet/src/INET,             180s,         71fb-c20e/tplx, PASS,
 
 # scalar & vector
 ../../simulations/baseline,        ../../src/6GDetCom_Simulator -f omnetpp.ini -c Bidirectional -n ..:../../src:../../../inet/src -l ../../../inet/src/INET,             60s,         274a-4df8/szv, PASS,
@@ -45,4 +48,7 @@
 ../../simulations/edgecloud,        ../../src/6GDetCom_Simulator -f omnetpp.ini -c Fifo_fiveG -n ..:../../src:../../../inet/src -l ../../../inet/src/INET,             60s,         e1b1-f886/szv, PASS,
 ../../simulations/edgecloud,        ../../src/6GDetCom_Simulator -f omnetpp.ini -c Deadline_fiveG -n ..:../../src:../../../inet/src -l ../../../inet/src/INET,             60s,         2425-7fb0/szv, PASS,
 ../../simulations/packetdelaycorrection,        ../../src/6GDetCom_Simulator -f omnetpp.ini -c Uplink -n ..:../../src:../../../inet/src -l ../../../inet/src/INET,             60s,         e34f-4d41/szv, PASS,
-# ../../simulations/timesync,        ../../src/6GDetCom_Simulator -f omnetpp.ini -c OneMasterClock -n ..:../../src:../../../inet/src -l ../../../inet/src/INET,             60s,         1c14-5d50/szv 7898-d357/szv, PASS,
+../../simulations/timesync,        ../../src/6GDetCom_Simulator -f omnetpp.ini -c HotStandby1_Delay -n ..:../../src:../../../inet/src -l ../../../inet/src/INET,             180s,         660a-82ab/szv, PASS,
+../../simulations/timesync,        ../../src/6GDetCom_Simulator -f omnetpp.ini -c HotStandby1_Delay_DetComDrift -n ..:../../src:../../../inet/src -l ../../../inet/src/INET,             180s,         f781-e23f/szv, PASS,
+../../simulations/timesync,        ../../src/6GDetCom_Simulator -f omnetpp.ini -c HotStandby2_Delay -n ..:../../src:../../../inet/src -l ../../../inet/src/INET,             180s,         db52-e534/szv, PASS,
+../../simulations/timesync,        ../../src/6GDetCom_Simulator -f omnetpp.ini -c BMCA_Delay -n ..:../../src:../../../inet/src -l ../../../inet/src/INET,             180s,         7d40-82b7/szv, PASS,
