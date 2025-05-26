@@ -21,9 +21,11 @@ import inet.node.tsn.TsnSwitch;
 module TsnTranslator extends TsnSwitch
 {
     parameters:
+        @class(TsnTranslator);
         int numTtInterfaces = default(0); // Number of other TT interfaces connected to this TSN Translator.
         bool isDstt = default(false); // Specifies whether the TSN Translator is a DS-TT (otherwise it is a NW-TT).
-        bool queueingDelayer = default(false);/////////////
+        bool hasPdc = default(false);
+        bool queueingDelayer = default(false);
 
         clock.typename = default("PiServoClock");
         
@@ -39,7 +41,7 @@ module TsnTranslator extends TsnSwitch
         // Determines the type of queue to be used for egress traffic shaping.
         // If egress traffic shaping is enabled, "Ieee8021qTimeAwareShaper" is used.
         // Otherwise, a standard "PacketQueue" is used.
-        tt[*].macLayer.queue.typename = default(hasEgressTrafficShaping ? "Ieee8021qTimeAwareShaper" : "PacketQueue");
+        tt[*].macLayer.queue.typename = default("PacketQueue");
 
         // Chooses the appropriate PHY layer type.
         // "EthernetStreamThroughPhyLayer" is used if cut-through switching is enabled.
@@ -48,18 +50,20 @@ module TsnTranslator extends TsnSwitch
         tt[*].phyLayer.typename = default("EthernetStreamingPhyLayer");
 
         bridging.typename = default("TTBridgingLayer");
+        bridging.pdc.typename = default(hasPdc ? "PdcLayer" : "");
 
         bridging.delayLayer.typename = default("TTDelayLayer");
         bridging.delayLayer.queueingDelayer = default(this.queueingDelayer);
         bridging.delayLayer.delayUplink = default(this.delayUplink);
         bridging.delayLayer.delayDownlink = default(this.delayDownlink);
+
         eth[*].enableTimeTagging = default(true);
         tt[*].enableTimeTagging = default(false);
-        
+
         gptp.typename = default(hasGptp ? "DetComGptp" : "");
 
         eth[*].timeTagger.clockModule = default(exists(detComClock) ? absPath(".detComClock") : "");
-
+        @signal[distribution-event](type=cMessage);
     gates:
         inout ttg[numTtInterfaces] @labels(EtherFrame-conn);
     submodules:

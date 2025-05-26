@@ -11,5 +11,5 @@ Table of Contents
    :name: mastertoc
 
    simulations/index
-   NED documentation <https://deterministic6g.github.io/deterministic6g/doc/neddoc/>
+   NED documentation <https://deterministic6g.github.io/6GDetCom_Simulator/doc/neddoc/>
    ← Deterministic6G project website <https://deterministic6g.eu/>

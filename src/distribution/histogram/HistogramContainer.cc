@@ -16,17 +16,21 @@ using namespace inet::xmlutils;
 
 Define_Module(HistogramContainer);
 
+
 void HistogramContainer::initialize(int stage) {
     if (stage == INITSTAGE_LOCAL) {
         histograms.clear();
 
-        auto histogramsMap = check_and_cast<cValueMap *>(par("histograms").objectValue());
+        auto histogramsMap = check_and_cast<cValueMap*>(
+                par("histograms").objectValue());
         auto histogramsFields = histogramsMap->getFields();
 
-        for (auto &histogramsField: histogramsFields) {
+        for (auto &histogramsField : histogramsFields) {
             auto streamName = histogramsField.first;
             auto xmlFile = histogramsField.second.stringValue();
             histograms[streamName] = loadHistogramFromFile(xmlFile);
+            EV << histograms[streamName] << std::endl;
+
         }
     }
 }
@@ -67,10 +71,38 @@ Histogram *HistogramContainer::getHistogram(const std::string &key) const {
     return it->second;
 }
 
+
+void HistogramContainer::processCommand(const cXMLElement &node) {
+    Enter_Method("processCommand");
+    if (!strcmp(node.getTagName(), "set-histogram")) {
+        auto key = xmlutils::getMandatoryAttribute(node, "key");
+        auto pathToHistogram = xmlutils::getMandatoryAttribute(node,
+                "histogram");
+
+        auto it = histograms.find(key);
+        if (it != histograms.end()) {
+            delete it->second;
+        }
+        histograms[key] = loadHistogramFromFile(pathToHistogram);
+
+    } else
+        throw cRuntimeError("Invalid command: %s", node.getTagName());
+}
+
+void HistogramContainer::handleParameterChange(const char *parname) {
+    if (!strcmp(parname, "histograms")) {
+        EV << (histograms.rbegin())->first << std::endl;
+    }
+
+}
+
+
 HistogramContainer::~HistogramContainer() {
     for (auto &histogram: histograms) {
         delete histogram.second;
     }
 }
+
+
 
 } /* namespace d6g */

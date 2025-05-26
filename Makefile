@@ -1,4 +1,5 @@
 INET ?= ../../inet
+
 .PHONY: doc
 
 all: checkmakefiles
@@ -29,7 +30,7 @@ checkmakefiles:
 	fi
 
 neddoc:
-	cd .. && opp_neddoc --verbose --doxygen deterministic6g/ inet/
+	cd .. && opp_neddoc --verbose --doxygen 6GDetCom_Simulator/ inet/
 
 doc:
 	cd doc/src && ./docker-make html && echo "===> file:$$(pwd)/_build/html/index.html"

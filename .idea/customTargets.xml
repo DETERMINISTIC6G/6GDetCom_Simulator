@@ -1,21 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="CLionExternalBuildManager">
-    <target id="9adada03-a06d-4f04-b613-d9e938deb21e" name="all debug" defaultType="MAKE">
-      <configuration id="96a8b1ae-0014-453e-b29a-e34a9ac17062" name="all debug">
+    <target id="7acee1d9-a186-4590-a798-3f8d520aad84" name="all debug" defaultType="MAKE">
+      <configuration id="2e60558a-45b3-4352-b074-52e90eba4a06" name="all debug">
         <build type="MAKE">
           <make targetName="MODE=debug all" />
         </build>
-      </configuration>
-    </target>
-    <target id="290c1917-5eb1-4f34-9e95-6d8223e74e78" name="d6g" defaultType="MAKE">
-      <configuration id="d1bcf7db-40e9-41bf-b43a-8931703ad742" name="d6g">
-        <build type="MAKE">
-          <make targetName="make -j $(nproc) MODE=release all" />
-        </build>
-        <clean type="MAKE">
-          <make targetName="make clean" />
-        </clean>
       </configuration>
     </target>
   </component>

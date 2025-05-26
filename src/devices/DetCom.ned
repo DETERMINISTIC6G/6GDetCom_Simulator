@@ -43,7 +43,7 @@ module DetCom
             @display("p=100,100,col,150;");
         }
         nwtt: TsnTranslator {
-            @display("p=550,100;");
+            @display("p=250,100;");
         }
     connections:
         nwttg <--> nwtt.ethg++;

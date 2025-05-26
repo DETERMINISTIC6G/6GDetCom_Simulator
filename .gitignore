@@ -4,6 +4,8 @@ simulations/frames
 *.sif
 src/deterministic6g
 src/deterministic6g_dbg
+src/6GDetCom_Simulator
+src/6GDetCom_Simulator_dbg
 *.vci
 *.vec
 *.sca

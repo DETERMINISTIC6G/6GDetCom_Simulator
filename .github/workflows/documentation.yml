@@ -16,38 +16,38 @@ jobs:
       - name: Checkout Deterministic6G repository
         uses: actions/checkout@main
         with:
-          path: deterministic6g
+          path: 6GDetCom_Simulator
       - name: Checkout INET repository
         uses: actions/checkout@main
         with:
           repository: inet-framework/inet
           path: inet
-          ref: 'v4.5.2'
+          ref: '6211cd63ebe479b9b01f5ccecc632d5c2e1952af'
       - name: "Build Neddoc"
         run: |
-          source "$HOME/.bashrc"
-          cd deterministic6g
+          source "$HOME/.profile"
+          cd 6GDetCom_Simulator
           xvfb-run -a make neddoc
       - name: "Upload NEDdoc artifact"
         uses: actions/upload-artifact@v4
         with:
           name: neddoc
           path: |
-            deterministic6g/doc/neddoc
+            6GDetCom_Simulator/doc/neddoc
           retention-days: 7
       - name: "Upload Doxy artifact"
         uses: actions/upload-artifact@v4
         with:
           name: doxy
           path: |
-            deterministic6g/doc/doxy
+            6GDetCom_Simulator/doc/doxy
           retention-days: 7
       - name: "Upload nedtags.xml artifact"
         uses: actions/upload-artifact@v4
         with:
           name: nedtags
           path: |
-            deterministic6g/doc/neddoc/nedtags.xml
+            6GDetCom_Simulator/doc/neddoc/nedtags.xml
           retention-days: 7
 
   doc:

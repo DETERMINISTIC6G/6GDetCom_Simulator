@@ -12,7 +12,7 @@ The following figure shows the design of the showcase scenario.
 
 .. image:: Deadline_EdgeCloudNetwork.png
 
-The following code snippet shows the configuration of the cloudServer device in Figure 14, where localPort is the port on which the UdpEdgeCloudApp9 is listening, and destAddress and destPort are the name of the destination device and destination port of the destination device, respectively.
+The following code snippet shows the configuration of the cloudServer device in Figure 14, where localPort is the port on which the UdpEdgeCloudApp is listening, and destAddress and destPort are the name of the destination device and destination port of the destination device, respectively.
 The delay parameter contains the intended delay configuration.
 In particular, every app of the cloud server has exactly one delay configuration, which is applied if a packet arrives at the specified localPort.
 In order to specify different delays for different sources, one can create multiple apps with a different localPort and modify the source apps respectively.

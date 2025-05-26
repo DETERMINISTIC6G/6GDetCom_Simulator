@@ -3,6 +3,9 @@
   <component name="Black">
     <option name="sdkName" value="omnet" />
   </component>
+  <component name="CMakePythonSetting">
+    <option name="pythonIntegrationState" value="YES" />
+  </component>
   <component name="ExternalStorageConfigurationManager" enabled="true" />
   <component name="MakefileSettings">
     <option name="linkedExternalProjectsSettings">

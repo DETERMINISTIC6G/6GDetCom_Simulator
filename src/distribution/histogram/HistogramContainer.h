@@ -9,6 +9,8 @@
 #define DETERMINISTIC6G_HISTOGRAMCONTAINER_H_
 
 #include <omnetpp.h>
+
+#include "inet/common/scenario/IScriptable.h"
 #include "inet/common/INETDefs.h"
 #include "../contract/IRandomNumberProvider.h"
 #include "../histogram/Histogram.h"
@@ -26,7 +28,7 @@ using namespace inet;
  *
  * For detailed usage and configuration, refer to the NED doc.
  */
-class HistogramContainer : public cSimpleModule, public IRandomNumberProvider {
+class HistogramContainer : public cSimpleModule, public IRandomNumberProvider, public IScriptable {
 
 private:
     std::map<std::string, Histogram *> histograms; ///< Map associating string keys with Histogram instances.
@@ -34,6 +36,8 @@ private:
 
 protected:
     virtual void initialize(int stage) override;
+
+    void handleParameterChange(const char *parname) override;
 
     /*!
      * Create and load a Histogram instance from a file.
@@ -43,6 +47,11 @@ protected:
      * @return Histogram data according to the XML file.
      */
     static Histogram *loadHistogramFromFile(const char *fileName);
+
+
+    // IScriptable implementation
+    virtual void processCommand(const cXMLElement& node) override;
+
 public:
     /*!
      * Retrieves a Histogram instance based on the given key.

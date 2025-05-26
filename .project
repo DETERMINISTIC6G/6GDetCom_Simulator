@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>deterministic6g</name>
+	<name>6GDetCom_Simulator</name>
 	<comment></comment>
 	<projects>
 		<project>inet</project>

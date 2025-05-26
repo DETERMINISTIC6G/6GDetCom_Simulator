@@ -22,13 +22,13 @@ network DetComNetworkBase extends TsnNetworkBase
         *.eth[*].bitrate = default(1Gbps);
         detCom.*.eth[*].bitrate = default(1Gbps);
         **.eth[*].phyLayer.typename = default("EthernetStreamingPhyLayer");
+
         
-        
-		**.hasEgressTrafficShaping = true; // Enabling egress traffic shaping for all nodes in the network.
+		**.hasEgressTrafficShaping = default(true); // Enabling egress traffic shaping for all nodes in the network.
 		
 		
-		**.hasIncomingStreams = true; // Specifying that all nodes in the network have incoming streams.
+		**.hasIncomingStreams = default(true); // Specifying that all nodes in the network have incoming streams.
 		
 		
-		**.eth[*].macLayer.queue.numTrafficClasses = 2; // Specifying the number of traffic classes at the MAC layer for all Ethernet interfaces.
+		**.eth[*].macLayer.queue.numTrafficClasses = default(2); // Specifying the number of traffic classes at the MAC layer for all Ethernet interfaces.
 }
