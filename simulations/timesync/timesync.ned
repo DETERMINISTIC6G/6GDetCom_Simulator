@@ -5,7 +5,7 @@
 //
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-package d6g.simulations.timesync.paper;
+package d6g.simulations.timesync;
 
 import d6g.devices.DetCom;
 import d6g.distribution.histogram.HistogramContainer;

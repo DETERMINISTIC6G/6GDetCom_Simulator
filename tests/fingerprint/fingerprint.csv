@@ -1,7 +1,8 @@
 # working directory, command line arguments, simulation time limit, fingerprint, expected result, tags
 # tplx
 ../../simulations/baseline,        ../../src/6GDetCom_Simulator -f omnetpp.ini -c Bidirectional -n ..:../../src:../../../inet/src -l ../../../inet/src/INET,             60s,         538a-9806/tplx, PASS,
-../../simulations/baseline,        ../../src/6GDetCom_Simulator -f omnetpp.ini -c Unidirectional_LeftToRight -n ..:../../src:../../../inet/src -l ../../../inet/src/INET,             60s,         9987-d802/tplx, PASS,
+../../simulations/baseline,        ../../src/6GDetCom_Simulator -f omnetpp.ini -c Unidirectional_LeftToRight -n ..:../../src:../../../inet/src -l ../../../inet/src/INET,             60s,         88f3-c03f/tplx, PASS,
+../../simulations/baseline,        ../../src/6GDetCom_Simulator -f omnetpp.ini -c Unidirectional_LeftToRight_Queueing -n ..:../../src:../../../inet/src -l ../../../inet/src/INET,             60s,         9c61-9c8d/tplx, PASS,
 ../../simulations/baseline,        ../../src/6GDetCom_Simulator -f omnetpp.ini -c Unidirectional_RightToLeft -n ..:../../src:../../../inet/src -l ../../../inet/src/INET,             60s,         1bba-6ddb/tplx, PASS,
 ../../simulations/baseline,        ../../src/6GDetCom_Simulator -f omnetpp.ini -c Bidirectional_RandomWalk -n ..:../../src:../../../inet/src -l ../../../inet/src/INET,             60s,         3339-3ab6/tplx, PASS,
 ../../simulations/cooperativemanufacturing,        ../../src/6GDetCom_Simulator -f omnetpp.ini -c OnlyAgvToCell -n ..:../../src:../../../inet/src -l ../../../inet/src/INET,             60s,         9f91-6429/tplx, PASS,
@@ -24,7 +25,8 @@
 
 # scalar & vector
 ../../simulations/baseline,        ../../src/6GDetCom_Simulator -f omnetpp.ini -c Bidirectional -n ..:../../src:../../../inet/src -l ../../../inet/src/INET,             60s,         274a-4df8/szv, PASS,
-../../simulations/baseline,        ../../src/6GDetCom_Simulator -f omnetpp.ini -c Unidirectional_LeftToRight -n ..:../../src:../../../inet/src -l ../../../inet/src/INET,             60s,         83a4-83fd/szv, PASS,
+../../simulations/baseline,        ../../src/6GDetCom_Simulator -f omnetpp.ini -c Unidirectional_LeftToRight -n ..:../../src:../../../inet/src -l ../../../inet/src/INET,             60s,         182d-a863/szv, PASS,
+../../simulations/baseline,        ../../src/6GDetCom_Simulator -f omnetpp.ini -c Unidirectional_LeftToRight_Queueing -n ..:../../src:../../../inet/src -l ../../../inet/src/INET,             60s,         0d5a-7e9e/szv, PASS,
 ../../simulations/baseline,        ../../src/6GDetCom_Simulator -f omnetpp.ini -c Unidirectional_RightToLeft -n ..:../../src:../../../inet/src -l ../../../inet/src/INET,             60s,         9eb9-0c32/szv, PASS,
 ../../simulations/baseline,        ../../src/6GDetCom_Simulator -f omnetpp.ini -c Bidirectional_RandomWalk -n ..:../../src:../../../inet/src -l ../../../inet/src/INET,             60s,         0e00-2e8f/szv, PASS,
 ../../simulations/cooperativemanufacturing,        ../../src/6GDetCom_Simulator -f omnetpp.ini -c OnlyAgvToCell -n ..:../../src:../../../inet/src -l ../../../inet/src/INET,             60s,         9119-c7a9/szv, PASS,
