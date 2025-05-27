@@ -8,10 +8,12 @@
 package d6g.simulations.timesync;
 
 import d6g.devices.DetCom;
+import d6g.distribution.histogram.HistogramContainer;
+import inet.common.scenario.ScenarioManager;
 import inet.networks.base.TsnNetworkBase;
 import inet.node.ethernet.EthernetLink;
-import inet.node.tsn.TsnClock;
 import inet.node.tsn.TsnDevice;
+import inet.node.tsn.TsnSwitch;
 
 
 // 
@@ -20,23 +22,95 @@ import inet.node.tsn.TsnDevice;
 network TimeSyncNetwork extends TsnNetworkBase
 {
     submodules:
-        timeTransmitter: TsnClock {
-            @display("p=500,150");
+        scenarioManagerLink: ScenarioManager {
+            @display("p=100,500;is=s");
+        }
+        scenarioManagerGm: ScenarioManager {
+            @display("p=100,550;is=s");
+        }
+        histogramContainer: HistogramContainer {
+            @display("p=100,800");
+        }
+        tsnDeviceA: TsnDevice {
+            @display("p=800,300");
+        }
+        tsnSwitchA1: TsnSwitch {
+            @display("p=700,300");
+        }
+        tsnSwitchA2: TsnSwitch {
+            @display("p=600,300");
         }
         detCom: DetCom {
             @display("p=500,300");
         }
-        tsnDevice1: TsnDevice {
-            @display("p=400,450");
+        tsnSwitchB1: TsnSwitch {
+            @display("p=400,250");
         }
-        tsnDevice2: TsnDevice {
-            @display("p=600,450");
+        tsnDeviceB: TsnDevice {
+            @display("p=300,250");
+        }
+        tsnDeviceC: TsnDevice {
+            @display("p=300,350");
         }
 
 
     connections:
-        timeTransmitter.ethg++ <--> EthernetLink <--> detCom.nwttg;
-        tsnDevice1.ethg++ <--> EthernetLink <--> detCom.dsttg++;
-        tsnDevice2.ethg++ <--> EthernetLink <--> detCom.dsttg++;
+        detCom.nwttg <--> EthernetLink <--> tsnSwitchA2.ethg++;
+        detCom.dsttg++ <--> EthernetLink <--> tsnSwitchB1.ethg++;
+        detCom.dsttg++ <--> EthernetLink <--> tsnDeviceC.ethg++;
+
+        tsnSwitchA2.ethg++ <--> EthernetLink <--> tsnSwitchA1.ethg++;
+        tsnSwitchA1.ethg++ <--> EthernetLink <--> tsnDeviceA.ethg++;
+
+        tsnSwitchB1.ethg++ <--> EthernetLink <--> tsnDeviceB.ethg++;
+
+}
+
+network TimeSyncNetworkMultihop extends TsnNetworkBase
+{
+    parameters:
+        int numSwitchesA;
+    submodules:
+        scenarioManagerLink: ScenarioManager {
+            @display("p=100,500;is=s");
+        }
+        scenarioManagerGm: ScenarioManager {
+            @display("p=100,550;is=s");
+        }
+        histogramContainer: HistogramContainer {
+            @display("p=100,800");
+        }
+        tsnDeviceA: TsnDevice {
+            @display("p=800,300");
+        }
+        tsnSwitchA[numSwitchesA]: TsnSwitch {
+            @display("p=700,300,col,100");
+            numEthInterfaces = 2;
+        }
+        detCom: DetCom {
+            @display("p=500,300");
+        }
+        tsnSwitchB1: TsnSwitch {
+            @display("p=400,250");
+        }
+        tsnDeviceB: TsnDevice {
+            @display("p=300,250");
+        }
+        tsnDeviceC: TsnDevice {
+            @display("p=300,350");
+        }
+
+
+    connections:
+        detCom.nwttg <--> EthernetLink <--> tsnSwitchA[0].ethg[0];
+        detCom.dsttg++ <--> EthernetLink <--> tsnSwitchB1.ethg++;
+        detCom.dsttg++ <--> EthernetLink <--> tsnDeviceC.ethg++;
+
+        for i=0..sizeof(tsnSwitchA)-2 {
+            tsnSwitchA[i].ethg[1] <--> EthernetLink <--> tsnSwitchA[i+1].ethg[0];
+        }
+        tsnSwitchA[numSwitchesA-1].ethg[1] <--> EthernetLink <--> tsnDeviceA.ethg++;
+
+        tsnSwitchB1.ethg++ <--> EthernetLink <--> tsnDeviceB.ethg++;
 
 }

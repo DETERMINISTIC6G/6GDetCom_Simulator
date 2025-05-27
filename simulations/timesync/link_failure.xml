@@ -1,0 +1,13 @@
+<scenario>
+    <!-- nwtt <-> dstt breaks -->
+    <set-channel-param t="70.2s" src-module="detCom.dstt[0]" dest-module="detCom.nwtt" par="disabled" value="true"/>
+    <set-channel-param t="70.2s" src-module="detCom.dstt[1]" dest-module="detCom.nwtt" par="disabled" value="true"/>
+    <set-channel-param t="70.2s" src-module="detCom.dstt[0]" dest-module="detCom.dstt[1]" par="disabled" value="true"/>
+    <set-channel-param t="110s" src-module="detCom.dstt[0]" dest-module="detCom.nwtt" par="disabled" value="false"/>
+    <set-channel-param t="110s" src-module="detCom.dstt[1]" dest-module="detCom.nwtt" par="disabled" value="false"/>
+    <set-channel-param t="110s" src-module="detCom.dstt[0]" dest-module="detCom.dstt[1]" par="disabled" value="false"/>
+    
+    <!-- nw-side becomes disconnected -->
+    <set-channel-param t="130.3s" src-module="detCom" dest-module="tsnSwitchA2" par="disabled" value="true"/>
+    <set-channel-param t="170s" src-module="detCom" dest-module="tsnSwitchA2" par="disabled" value="false"/>
+</scenario>

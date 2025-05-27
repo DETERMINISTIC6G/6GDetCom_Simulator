@@ -25,9 +25,10 @@ module TsnTranslator extends TsnSwitch
         int numTtInterfaces = default(0); // Number of other TT interfaces connected to this TSN Translator.
         bool isDstt = default(false); // Specifies whether the TSN Translator is a DS-TT (otherwise it is a NW-TT).
         bool hasPdc = default(false);
+        bool queueingDelayer = default(false);
 
-        clock.typename = "IdealClock";
-
+        clock.typename = default("PiServoClock");
+        
         eth[*].typename = default("TTEthInterface");
 
         volatile double delayUplink @mutable @unit(s) = default(0s); // Uplink Delay
@@ -52,12 +53,14 @@ module TsnTranslator extends TsnSwitch
         bridging.pdc.typename = default(hasPdc ? "PdcLayer" : "");
 
         bridging.delayLayer.typename = default("TTDelayLayer");
+        bridging.delayLayer.queueingDelayer = default(this.queueingDelayer);
         bridging.delayLayer.delayUplink = default(this.delayUplink);
         bridging.delayLayer.delayDownlink = default(this.delayDownlink);
 
-
         eth[*].enableTimeTagging = default(true);
         tt[*].enableTimeTagging = default(false);
+
+        gptp.typename = default(hasGptp ? "DetComGptp" : "");
 
         eth[*].timeTagger.clockModule = default(exists(detComClock) ? absPath(".detComClock") : "");
         @signal[distribution-event](type=cMessage);

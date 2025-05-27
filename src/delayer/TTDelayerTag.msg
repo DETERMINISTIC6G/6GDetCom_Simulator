@@ -5,15 +5,16 @@
 //
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-package d6g.timestamping;
+import inet.common.TagBase;
+import inet.clock.contract.ClockTime;
 
+namespace d6g;
 
-import inet.common.SimpleModule;
+cplusplus {{
+using namespace inet;
+}}
 
-
-simple TimeTagger extends SimpleModule
+class TTDelayerTag extends inet::TagBase
 {
-    @display("i=block/blackboard");
-    @class(TimeTagger);
-    string clockModule = default(""); // Relative path of a module that implements IClock; optional
+    inet::clocktime_t enqueueTime;
 }

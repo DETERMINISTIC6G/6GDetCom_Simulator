@@ -2,7 +2,8 @@
 
 printf "\n=== Check dependencies ===\n"
 
-version="6.0.3"
+version="6.1.0"
+check_for_version="6.1"
 inet_version="4.5.3"
 
 # Function to check if a package is installed
@@ -20,7 +21,7 @@ install_package() {
 # List of required packages
 required_packages=("build-essential" "clang" "lld" "gdb" "bison" "flex" "perl" "python3" "python3-pip" "python3-venv"
 "qtbase5-dev" "qtchooser" "qt5-qmake" "qtbase5-dev-tools" "libqt5opengl5-dev" "libxml2-dev" "zlib1g-dev" "doxygen"
-"graphviz" "libwebkit2gtk-4.0-37" "curl" "tar") # Replace with actual package names
+"graphviz" "curl" "tar")
 
 # Check for required packages
 missing_packages=()
@@ -79,7 +80,7 @@ done
 
 create_venv() {
   echo "Creating venv..."
-  default_venv_path="$HOME/venv/deterministic6g"
+  default_venv_path="$HOME/venv/6GDetCom_Simulator"
   read -p "Enter the venv path [$default_venv_path]: " venv_path
   venv_path=${venv_path:-$default_venv_path}
   python3 -m venv "$venv_path"
@@ -183,7 +184,7 @@ install_omnetpp() {
 if [ -d "$install_path" ] && [ "$(ls -A "$install_path")" ]; then
     echo "Installation path $install_path exists and is not empty."
     # Check Omnet++ version
-    if "$install_path/bin/opp_run" -v 2>&1 | grep -q "Version: $version"; then
+    if "$install_path/bin/opp_run" -v 2>&1 | grep -q "Version: $check_for_version"; then
         echo "OMNeT++ version $version is already installed at $install_path. Continuing without installation"
         echo "Setting environment variables..."
         if ! source "$install_path/setenv"; then
@@ -207,20 +208,20 @@ printf "\n=== Workspace setup ===\n"
 default_workspace_path="$HOME/workspaces/deterministic6g_workspace"
 
 install_d6g() (
-  echo "Cloning DETERMINISTIC6G repository..."
+  echo "Cloning 6GDetCom_Simulator repository..."
   cd "$workspace_path" || exit 1
-  if ! git clone "https://github.com/DETERMINISTIC6G/deterministic6g.git"; then
-      echo "Failed cloning DETERMINISTIC6G repository. Exiting."
+  if ! git clone "https://github.com/DETERMINISTIC6G/6GDetCom_Simulator.git"; then
+      echo "Failed cloning 6GDetCom_Simulator repository. Exiting."
       exit 1
   fi
-  cd "deterministic6g" || exit 1
+  cd "6GDetCom_Simulator" || exit 1
 
   if ! make makefiles; then
       echo "Failed to generate makefiles. Exiting."
       exit 1
   fi
   if ! make -j$(nproc); then
-      echo "Failed to build DETERMINISTIC6G. Exiting."
+      echo "Failed to build 6GDetCom_Simulator. Exiting."
       exit 1
   fi
 )
@@ -229,7 +230,8 @@ install_inet() (
   echo "Installing INET..."
   cd "$workspace_path" || exit 1
 
-  if ! git clone --branch v$inet_version https://github.com/inet-framework/inet.git; then
+  # if ! git clone --branch v$inet_version https://github.com/inet-framework/inet.git; then
+  if ! git clone https://github.com/DETERMINISTIC6G/inet-gptp.git inet; then
       echo "Failed cloning INET repository. Exiting."
       exit 1
   fi

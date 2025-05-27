@@ -27,12 +27,16 @@ module DetCom
 {
     parameters:
         @display("i=device/antennatower");
+        bool hasTimeSynchronization = default(false); // Enable time synchronization
         int numUEs = default(0); // Number of connected UEs (specifies number of dstt modules).
         xml delayConfig = default(xml("<delays></delays>")); // XML delay configuration, alternative way to specify the uplink and downlink delays for dstts.
+        bool queueingDelayer = default(hasTimeSynchronization); // -------
+        *.hasTimeSynchronization = default(this.hasTimeSynchronization);
+        dstt[*].queueingDelayer = default(this.queueingDelayer);
         @class(DetCom);
     gates:
-        inout dsttg[numUEs];
-        inout nwttg;
+        inout dsttg[numUEs]; // Device-side TsnTranslator gate
+        inout nwttg; // Network-side TsnTranslator gate
     submodules:
         dstt[sizeof(dsttg)]: TsnTranslator {
             isDstt = default(true);

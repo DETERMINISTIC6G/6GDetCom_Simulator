@@ -18,7 +18,6 @@ namespace d6g {
 using namespace omnetpp;
 using namespace inet;
 
-
 template <typename T> class InterfaceFilterMixin : public T
 {
   protected:
@@ -29,22 +28,32 @@ template <typename T> class InterfaceFilterMixin : public T
     void initialize(int stage) override;
     void addInterfacesToSet(std::set<int> &set, const char *interfaceType);
     bool matchesInterfaceConfiguration(Packet *packet) const;
+    bool idMatchesSet(int id, const std::set<int> &set) const;
 };
-template <typename T> void InterfaceFilterMixin<T>::initialize(int stage) {
+
+template <typename T> void InterfaceFilterMixin<T>::initialize(int stage)
+{
     T::initialize(stage);
     if (stage == INITSTAGE_LAST) {
-        auto indInterfaceTypes = check_and_cast<cValueArray *>(T::par("indInterfaceTypes").objectValue());
-        for (int i = 0; i < indInterfaceTypes->size(); i++) {
-            addInterfacesToSet(indInterfaces, indInterfaceTypes->get(i).stringValue());
+        indInterfaces.clear();
+        if (T::hasPar("indInterfaceTypes")) {
+            auto indInterfaceTypes = check_and_cast<cValueArray *>(T::par("indInterfaceTypes").objectValue());
+            for (int i = 0; i < indInterfaceTypes->size(); i++) {
+                addInterfacesToSet(indInterfaces, indInterfaceTypes->get(i).stringValue());
+            }
         }
-        auto reqInterfaceTypes = check_and_cast<cValueArray *>(T::par("reqInterfaceTypes").objectValue());
-        for (int i = 0; i < reqInterfaceTypes->size(); i++) {
-            addInterfacesToSet(reqInterfaces, reqInterfaceTypes->get(i).stringValue());
+        reqInterfaces.clear();
+        if (T::hasPar("reqInterfaceTypes")) {
+            auto reqInterfaceTypes = check_and_cast<cValueArray *>(T::par("reqInterfaceTypes").objectValue());
+            for (int i = 0; i < reqInterfaceTypes->size(); i++) {
+                addInterfacesToSet(reqInterfaces, reqInterfaceTypes->get(i).stringValue());
+            }
         }
     }
 }
 
-template <typename T> void InterfaceFilterMixin<T>::addInterfacesToSet(std::set<int> &set, const char *interfaceType) {
+template <typename T> void InterfaceFilterMixin<T>::addInterfacesToSet(std::set<int> &set, const char *interfaceType)
+{
     // Check if context has submodule with name interfaceType
     auto node = getContainingNode(this);
     if (!node->hasSubmoduleVector(interfaceType)) {
@@ -63,28 +72,20 @@ template <typename T> void InterfaceFilterMixin<T>::addInterfacesToSet(std::set<
 
 template <typename T> bool InterfaceFilterMixin<T>::matchesInterfaceConfiguration(Packet *packet) const
 {
-    bool indInterfaceMatch = false;
-    bool reqInterfaceMatch = false;
+    auto indTag = packet->findTag<InterfaceInd>();
+    bool indInterfaceMatch = !indTag || idMatchesSet(indTag->getInterfaceId(), indInterfaces);
 
-    if (indInterfaces.empty() || !packet->hasTag<InterfaceInd>()) {
-        indInterfaceMatch = true;
-    }
-    if (!indInterfaceMatch) {
-        auto interfaceInd = packet->getTag<InterfaceInd>();
-        indInterfaceMatch = indInterfaces.find(interfaceInd->getInterfaceId()) != indInterfaces.end();
-    }
-
-    if (reqInterfaces.empty() || !packet->hasTag<InterfaceReq>()) {
-        reqInterfaceMatch = true;
-    }
-    if (!reqInterfaceMatch) {
-        auto interfaceReq = packet->getTag<InterfaceReq>();
-        reqInterfaceMatch = reqInterfaces.find(interfaceReq->getInterfaceId()) != reqInterfaces.end();
-    }
+    auto reqTag = packet->findTag<InterfaceReq>();
+    bool reqInterfaceMatch = !reqTag || idMatchesSet(reqTag->getInterfaceId(), reqInterfaces);
 
     return indInterfaceMatch && reqInterfaceMatch;
 }
 
-} /* namespace d6g */
+template <typename T> bool InterfaceFilterMixin<T>::idMatchesSet(int id, const std::set<int> &set) const
+{
+    return set.empty() || set.find(id) != set.end();
+}
+
+}/* namespace d6g */
 
 #endif /* UTILS_INTERFACEFILTER_H_ */

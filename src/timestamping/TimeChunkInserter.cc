@@ -41,9 +41,7 @@ void TimeChunkInserter::processPacket(Packet *packet)
 {
     Enter_Method("processPacket");
 
-    auto ingressTag = packet->findTag<DetComIngressTimeTag>();
-    if (!ingressTag)
-        throw cRuntimeError("TimeChunkInserter requires IngressTimeTag to be present in the packet");
+    auto ingressTag = packet->getTag<DetComIngressTimeTag>();
 
     auto ingressTimeChunk = makeShared<DetComTimeChunk>();
     ingressTimeChunk->setReceptionStarted(ingressTag->getReceptionStarted());

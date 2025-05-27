@@ -7,10 +7,10 @@
 
 #include "TimeChunkEnforcer.h"
 
+#include "DetComTimeTag_m.h"
 #include "TimeChunkInserter.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/common/NetworkInterface.h"
-
 
 namespace d6g {
 
@@ -22,7 +22,8 @@ void TimeChunkEnforcer::initialize(int stage)
 }
 
 void TimeChunkEnforcer::processPacket(Packet *packet) {
-    if (matchesInterfaceConfiguration(packet)) {
+    auto ingressTag = packet->findTag<DetComIngressTimeTag>();
+    if (ingressTag && matchesInterfaceConfiguration(packet)) {
         ensureEncapsulationProtocolReq(packet, &TimeChunkInserter::timeTagProtocol);
     } else {
         removeEncapsulationProtocolReq(packet, &TimeChunkInserter::timeTagProtocol);
