@@ -8,6 +8,9 @@ permissions:
   pages: write
   id-token: write
 
+env:
+  INET_VERSION: ab360b8a58018eb485b5e07682faa6fef9ee80f3
+
 jobs:
   neddoc:
     name: "Generate NED-Documentation and Doxy"
@@ -20,9 +23,9 @@ jobs:
       - name: Checkout INET repository
         uses: actions/checkout@main
         with:
-          repository: inet-framework/inet
+          repository: DETERMINISTIC6G/inet-gptp
           path: inet
-          ref: '6211cd63ebe479b9b01f5ccecc632d5c2e1952af'
+          ref: ${{ env.INET_VERSION }}
       - name: "Build Neddoc"
         run: |
           source "$HOME/.profile"
