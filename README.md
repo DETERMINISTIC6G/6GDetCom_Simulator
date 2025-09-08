@@ -19,7 +19,7 @@ The software is licensed under the [GNU LESSER GENERAL PUBLIC LICENSE Version 3]
 
 If you use this software, please cite the following paper:
 
-Haug, Lucas; Dürr, Frank; Egger, Simon; Grohmann, Lorenz; Gross, James; Sharma, Gourav Prateek; Sachs, Joachim: Simulating and Emulating the Characteristic Packet Delay of Logical 5G TSN Bridges. 2025, https://doi.org/10.15496/PUBLIKATION-105097.
+Haug, L., Dürr, F., Egger, S., Mostovaya, E., Gross, J., Sharma, G., & Sachs, J. (2025). A data-driven simulation framework for logical 5G-TSN bridges. In B. Koldehofe, F. Klingler, C. Sommer, K. A. Hummel, & P. Amthor (Eds.), Proceedings of the International Conference on Networked Systems 2025 (NetSys 2025): Technische Universität Ilmenau, 1 – 4 September 2025 (116; pp. 21–24). ilmedia. https://doi.org/10.22032/dbt.67110
 
 
 ## Compatibility
