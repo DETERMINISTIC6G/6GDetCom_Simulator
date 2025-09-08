@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<analysis version="2">
+    <inputs>
+        <input pattern="results/Task2_4-*.vec"/>
+        <input pattern="results/Task2_4-*.sca"/>
+    </inputs>
+    <charts/>
+</analysis>
