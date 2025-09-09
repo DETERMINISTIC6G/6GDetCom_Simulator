@@ -23,7 +23,7 @@ Haug, L., Dürr, F., Egger, S., Mostovaya, E., Gross, J., Sharma, G., & Sachs, J
 
 
 ## Compatibility
-This version of the D6G framework is compatible with OMNeT++ 6.1 and a current INET master branch build
+This version of the D6G framework is compatible with OMNeT++ 6.2.0 and a current INET master branch build
 (NOTE: current release 4.5.4 is not compatible, use our modified version of INET instead).
 
 ## Getting Started
