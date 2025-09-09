@@ -12,13 +12,17 @@ variables:
 
 .link_repos:
   before_script:
+    - apt-get update && apt-get install -y wget unzip
     - echo "Linking INET"
     - ln -s "/home/gitlab-runner/prebuilt/inet" "../inet"
-    - echo "Linking Data"
-    - ln -s "/home/gitlab-runner/prebuilt/deterministic6g_data" "../deterministic6g_data"
+    - echo "Getting Data"
+    - wget https://github.com/DETERMINISTIC6G/deterministic6g_data/releases/latest/download/histograms_for_omnetpp.zip
+    - unzip histograms_for_omnetpp.zip
+    - rm histograms_for_omnetpp.zip
+    - mv histograms_for_omnetpp ../deterministic6g_data
   after_script:
     - echo "Unlinking Data"
-    - rm ../deterministic6g_data
+    - rm -rf ../deterministic6g_data
     - echo "Unlinking INET"
     - rm ../inet
 
