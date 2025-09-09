@@ -35,7 +35,7 @@ This includes analyzing how the resulting simulated packet delay corresponds to 
 Histogram
 ^^^^^^^^^
 
-The following figures the distribution of the resulting packet delays in both, the uplink and downlink direction.
+The following figures show the distribution of the resulting packet delays in both, the uplink and downlink direction.
 By comparing the distribution of the result of the simulation to the configured distributions from above, we see that the simulated distributions follow the given distributions.
 
 +---------------+----------------+

@@ -1,7 +1,7 @@
 DETERMINISTIC6G Framework Documentation
 =======================================
 
-For more information, see the `DETERMINISTIC6G website <https://https://deterministic6g.eu//>`_.
+For more information, see the `DETERMINISTIC6G website <https://deterministic6g.eu/>`_.
 
 Table of Contents
 -----------------

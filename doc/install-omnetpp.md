@@ -3,11 +3,11 @@
 The following descriptions have been tested with Debian 12, but should also work with other Linux distributions.
 
 Information for other Linux distributions (Ubuntu) and platforms (Windows, macOS) as well as a more detailed description
-can be found in the official (OMNeT++ Installation Guide)[https://doc.omnetpp.org/omnetpp/InstallGuide.pdf].
+can be found in the official [OMNeT++ Installation Guide](https://doc.omnetpp.org/omnetpp/InstallGuide.pdf).
 
 ## Installing OMNeT++
 
-We are using OMNeT++ 6.1, although other versions of OMNeT++ might also work.
+We are using OMNeT++ 6.0.1, although other versions of OMNeT++ might also work.
 
 Install required packages using the package manager:
 
@@ -26,15 +26,15 @@ $ source ~/venv-omnetpp/bin/activate
 (venv-omnetpp) $ pip install numpy pandas matplotlib scipy seaborn posix-ipc
 ```
 
-Download `omnetpp-6.1-linux-x86_64.tgz` from (OMNeT++ web page)[https://omnetpp.org/].
+Download `omnetpp-6.0.1-linux-x86_64.tgz` from the [OMNeT++ web page](https://omnetpp.org/).
 
 Extract archive to a folder of your choice. In the following, we install OMNeT++ directly to the home directory `~/` of
-the user and refer to the OMNeT++ folder as `~/omnetpp-6.1`:
+the user and refer to the OMNeT++ folder as `~/omnetpp-6.0.1`:
 
 ```
 $ cd ~/
-$ tar xzf omnetpp-6.0-linux-x86_64.tgz
-$ cd ~/omnetpp-6.1
+$ tar xzf omnetpp-6.0.1-linux-x86_64.tgz
+$ cd ~/omnetpp-6.0.1
 ```
 
 Edit `configure.user`:
@@ -64,7 +64,7 @@ start OMNeT++ from within this environment:
 #!/usr/bin/bash
 
 source ~/venv-omnetpp/bin/activate
-cd ~/omnetpp-6.1
+cd ~/omnetpp-6.0.1
 source setenv
 ./bin/omnetpp
 ```
@@ -96,15 +96,12 @@ $ git checkout tags/v4.5.2 -b mybranch
 You can change the branch name `mybranch` as you like. You could even leave it out, but it is good style not to work
 with a so-called detached head if you plan to make changes.
 
-Import the project into the workspace in the OMNeT++ IDE using the menu: 
+Import the project into the workspace in the OMNeT++ IDE using the menu:
 
-File | Import | General | Existing projects into Workspace
-
-Then select the workspace dir as the root directory, and be sure NOT to check the
-"Copy projects into workspace" box. Click Finish.
+`File | Import | General | Existing projects into Workspace`
 
 Select as root directory the directory to which you have checked out INET above: `~/workspace/inet`. Do not check the
-option Copy Project into Workspace. Click Finish. Note that OMNet++ might take a while to check the project showing some
+option "Copy Project into Workspace". Click Finish. Note that OMNet++ might take a while to check the project showing some
 warnings, which you can ignore.
 
 Select the INET project from the OMNeT++ Project Explorer (tree-view on the left side in the IDE). Then build the INET

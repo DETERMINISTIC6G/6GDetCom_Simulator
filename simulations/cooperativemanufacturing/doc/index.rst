@@ -60,7 +60,7 @@ Influence of PDVs onto other streams
 
 In our first evaluation, we only consider the first two streams, i.e., from agv1.interToCell to processingCell.swarmStatus and from agv2.interToCell to processingCell.swarmStatus.
 First, we assume constant transmission and propagation delay for both streams using the following delay configuration for the :ned:`DetCom`.
-Note, that these delay values include all delay components of the wireless links (dotted lines in the network), i.e., also the propagation delay, transmission delay, delay because of retransmissions, etc.
+Note that these delay values include all delay components of the wireless links (dotted lines in the network), i.e., also the propagation delay, transmission delay, delay because of retransmissions, etc.
 All other links (solid lines in Figure 21) behave like default EthernetLinks in INET.
 
 .. code-block:: ini
@@ -69,7 +69,7 @@ All other links (solid lines in Figure 21) behave like default EthernetLinks in 
 
 We then use a “non-wireless-friendly” scheduling approach similar to [DN16], designed for wired TSN networks, assuming very small and constant delay, i.e. zero PDV.
 This approach aims to minimize the end-to-end delay and keeps the streams close together in time (“back-to-back” scheduling) to minimize the required number of GCL entries.
-With this scheduling approach, the calculated schedule is show below:
+With this scheduling approach, the calculated schedule is shown below:
 
 Stream 1:
 
@@ -105,9 +105,9 @@ Stream 2:
 +------------------------------+------------------------------+-----------+--------------------+-------------------+
 
 
-Note, that Stream 2 starts later than Stream 1 to ensure there is no overlap on the first consecutive link from detCom to processingCell.detComAdapter.
+Note that Stream 2 starts later than Stream 1 to ensure there is no overlap on the first consecutive link from detCom to processingCell.detComAdapter.
 Stream 2 is scheduled directly after the transmission of Stream 1 except for the inter-frame gap (IFG) of 0.96 μs in our setup.
-Note, that there is no transmission and propagation delay on the wireless link before the detCom node.
+Note that there is no transmission and propagation delay on the wireless link before the detCom node.
 These delays are part of the delay configured in Listing 8 and are shown as bold entries in the tables.
 The calculated schedule leads to the GCL configuration for the detCom node as shown below:
 
@@ -124,7 +124,7 @@ The calculated schedule leads to the GCL configuration for the detCom node as sh
 
 
 The simulation results below show that all packets arrive at their pre-calculated time with the expected end-to-end delay of 420.2 μs.
-Note, as the end-to-end delay is equal for both streams only one stream is visible in the diagram.
+Note, as the end-to-end delay is equal for both streams, only one stream is visible in the diagram.
 
 .. image:: constant.png
    :width: 50%
@@ -144,11 +144,11 @@ To this end, we re-run the simulation with the following delay configuration:
 
 
 Without any changes to our schedule or the GCL this leads to the simulation results in the following figure.
-The figure shows, that the streams only arrive within their calculated time in the first cycle.
+The figure shows that the streams only arrive within their calculated time in the first cycle.
 In the second cycle, the frame of stream 1 arrives at the GCL later than calculated leading to an end-to-end delay of ~429 μs (instead of the calculated 420 μs).
 Thus, by the time the frame of stream 1 is completely transmitted the remaining duration of the open gate is not long enough anymore to transmit the frame of stream 2.
 This leads to the frame of stream 2 being queued until the beginning of the next cycle.
-In the rest of the simulation, as soon as the gate opens in the next cycle, the queued frame of stream 2 of the previous cycle is transmitted first (resulting in and end-to-end delay of ~1340 μs).
+In the rest of the simulation, as soon as the gate opens in the next cycle, the queued frame of stream 2 of the previous cycle is transmitted first (resulting in an end-to-end delay of ~1340 μs).
 During this transmission, the frame of stream 1 of the current cycle arrives which is then transmitted immediately afterwards.
 As the open gate slot is completely filled with the frame of stream 2 from the previous cycle and the frame of stream 1 of the current cycle, the frame of stream 2 of the current cycle again has to be queued until the gate opening in the next cycle.
 Without dropping any packets (e.g. by using ingress filtering and policing) or using additional gate opening times, there is no possibility to recover from this.
@@ -244,7 +244,7 @@ Stream 2:
 Please note that Stream 2 is now scheduled exactly 500 μs after Stream 1, which is exactly half the cycle time of 1 ms.
 For two streams, this is the optimal case, as it minimizes the probability of streams colliding with streams of the same cycle as well as the next cycle.
 Please note that in this example, an adaptation of the start times at the end systems is sufficient to avoid interference between streams.
-However, in general, a wireless-friendly schedule will consider both, the start times of transmissions at end systems as well as the transmission times at bridges as defined by the GCL.
+However, in general, a wireless-friendly schedule will consider both the start times of transmissions at end systems as well as the transmission times at bridges as defined by the GCL.
 The adapted GCL for this schedule looks like this:
 
 .. code-block:: ini

@@ -31,7 +31,7 @@ Results
 -------
 
 If we execute a simulation using the first figure as an input distribution histogramCloud, we can see the resulting end-to-end delay of this stream follows the same distribution (second figure), i.e., the delay is added as intended.
-Note, that the only network delay simulated in this simulation is the constant delay of Ethernet links, i.e. there is no PDV simulated by our :ned:`DetComDelayer`.
+Note that the only network delay simulated in this simulation is the constant delay of Ethernet links, i.e. there is no PDV simulated by our :ned:`DetComDelayer`.
 
 +----------+----------+
 | |input|  | |output| |

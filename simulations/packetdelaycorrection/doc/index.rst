@@ -29,8 +29,8 @@ The configuration of PDC works on a per-stream basis and is based on the streamI
 which is also used in INET to enable Per Stream Filtering and Policing (PSFP) and to map streams to PCP values.
 The following code shows an example PDC configuration.
 It contains two streams.
-The PDC values of Stream 1 is chosen such that ``70 %`` of the frames from the expected interval are corrected.
-Stream 2 is configured to correct ``99.99 %`` of the streams.
+The PDC values of Stream 1 are chosen such that ``70%`` of the frames from the expected interval are corrected.
+Stream 2 is configured to correct ``99.99%`` of the streams.
 The jitter parameter allows to additionally specify a random delay that is added after correction.
 This can be used to simulate the behavior of timeslots.
 In this example, a uniform additional delay is selected from the interval ``[0ms,0.5ms]`` simulating a virtual-time-slot based approach with a time-slot length of ``500 μs``.
@@ -45,8 +45,8 @@ Results
 
 The result of the above configuration is shown in the following figure:
 The blue dots represent the delays of the frames of Stream 1, while the orange dots represent the delays of the frames of Stream 2.
-As expected, the delays of Stream 1 form a line at ``5.82 ms`` as configured with some outliers above the line corresponding to the expected remaining ``30 %`` of the frames.
-The delays of Stream2 form a line of width ``500 μs`` corresponding to the configured time-slot size.
+As expected, the delays of Stream 1 form a line at ``5.82 ms`` as configured with some outliers above the line corresponding to the expected remaining ``30%`` of the frames.
+The delays of Stream 2 form a line of width ``500 μs`` corresponding to the configured time-slot size.
 
 .. image:: PDC.png
 
