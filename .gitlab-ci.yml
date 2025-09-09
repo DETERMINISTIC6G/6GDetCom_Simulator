@@ -5,26 +5,24 @@ stages:
   - test
 
 variables:
-  IMAGE_TAG_OMNETPP_GUI_XVFB: $CI_REGISTRY_IMAGE:omnetpp-gui-xvfb-latest
   # Tell 'docker:dind' to enable TLS (recommended)
   # and generate certificates in the specified directory.
   DOCKER_TLS_CERTDIR: "/certs"
 
 .link_repos:
   before_script:
-    - apt-get update && apt-get install -y wget unzip
     - echo "Linking INET"
-    - ln -s "/home/gitlab-runner/prebuilt/inet" "../inet"
+    - git clone --depth=1 https://github.com/DETERMINISTIC6G/inet-gptp.git ../inet
+    - source ../inet/setenv
     - echo "Getting Data"
     - wget https://github.com/DETERMINISTIC6G/deterministic6g_data/releases/latest/download/histograms_for_omnetpp.zip
-    - unzip histograms_for_omnetpp.zip
+    - unzip -o histograms_for_omnetpp.zip -d ../deterministic6g_data
     - rm histograms_for_omnetpp.zip
-    - mv histograms_for_omnetpp ../deterministic6g_data
   after_script:
     - echo "Unlinking Data"
     - rm -rf ../deterministic6g_data
     - echo "Unlinking INET"
-    - rm ../inet
+    - rm -rf ../inet
 
 neddoc:
   needs: []
@@ -39,6 +37,7 @@ neddoc:
     - rm -rf public/neddoc
     - rm -rf public/doxy
   script:
+    - source ~/omnetpp-6.1/setenv # Needed because opp_neddoc is broken in version 6.2.0
     - xvfb-run -a make neddoc
     - mkdir -p public/doc
     - mv doc/neddoc public/doc/neddoc
@@ -103,8 +102,12 @@ fingerprint:
   stage: test
   script:
     - source ../inet/setenv
+    - cd ../inet
     - make makefiles
-    - make
+    - make -j$(nproc)
+    - cd ../6GDetCom_Simulator
+    - make makefiles
+    - make -j$(nproc)
     - cd tests/fingerprint
     - inet_fingerprinttest
   tags:
