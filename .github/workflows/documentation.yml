@@ -28,7 +28,7 @@ jobs:
           ref: ${{ env.INET_VERSION }}
       - name: "Build Neddoc"
         run: |
-          source "$HOME/.profile"
+          source $HOME/omnetpp-6.1/setenv # Need Omnet++ 6.1 for neddoc, does not work in 6.2.0 currently
           cd 6GDetCom_Simulator
           xvfb-run -a make neddoc
       - name: "Upload NEDdoc artifact"

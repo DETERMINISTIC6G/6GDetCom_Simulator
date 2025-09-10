@@ -28,34 +28,15 @@ jobs:
         with:
           path: 6GDetCom_Simulator
 
-      - name: Checkout deterministic6g_data repository
-        uses: actions/checkout@main
-        with:
-          repository: DETERMINISTIC6G/deterministic6g_data
-          path: deterministic6g_data
+      - name: Install dependencies
+        run: apt-get update && apt-get install -y unzip
 
-      - name: Cache Data Repo
-        id: cache-data
-        uses: actions/cache@v4
-        with:
-          path: |
-            deterministic6g_data/PD-Wireless-5G-1/**.xml
-            deterministic6g_data/PD-Wireless-5G-1/**.csv
-            deterministic6g_data/ProcessingDelayDistribution2/**.xml
-          key: ${{ runner.os }}-deterministic6g_data-${{ hashFiles('deterministic6g_data/PD-Wireless-5G-1/**') }}-${{ hashFiles('deterministic6g_data/ProcessingDelayDistribution2/**') }}
-          save-always: true
-
-      - name: Build PD
-        if: steps.cache-data.outputs.cache-hit != 'true'
+      - name: Get deterministic6g_data
         shell: bash
         run: |
-          source "/root/omnetpp/setenv"
-          cd deterministic6g_data/PD-Wireless-5G-1
-          pip install requests pyarrow
-          export PYTHONPATH=$PYTHONPATH:..
-          python3 main.py
-          cd ../ProcessingDelayDistribution2
-          python3 main.py
+          wget https://github.com/DETERMINISTIC6G/deterministic6g_data/releases/latest/download/histograms_for_omnetpp.zip
+          unzip histograms_for_omnetpp.zip -d deterministic6g_data
+          rm histograms_for_omnetpp.zip
 
       - name: Checkout INET repository
         uses: actions/checkout@main
